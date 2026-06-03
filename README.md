@@ -1,7 +1,6 @@
-# Pilot 
-
 <img width="5520" height="1872" alt="Banner-Pilot" src="https://github.com/user-attachments/assets/25c8d1e2-a995-4a79-b3bc-963a090b43b2" />
 
+# Pilot 
 
 Pilot is a personal AI-powered browser automation tool designed to perform repetitive web-based workflows automatically.
 

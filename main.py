@@ -1,38 +1,31 @@
-print("STARTING PILOT...")
-
 from core import login
 from core.browser import Browser
 from core.login import Login
 from config import URL, USERNAME, PASSWORD
 from workflow.workflow import Workflow
+from core.session import Session
+
 
 def run():
-    print("RUN FUNCTION ENTERED")
+    print("STARTING PILOT...")
 
     browser = Browser()
     page = browser.page
 
-    print("Opening site...")
     browser.open(URL)
 
-    login = Login(page)
+    session = Session(page)
 
-    # Step 1: Filling Creds
-    login.attempt_login(USERNAME, PASSWORD)
-    
-    #Step 2: wait for manual login
-    login.wait_for_manual_login()
+    session.wait_for_ready()
 
-    # Step 3: Verify login
-    if login.is_logged_in():
-        print("[PILOT] Login successful")
+    if session.is_ready():
+        print("[PILOT] Session is ready.")
     else:
-        print("[PILOT] Login not detected")
-        
-    #Step 4: start workflow
+        print("[PILOT] Session uncertain.")
+
     workflow = Workflow(page)
     workflow.start()
-    
+
     input("\nPress ENTER to exit Pilot...")
 
     browser.close()

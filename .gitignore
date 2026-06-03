@@ -11,3 +11,5 @@ config.py
 # Profile data
 profile/
 
+# VsCode settings
+.vscode/

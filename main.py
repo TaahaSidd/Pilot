@@ -1,9 +1,6 @@
-from core import login
 from core.browser import Browser
-from core.login import Login
-from config import URL, USERNAME, PASSWORD
-from workflow.workflow import Workflow
 from core.session import Session
+from workflow.workflow import Workflow
 
 
 def run():
@@ -12,22 +9,13 @@ def run():
     browser = Browser()
     page = browser.page
 
-    browser.open(URL)
-
     session = Session(page)
-
-    session.wait_for_ready()
-
-    if session.is_ready():
-        print("[PILOT] Session is ready.")
-    else:
-        print("[PILOT] Session uncertain.")
+    session.ensure_logged_in()
 
     workflow = Workflow(page)
     workflow.start()
 
     input("\nPress ENTER to exit Pilot...")
-
     browser.close()
 
 

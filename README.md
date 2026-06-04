@@ -2,8 +2,76 @@
 
 # Pilot 
 
-Pilot is a personal AI-powered browser automation tool designed to perform repetitive web-based workflows automatically.
+Pilot is an AI-powered browser automation platform that combines web automation with large language models to execute repetitive online workflows.
 
-Instead of manually reading, copying, summarizing, rewriting, and pasting content between websites and applications, Pilot acts as an intelligent operator that can read information from a webpage, process it using AI, and perform the required actions on the user's behalf.
+By integrating browser control, workflow orchestration, and AI reasoning, Pilot can navigate websites, extract information, process content, and perform actions on behalf of the user.
 
-The project is focused on automating personal workflows, reducing repetitive tasks, and experimenting with AI-driven browser agents.
+The project serves as an experimental platform for building intelligent browser agents capable of reducing manual effort while keeping users in control of critical decisions.
+
+
+# Features
+
+- Browser automation powered by Playwright
+- AI-assisted decision making
+- Automatic workflow execution
+- Session persistence using browser profiles
+- Handles multi-step web processes
+- Progress tracking and logging
+- Human-in-the-loop support for CAPTCHA/login steps
+- Extensible workflow architecture
+
+## Example Workflow
+
+Pilot can:
+
+1. Open a website
+2. Navigate through pages
+3. Read content
+4. Send content to an AI model
+5. Process the response
+6. Fill forms automatically
+7. Submit actions
+8. Generate progress reports
+
+## Project Structure
+
+```
+Pilot/
+├── core/
+├── workflows/
+├── profile/
+├── config/
+├── main.py
+```
+## Why Pilot?
+
+Many online workflows involve repetitive actions that consume time without providing additional value.
+
+Pilot explores how AI and browser automation can be combined to reduce manual effort while keeping the user in control.
+
+## Built With
+
+- Python
+- Playwright
+- Groq API
+- Gemini API
+- Rich
+
+## Roadmap
+
+- [x] Browser automation
+- [x] Session profiles
+- [x] AI integration
+- [x] Workflow engine
+- [ ] Plugin system
+- [ ] Multi-provider AI routing
+- [ ] Workflow marketplace
+- [ ] Desktop GUI
+- [ ] Cloud execution
+
+## Disclaimer
+
+Pilot is intended for personal productivity and workflow automation.
+
+Users are responsible for ensuring their use complies with the terms and policies of the websites and services they interact with.
+

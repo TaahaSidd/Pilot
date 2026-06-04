@@ -6,6 +6,7 @@ from workflow.quiz_solver import QuizSolver
 class Workflow:
     def __init__(self, page: Page):
         self.page = page
+        self.last_page_content = ""
 
     def stabilize_page(self):
         try:
@@ -127,6 +128,18 @@ class Workflow:
         self.page.goto(module["url"])
         self.page.wait_for_load_state("domcontentloaded")
         self.page.wait_for_timeout(3000)
+
+        # Saving page content for quiz
+        try:
+            content = self.page.locator(
+                "div#region-main, div.course-content, div[role-'main']").first.inner_text()
+            self.last_page_content = content[:3000]
+            print(
+                f"[PILOT][PAGE] Content saved ({len(self.last_page_content)} chars)")
+
+        except Exception as e:
+            self.last_page_content = ""
+
         print(f"[PILOT][PAGE] ✓ done")
 
     def handle_module(self, module: dict):
@@ -134,40 +147,53 @@ class Workflow:
             self.visit_page_module(module)
         elif module["type"] == "QUIZ":
             solver = QuizSolver(self.page)
-            solver.solve(module["url"])
+            solver.solve(module["url"], context=self.last_page_content)
         else:
             print(f"[PILOT][SKIP] {module['type']} → {module['title']}")
 
     def process_course(self, course: dict):
-        print(
-            f"\n[PILOT] ── Course: {course['title']} ({course['completion']}%)")
+        print(f"\n[PILOT] ── Course: {course['title']} ({course['completion']}%)")
         self.page.goto(course["url"])
         self.page.wait_for_load_state("domcontentloaded")
         self.page.wait_for_timeout(3000)
         self.stabilize_page()
 
-        modules = self.collect_module_urls()
+        max_passes = 10 
+        passes = 0
 
-        pending = [
-            m for m in modules
-            if not m["completed"] and m["type"] in ("PAGE", "QUIZ")
-        ]
+        while passes < max_passes:
+            passes += 1
+            print(f"\n[PILOT] Scan pass {passes}...")
 
-        if not pending:
-            print(f"[PILOT] Nothing pending — skipping")
-            return
+            # Re-navigate to course page to get fresh sidebar
+            self.page.goto(course["url"])
+            self.page.wait_for_load_state("domcontentloaded")
+            self.page.wait_for_timeout(2000)
 
-        print(f"[PILOT] {len(pending)} modules to process")
+            modules = self.collect_module_urls()
 
-        for i, module in enumerate(pending):
-            print(
-                f"\n[PILOT] {i+1}/{len(pending)}: [{module['type']}] {module['title']}")
-            try:
-                self.handle_module(module)
-            except PlaywrightTimeoutError:
-                print(f"[PILOT][TIMEOUT] {module['title']}")
-            except Exception as e:
-                print(f"[PILOT][ERROR] {module['title']}: {e}")
+            pending = [
+                m for m in modules
+                if not m["completed"] and m["type"] in ("PAGE", "QUIZ")
+            ]
+
+            if not pending:
+                print(f"[PILOT] Nothing pending — course done")
+                return
+
+            print(f"[PILOT] {len(pending)} modules to process this pass")
+
+            for i, module in enumerate(pending):
+                print(
+                    f"\n[PILOT] {i+1}/{len(pending)}: [{module['type']}] {module['title']}")
+                try:
+                    self.handle_module(module)
+                except PlaywrightTimeoutError:
+                    print(f"[PILOT][TIMEOUT] {module['title']}")
+                except Exception as e:
+                    print(f"[PILOT][ERROR] {module['title']}: {e}")
+
+            print(f"[PILOT] Pass {passes} complete — rescanning for newly unlocked modules...")
 
     def start(self):
         print("[PILOT] Workflow started")

@@ -1,30 +1,44 @@
+import time
+import re as re_module
 import google.generativeai as genai
-from config import GEMINI_API_KEY
+from groq import Groq
+from config import GEMINI_API_KEY, GROQ_API_KEY, AI_PROVIDER
 
+# Setup Gemini
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-2.5-flash-latest")
+gemini_model = genai.GenerativeModel("gemini-2.0-flash")
+
+# Setup Groq
+groq_client = Groq(api_key=GROQ_API_KEY)
 
 
 class QuizSolver:
     def __init__(self, page):
         self.page = page
+        self.provider = AI_PROVIDER  # "gemini" or "groq"
+        print(f"[QUIZ] AI Provider: {self.provider.upper()}")
 
-    def solve(self, quiz_url: str):
+    def solve(self, quiz_url: str, context: str = ""):
         print(f"[QUIZ] Opening → {quiz_url}")
         self.page.goto(quiz_url)
         self.page.wait_for_load_state("domcontentloaded")
         self.page.wait_for_timeout(2000)
 
-        # Step 1: click Attempt quiz
+        # Step 1: click Attempt quiz or Continue your attempt
         attempt_btn = self.page.locator(
-            "button.btn:has-text('Attempt quiz'), a.btn:has-text('Attempt quiz')")
+            "a.btn:has-text('Attempt quiz'), "
+            "button.btn:has-text('Attempt quiz'), "
+            "a.btn:has-text('Continue your attempt'), "
+            "button.btn:has-text('Continue your attempt')"
+        )
         if attempt_btn.count() > 0:
             attempt_btn.first.click()
             self.page.wait_for_load_state("domcontentloaded")
             self.page.wait_for_timeout(2000)
             print("[QUIZ] Attempt started")
         else:
-            print("[QUIZ] No attempt button — may already be in progress")
+            print("[QUIZ] No attempt button found — skipping")
+            return
 
         # Step 2: read and answer all questions
         questions = self.page.locator("div.que.multichoice")
@@ -40,11 +54,8 @@ class QuizSolver:
         for i in range(count):
             try:
                 q = questions.nth(i)
-
-                # Get question text
                 q_text = q.locator("div.qtext").inner_text().strip()
 
-                # Get answer options — clean up "a.\n\nSome text" → "Some text"
                 options = []
                 labels = q.locator("div[data-region='answer-label']")
                 for j in range(labels.count()):
@@ -61,19 +72,17 @@ class QuizSolver:
                 print(f"[QUIZ] Q{i+1}: {q_text}")
                 print(f"[QUIZ] Options: {options}")
 
-                # Ask Gemini
-                answer_index = self._ask_gemini(q_text, options)
+                answer_index = self._ask_ai(q_text, options, context=context)
 
                 if answer_index is None:
                     print(
-                        f"[QUIZ][WARN] Q{i+1}: Gemini returned no answer — skipping this question")
+                        f"[QUIZ][WARN] Q{i+1}: AI returned no answer — skipping")
                     all_answered = False
                     continue
 
                 print(
-                    f"[QUIZ] Gemini chose {answer_index} → {options[answer_index]}")
+                    f"[QUIZ] AI chose {answer_index} → {options[answer_index]}")
 
-                # Click the label (not the hidden radio input)
                 label = q.locator(
                     "div[data-region='answer-label']").nth(answer_index)
                 label.click()
@@ -83,7 +92,6 @@ class QuizSolver:
                 print(f"[QUIZ][ERROR] Q{i+1}: {e}")
                 all_answered = False
 
-        # Safety check — only submit if all questions were answered
         if not all_answered:
             print(
                 "[QUIZ][ABORT] Not all questions answered — skipping submission to protect your marks")
@@ -100,12 +108,11 @@ class QuizSolver:
         self.page.wait_for_timeout(2000)
         print("[QUIZ] Finish attempt clicked")
 
-        # Step 4: verify all answers saved before submitting
+        # Step 4: verify all answers saved
         not_answered = self.page.locator("td:has-text('Not yet answered')")
         if not_answered.count() > 0:
             print(
-                f"[QUIZ][ABORT] {not_answered.count()} question(s) still unanswered on summary — not submitting")
-            # Go back and try again
+                f"[QUIZ][ABORT] {not_answered.count()} question(s) still unanswered — not submitting")
             return_btn = self.page.locator(
                 "button:has-text('Return to attempt')")
             if return_btn.count() > 0:
@@ -124,49 +131,78 @@ class QuizSolver:
         print("[QUIZ] Submit clicked")
 
         # Step 6: confirm modal
-        confirm_btn = self.page.locator(
-            "button:has-text('Submit all and finish')")
-        if confirm_btn.count() > 0:
-            confirm_btn.first.click()
+        try:
+            self.page.wait_for_selector(
+                "button[data-action='save']", timeout=5000)
+            self.page.locator("button[data-action='save']").click()
             self.page.wait_for_timeout(2000)
             print("[QUIZ] Confirmed — quiz submitted")
-        else:
-            print("[QUIZ][WARN] Confirmation modal not found")
+        except Exception as e:
+            print(f"[QUIZ][WARN] Modal confirmation failed: {e}")
 
-    def _ask_gemini(self, question: str, options: list[str]) -> int | None:
-        """
-        Ask Gemini for the correct answer index.
-        Returns index (0-based) or None if it fails.
-        """
+    def _ask_ai(self, question: str, options: list[str], context: str = "") -> int | None:
+        if self.provider == "groq":
+            return self._ask_groq(question, options, context)
+        else:
+            return self._ask_gemini(question, options, context)
+
+    def _build_prompt(self, question: str, options: list[str], context: str = "") -> str:
         options_text = "\n".join(
             [f"{i}. {opt}" for i, opt in enumerate(options)])
+        context_block = f"Use this study material as context to answer:\n{context}\n\n" if context else ""
+        return f"""You are answering a multiple choice exam question.
+{context_block}Reply with ONLY a single digit — the number of the correct answer (0, 1, 2, or 3).
+Do not explain. Do not write anything else. Just the number.
 
-        prompt = f"""You are answering a multiple choice exam question.
-                    Reply with ONLY a single digit — the number of the correct answer (0, 1, 2, or 3).
-                    Do not explain. Do not write anything else. Just the number.
+Question: {question}
 
-                    Question: {question}
+Options:
+{options_text}
 
-                    Options:
-                    {options_text}
+Answer (single digit only):"""
 
-                    Answer (single digit only):"""
+    def _parse_response(self, raw: str, options: list[str]) -> int | None:
+        for char in raw:
+            if char.isdigit():
+                idx = int(char)
+                if 0 <= idx < len(options):
+                    return idx
+        print(f"[QUIZ][AI] Could not parse valid index from: '{raw}'")
+        return None
 
+    def _ask_groq(self, question: str, options: list[str], context: str = "") -> int | None:
+        prompt = self._build_prompt(question, options, context)
         try:
-            response = model.generate_content(prompt)
-            raw = response.text.strip()
-            print(f"[QUIZ][GEMINI] Raw response: '{raw}'")
-
-            for char in raw:
-                if char.isdigit():
-                    idx = int(char)
-                    if 0 <= idx < len(options):
-                        return idx
-
-            print(
-                f"[QUIZ][GEMINI] Could not parse a valid index from: '{raw}'")
-            return None
-
+            response = groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=10
+            )
+            raw = response.choices[0].message.content.strip()
+            print(f"[QUIZ][GROQ] Raw response: '{raw}'")
+            return self._parse_response(raw, options)
         except Exception as e:
-            print(f"[QUIZ][GEMINI ERROR] {e}")
+            print(f"[QUIZ][GROQ ERROR] {e}")
             return None
+
+    def _ask_gemini(self, question: str, options: list[str], context: str = "") -> int | None:
+        prompt = self._build_prompt(question, options, context)
+        for attempt in range(3):
+            try:
+                response = gemini_model.generate_content(prompt)
+                raw = response.text.strip()
+                print(f"[QUIZ][GEMINI] Raw response: '{raw}'")
+                return self._parse_response(raw, options)
+            except Exception as e:
+                error_str = str(e)
+                if "429" in error_str:
+                    match = re_module.search(r'seconds: (\d+)', error_str)
+                    wait = int(match.group(1)) + 5 if match else 60
+                    print(
+                        f"[QUIZ][RATE LIMIT] Waiting {wait}s before retry {attempt+1}/3...")
+                    time.sleep(wait)
+                else:
+                    print(f"[QUIZ][GEMINI ERROR] {e}")
+                    return None
+        print("[QUIZ][GEMINI] All retries exhausted")
+        return None

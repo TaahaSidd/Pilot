@@ -1,6 +1,11 @@
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
 import re
 from workflow.quiz_solver import QuizSolver
+from pilot_ui import (
+    log_info, log_success, log_warning, log_error,
+    log_page, log_quiz, log_skip, log_course, log_module_progress,
+    show_course_summary
+)
 
 
 class Workflow:
@@ -11,18 +16,16 @@ class Workflow:
     def stabilize_page(self):
         try:
             self.page.locator("#popupCloseBtn").click(timeout=3000)
-            print("[PILOT] Popup closed")
         except:
             pass
 
     def get_course_urls(self) -> list[dict]:
-        print("[PILOT] Scanning courses...")
+        log_info("Scanning courses...")
         courses = []
 
-        # Each course card has a unique id like course-info-container-4418-4
         buttons = self.page.locator("a.view-course-btn")
         count = buttons.count()
-        print(f"[PILOT] Found {count} courses")
+        log_info(f"Found {count} courses")
 
         for i in range(count):
             try:
@@ -31,24 +34,29 @@ class Workflow:
                 if not href:
                     continue
 
-                # Walk up to the course card container to read title + completion
-                card = btn.locator(
-                    "xpath=ancestor::div[contains(@id,'course-info-container')]")
-
-                title = ""
+                course_id = href.rstrip("/").split("=")[-1]
+                title = f"Course {course_id}"
                 try:
-                    title = card.locator(
-                        "h3, h4, .course-title, .card-title").first.inner_text().strip()
+                    card = self.page.locator(
+                        f"[id*='course-info-container-{course_id}']")
+                    if card.count() > 0:
+                        heading = card.locator(
+                            "h3, h4, strong, .card-title, [class*='title']").first
+                        if heading.count() > 0:
+                            title = heading.inner_text().strip()
                 except:
-                    title = f"Course {i+1}"
+                    pass
 
                 completion_pct = 0
                 try:
-                    text = card.inner_text()
-                    match = re.search(
-                        r'(\d+)%\s*Course Completed', text, re.IGNORECASE)
-                    if match:
-                        completion_pct = int(match.group(1))
+                    card = self.page.locator(
+                        f"[id*='course-info-container-{course_id}']")
+                    if card.count() > 0:
+                        text = card.inner_text()
+                        match = re.search(
+                            r'(\d+)%\s*Course Completed', text, re.IGNORECASE)
+                        if match:
+                            completion_pct = int(match.group(1))
                 except:
                     pass
 
@@ -58,11 +66,8 @@ class Workflow:
                     "completion": completion_pct
                 })
 
-                status = "✓ 100%" if completion_pct == 100 else f"{completion_pct}%"
-                print(f"[PILOT]   [{status}] {title}")
-
             except Exception as e:
-                print(f"[PILOT][ERROR] Reading course {i+1}: {e}")
+                log_error(f"Reading course {i+1}: {e}")
 
         return courses
 
@@ -70,17 +75,14 @@ class Workflow:
         self.page.wait_for_timeout(2000)
         modules = []
 
-        # Get all module <li> items that have an <a> with a mod/ href
         items = self.page.locator(
             "li.courseindex-item:has(a.courseindex-link[href*='/mod/'])")
         count = items.count()
-        print(f"[PILOT] Found {count} module items")
 
         for i in range(count):
             try:
                 item = items.nth(i)
 
-                # Skip dimmed (locked/restricted) modules
                 classes = item.get_attribute("class") or ""
                 if "dimmed" in classes:
                     continue
@@ -92,7 +94,6 @@ class Workflow:
                 if not href:
                     continue
 
-                # Classify type from URL
                 if "/mod/page/" in href:
                     mtype = "PAGE"
                 elif "/mod/quiz/" in href:
@@ -104,7 +105,6 @@ class Workflow:
                 else:
                     mtype = "OTHER"
 
-                # Check completion from the span class — exact match from HTML
                 completion_span = item.locator("span.completioninfo")
                 span_class = completion_span.get_attribute("class") or ""
                 completed = "completion_complete" in span_class
@@ -117,30 +117,23 @@ class Workflow:
                 })
 
             except Exception as e:
-                print(f"[PILOT][ERROR] Reading module {i+1}: {e}")
+                log_error(f"Reading module {i+1}: {e}")
 
         done = sum(1 for m in modules if m["completed"])
-        print(f"[PILOT] {done}/{len(modules)} already completed")
+        log_info(f"{done}/{len(modules)} modules already completed")
         return modules
 
     def visit_page_module(self, module: dict):
-        print(f"[PILOT][PAGE] → {module['title']}")
+        log_page(module["title"])
         self.page.goto(module["url"])
         self.page.wait_for_load_state("domcontentloaded")
         self.page.wait_for_timeout(3000)
 
-        # Saving page content for quiz
         try:
-            content = self.page.locator(
-                "div#region-main, div.course-content, div[role-'main']").first.inner_text()
+            content = self.page.locator("div[role='main']").first.inner_text()
             self.last_page_content = content[:3000]
-            print(
-                f"[PILOT][PAGE] Content saved ({len(self.last_page_content)} chars)")
-
-        except Exception as e:
+        except:
             self.last_page_content = ""
-
-        print(f"[PILOT][PAGE] ✓ done")
 
     def handle_module(self, module: dict):
         if module["type"] == "PAGE":
@@ -149,23 +142,21 @@ class Workflow:
             solver = QuizSolver(self.page)
             solver.solve(module["url"], context=self.last_page_content)
         else:
-            print(f"[PILOT][SKIP] {module['type']} → {module['title']}")
+            log_skip(f"{module['type']} → {module['title']}")
 
     def process_course(self, course: dict):
-        print(f"\n[PILOT] ── Course: {course['title']} ({course['completion']}%)")
         self.page.goto(course["url"])
         self.page.wait_for_load_state("domcontentloaded")
         self.page.wait_for_timeout(3000)
         self.stabilize_page()
 
-        max_passes = 10 
+        max_passes = 10
         passes = 0
+        last_pending_count = -1  # track if progress is being made
 
         while passes < max_passes:
             passes += 1
-            print(f"\n[PILOT] Scan pass {passes}...")
 
-            # Re-navigate to course page to get fresh sidebar
             self.page.goto(course["url"])
             self.page.wait_for_load_state("domcontentloaded")
             self.page.wait_for_timeout(2000)
@@ -178,38 +169,47 @@ class Workflow:
             ]
 
             if not pending:
-                print(f"[PILOT] Nothing pending — course done")
+                log_success("Course complete — nothing pending")
                 return
 
-            print(f"[PILOT] {len(pending)} modules to process this pass")
+            # If pending count hasn't changed since last pass — nothing new unlocked
+            if len(pending) == last_pending_count:
+                log_info("No new modules unlocked — moving to next course")
+                return
+
+            last_pending_count = len(pending)
+            log_info(f"Pass {passes}: {len(pending)} modules to process")
 
             for i, module in enumerate(pending):
-                print(
-                    f"\n[PILOT] {i+1}/{len(pending)}: [{module['type']}] {module['title']}")
+                log_module_progress(i + 1, len(pending), module["type"], module["title"])
                 try:
                     self.handle_module(module)
                 except PlaywrightTimeoutError:
-                    print(f"[PILOT][TIMEOUT] {module['title']}")
+                    log_warning(f"Timeout → {module['title']}")
                 except Exception as e:
-                    print(f"[PILOT][ERROR] {module['title']}: {e}")
+                    log_error(f"{module['title']}: {e}")
 
-            print(f"[PILOT] Pass {passes} complete — rescanning for newly unlocked modules...")
+            log_info(f"Pass {passes} complete — rescanning for newly unlocked modules...")
 
     def start(self):
-        print("[PILOT] Workflow started")
+        log_info("Workflow started")
         self.stabilize_page()
 
         courses = self.get_course_urls()
         pending = [c for c in courses if c["completion"] < 100]
         skipped = [c for c in courses if c["completion"] == 100]
 
-        print(f"\n[PILOT] {len(skipped)} course(s) complete — skipping")
-        print(f"[PILOT] {len(pending)} course(s) to process")
+        show_course_summary(courses)
 
-        for course in pending:
+        log_info(f"{len(skipped)} course(s) already complete — skipping")
+        log_info(f"{len(pending)} course(s) to process")
+
+        for idx, course in enumerate(pending):
+            log_course(course["title"], course["completion"],
+                       idx + 1, len(pending))
             try:
                 self.process_course(course)
             except Exception as e:
-                print(f"[PILOT][ERROR] Course failed → {course['title']}: {e}")
+                log_error(f"Course failed → {course['title']}: {e}")
 
-        print("\n[PILOT] All done.")
+        log_success("All courses processed!")

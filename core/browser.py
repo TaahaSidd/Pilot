@@ -1,5 +1,6 @@
 import os
 from playwright.sync_api import sync_playwright
+from pilot_ui import log_info
 
 
 class Browser:
@@ -10,7 +11,7 @@ class Browser:
             os.path.abspath(__file__)), "..", "profile")
         profile_dir = os.path.normpath(profile_dir)
 
-        print(f"[PILOT] Using profile: {profile_dir}")
+        log_info(f"Using profile: {profile_dir}")
 
         self.context = self.p.chromium.launch_persistent_context(
             user_data_dir=profile_dir,
@@ -22,7 +23,6 @@ class Browser:
 
     def open(self, url):
         self.page.goto(url)
-        print("Website opened successfully")
 
     def wait(self, ms=1000):
         self.page.wait_for_timeout(ms)

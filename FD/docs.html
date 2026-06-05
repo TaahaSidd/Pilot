@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation — Pilot</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="docs-body">
+
+    <nav class="docs-nav">
+        <a href="index.html" class="nav-logo">Pilot</a>
+        <ul class="nav-links">
+            <li><a href="index.html#features">Features</a></li>
+            <li><a href="docs.html" class="special-link">Docs</a></li>
+        </ul>
+        <a href="https://github.com/TaahaSidd/Pilot" class="nav-cta">GitHub →</a>
+    </nav>
+
+    <div class="docs-container">
+
+        <aside class="docs-sidebar">
+            <div class="sidebar-group">
+                <h3>Getting Started</h3>
+                <a href="#introduction" class="active">Introduction</a>
+                <a href="#uses">Uses of Pilot</a>
+                <a href="#prerequisites">Prerequisites</a>
+                <a href="#quick-start">Quick Start</a>
+            </div>
+            <div class="sidebar-group">
+                <h3>How It Works</h3>
+                <a href="#workflow-engine">Automation Loop</a>
+                <a href="#quiz-solver">Smart QuizSolver</a>
+                <a href="#feedback-solver">Feedback Engine</a>
+            </div>
+        </aside>
+
+        <main class="docs-content">
+
+            <section id="introduction">
+                <h1>Documentation</h1>
+                <p class="lead">Welcome to Pilot. This guide will walk you through deploying and configuring the browser
+                    automation engine in less than two minutes, executed entirely out of your native terminal window.
+                </p>
+                <p>Pilot navigates course material dashboards autonomously, handles read-through blocks for baseline
+                    context compilation, and processes complex assessment arrays utilizing highly optimized Llama 3.3
+                    70B models over Groq Cloud infrastructure.</p>
+            </section>
+
+            <hr class="docs-divider">
+
+            <section id="uses">
+                <h2>Uses of Pilot</h2>
+                <p>Pilot is engineered to abstract away repetitive administrative patterns across your student
+                    dashboard. It redirects manual, time-sink operations into automated pipelines so you can concentrate
+                    on high-priority development and learning objectives.</p>
+
+                <div class="workflow-steps">
+                    <div class="step-card">
+                        <h4>Asynchronous Course Progression</h4>
+                        <p>Eliminate manual multi-clicking. Pilot takes care of navigating linearly through extensive
+                            course layout structures, reading assignments, and informational pages on your behalf.</p>
+                    </div>
+                    <div class="step-card">
+                        <h4>Context-Aware Assessment Operations</h4>
+                        <p>Instead of copying questions one-by-one, Pilot reads active quiz screens, structures the
+                            variables into data formats, and queries them against an optimized AI core to secure swift
+                            solutions.</p>
+                    </div>
+                    <div class="step-card">
+                        <h4>Administrative Survey Resolution</h4>
+                        <p>Bypass unskippable system gates. Pilot autofills repetitive mid-module satisfaction cards,
+                            region queries, and feedback boxes so subsequent reading blocks unlock instantly.</p>
+                    </div>
+                </div>
+            </section>
+
+            <hr class="docs-divider">
+
+            <section id="prerequisites">
+                <h2>Prerequisites</h2>
+                <p>To run Pilot successfully, you must provide your own API keys and platform access details. Gather the
+                    following items before starting the execution script:</p>
+
+                <div class="workflow-steps">
+
+                    <div class="step-card">
+                        <h4>1. Amity Amigo Credentials</h4>
+                        <p>You need your official Amity University student email identifier (e.g.,
+                            <code>your.name@s.amity.edu</code>) and corresponding portal password. Pilot uses these
+                            parameters to authenticating sessions smoothly inside Playwright core.</p>
+                    </div>
+
+                    <div class="step-card">
+                        <h4>2. Groq API Access Key</h4>
+                        <p>Pilot handles evaluation queries using your personal model operational limits. Generate a
+                            functional application secret via your account dashboard.</p>
+                        <p style="margin-top: 0.75rem;"><a href="https://console.groq.com" target="_blank"
+                                style="color: var(--accent); font-weight: 500; text-decoration: none; font-size: 0.9rem;">Get
+                                Key from Groq Console →</a></p>
+                    </div>
+
+                    <div class="step-card">
+                        <h4>3. Python Environment</h4>
+                        <p>Verify that your host machine has a clean distribution of Python 3.8 or higher fully
+                            initialized and registered to your local system console pathway mapping array.</p>
+                    </div>
+
+                </div>
+            </section>
+
+            <hr class="docs-divider">
+
+            <section id="quick-start">
+                <h2>Quick Start Guide</h2>
+                <p>Forget handling hidden environment configuration files or leaving plain-text keys exposed on your
+                    local drive storage. Pilot prompts you interactively within your execution process console stream.
+                </p>
+
+                <h3>Step 1: Fetch Project & Environments</h3>
+                <p>Launch your terminal environment and input the subsequent deployment blocks to set up the workspace
+                    repository and install core packages:</p>
+
+                <div class="code-block-wrapper">
+                    <div class="code-header">Terminal Console</div>
+                    <pre><code># Clone the source repository
+git clone https://github.com/TaahaSidd/Pilot.git
+
+# Step directly into the working directory root
+cd Pilot
+
+# Install core interface, engine dependencies, and browser binaries
+pip install -r requirements.txt
+playwright install chromium</code></pre>
+                </div>
+
+                <h3>Step 2: Trigger the Engine</h3>
+                <p>Launch the root initialization routine to spin up the automation loop wrapper:</p>
+
+                <div class="code-block-wrapper">
+                    <div class="code-header">Terminal Console</div>
+                    <pre><code>python main.py</code></pre>
+                </div>
+
+                <h3>Step 3: Direct Console Authorization</h3>
+                <p>Provide your unique token and Amigo portal details directly into the terminal window when prompted by
+                    the application script:</p>
+
+                <div class="code-block-wrapper">
+                    <div class="code-header">Interactive Terminal Prompts</div>
+                    <pre><code>[PILOT] Enter your GROQ API Key: gsk_••••••••••••••••••••••••
+[PILOT] Enter Student Email Address: username@s.amity.edu
+[PILOT] Enter Student Portal Password: ••••••••••••
+[PILOT] Spin-up sequence validated. Launching automated browser view...</code></pre>
+                </div>
+
+                <blockquote>
+                    <strong>Visual Security Control Verification:</strong> Your submitted credential strings remain
+                    fully volatile inside the current session memory buffer. Once the automation browser renders on
+                    screen, it auto-fills your user parameters. Complete the localized visual CAPTCHA graphic step
+                    manually on the webpage, press <strong>ENTER</strong> inside your terminal dashboard, and hand over
+                    control.
+                </blockquote>
+            </section>
+
+            <hr class="docs-divider">
+
+            <section id="workflow-engine">
+                <h2>The Automation Workflow</h2>
+                <p>Once initialization clears, the task automation routine processes target user curriculum structures
+                    through a smart execution pipeline:</p>
+
+                <div class="workflow-steps">
+                    <div class="step-card">
+                        <h4>1. Target Evaluation</h4>
+                        <p>Pilot cross-examines the course listing indexes and skips 100% completed materials, focusing
+                            processing time only on active sections.</p>
+                    </div>
+                    <div class="step-card">
+                        <h4>2. Context Aggregation</h4>
+                        <p>During textbook reading passes, Pilot scrapes text representations straight into short-term
+                            execution memory matrices to feed context data into subsequent quizzes.</p>
+                    </div>
+                    <div class="step-card">
+                        <h4>3. Relational Multi-Pass Loops</h4>
+                        <p>Since progression configurations routinely gate subsequent tests behind prior items, Pilot
+                            loops through execution pipelines up to 10 distinct iterations to handle elements as they
+                            unlock.</p>
+                    </div>
+                </div>
+            </section>
+
+            <hr class="docs-divider">
+
+            <section id="quiz-solver">
+                <h2>Smart QuizSolver</h2>
+                <p>The internal <code>QuizSolver</code> reads multiple-choice options on your screen, parses layout
+                    trees into structural evaluation syntax maps, and ships them directly to the ultra-fast Groq
+                    framework executing Llama 3.3 70B models.</p>
+
+                <p><strong>Fail-Safe Grade Guardrails:</strong> Academic progress remains fully protected. If Pilot
+                    encounters custom layout styles it can't clear, or spots blank questions on a page, it stops
+                    processing to prevent faulty answer sets from hurting your grades.</p>
+            </section>
+
+            <hr class="docs-divider">
+
+            <section id="feedback-solver">
+                <h2>Feedback Engine</h2>
+                <p>To prevent progression locks due to mandatory survey fields, the integrated
+                    <code>FeedbackSolver</code> automates standard rating systems cleanly:</p>
+
+                <ul>
+                    <li>Enforces standard system location inputs across country and region selectors.</li>
+                    <li>Fills matrix choice loops safely using high tier review numbers (9/10 fields).</li>
+                    <li>Populates open textbox components using human-like, realistic strings to satisfy system minimum
+                        character criteria.</li>
+                </ul>
+            </section>
+
+        </main>
+    </div>
+
+    <footer class="docs-footer">
+        <div class="footer-logo">Pilot Automation</div>
+        <span class="footer-copy">© 2026 · Powered by Spica Labs</span>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebarLinks = document.querySelectorAll('.docs-sidebar a');
+            const sections = document.querySelectorAll('.docs-content section');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '-20% 0px -50% 0px',
+                threshold: 0
+            };
+
+            const observerCallback = (entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        sidebarLinks.forEach(link => link.classList.remove('active'));
+                        const activeLink = document.querySelector(`.docs-sidebar a[href="#${id}"]`);
+                        if (activeLink) {
+                            activeLink.classList.add('active');
+                        }
+                    }
+                });
+            };
+
+            const observer = new IntersectionObserver(observerCallback, observerOptions);
+            sections.forEach(section => observer.observe(section));
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pilot - CLI</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <link rel="icon" type="image/png" href="./Favicon-pilot copy.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <nav>
+        <a href="#" class="nav-logo">
+            Pilot
+        </a>
+        <ul class="nav-links">
+            <li><a href="#features">Features</a></li>
+            <li><a href="docs.html" class="special-link">Docs</a></li>
+        </ul>
+        <a href="https://github.com/TaahaSidd/Pilot" class="nav-cta">GitHub →</a>
+    </nav>
+
+    <div class="hero">
+        <div class="hero-bg-graphic"></div>
+        <div class="hero-glow"></div>
+
+        <div class="hero-content">
+            <h1 class="hero-title">Your courses,<br /><em>automated.</em></h1>
+            <p class="hero-sub">
+                An open-source browser autopilot. Launch it from your terminal, and watch Pilot clear reading modules
+                and
+                quizzes automatically.
+            </p>
+            <div class="hero-actions">
+                <a href="docs.html" class="btn-primary">Get Started</a>
+                <a href="https://github.com/TaahaSidd/Pilot" class="btn-secondary">View on GitHub</a>
+            </div>
+        </div>
+    </div>
+
+    <section id="features" class="features-split-container">
+
+        <div class="split-row reveal">
+            <div class="split-media">
+                <div class="media-placeholder browser-mock">
+                    <div class="mock-header">
+                        <div class="window-dots">
+                            <span class="dot-red"></span>
+                            <span class="dot-yellow"></span>
+                            <span class="dot-green"></span>
+                        </div>
+                        <span class="mock-header-title">bash — secure_auth_stream</span>
+                    </div>
+                    <div class="mock-body">
+                        <span class="c-blue">[PILOT]</span> <span class="c-gray">Enter Groq API Key:</span> <span
+                            class="c-green">gsk_••••••••••••••••••••••••</span><br>
+                        <span class="c-blue">[PILOT]</span> <span class="c-gray">Enter Student Email Address:</span>
+                        <span class="c-yellow">user@s.amity.edu</span><br>
+                        <span class="c-blue">[PILOT]</span> <span class="c-gray">Enter Student Portal Password:</span>
+                        <span class="c-green">••••••••••••</span><br>
+                        <span class="c-comment"># Memory layer initialized. 0B plain-text disc write
+                            execution.</span><br>
+                        <span class="c-green">[SUCCESS] Spin-up sequence validated. Launching automated browser
+                            view...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="split-text">
+                <h2>100% Terminal-Driven Privacy</h2>
+                <p>No configuration files, no plain-text <code>.env</code> file footprint left on your drive. Enter your
+                    Groq token and portal credentials straight into the secure command console prompt on launch. Your
+                    keys remain completely private to your local runtime session.</p>
+            </div>
+        </div>
+
+        <div class="split-row reverse reveal">
+            <div class="split-media">
+                <div class="media-placeholder ai-mock">
+                    <div class="mock-header">
+                        <div class="window-dots">
+                            <span class="dot-muted"></span>
+                            <span class="dot-muted"></span>
+                            <span class="dot-muted"></span>
+                        </div>
+                        <span class="mock-header-title">inference_engine.py</span>
+                    </div>
+                    <div class="mock-body">
+                        <span class="c-purple">import</span> groq_cloud<br><br>
+                        • <span class="c-yellow">Hardware Stack:</span> <span class="c-green">Groq LPU Inference
+                            Shards</span><br>
+                        • <span class="c-yellow">Target LLM Core:</span> <span
+                            class="c-blue">Llama-3.3-70B-SpecDec</span><br>
+                        • <span class="c-yellow">Context Frame:</span> <span class="c-green">Scraped On-Screen Syllabus
+                            Matrix</span><br>
+                        • <span class="c-yellow">Latency Profile:</span> <span class="c-cyan">~240ms Tokens-Per-Second
+                            Burst</span>
+                    </div>
+                </div>
+            </div>
+            <div class="split-text">
+                <h2>Ultra-Fast Quiz Resolution</h2>
+                <p>Backed by Groq's blindingly fast Llama 3.3 70B model execution framework. Pilot uses your standard
+                    reading materials on screen as temporary context stores to answer complex multi-choice assignments
+                    accurately—safely halting submission if formatting anomalies arise.</p>
+            </div>
+        </div>
+
+        <div class="split-row reveal">
+            <div class="split-media">
+                <div class="media-placeholder local-mock">
+                    <div class="mock-header">
+                        <div class="window-dots">
+                            <span class="dot-muted"></span>
+                            <span class="dot-muted"></span>
+                            <span class="dot-muted"></span>
+                        </div>
+                        <span class="mock-header-title">runtime_orchestrator.log</span>
+                    </div>
+                    <div class="mock-body">
+                        <span class="c-comment">[08:42:11]</span> <span class="c-blue">[ENGINE]</span> Pass 1/10:
+                        Mapping course layout matrix...<br>
+                        <span class="c-comment">[08:42:15]</span> <span class="c-purple">[ROUTINE]</span> Processing
+                        locked gateway requirement module...<br>
+                        <span class="c-comment">[08:42:19]</span> <span class="c-green">[FEEDBACK] Fills processed
+                            (Rating: 9/10). Gated fields opened.</span><br>
+                        <span class="c-comment">[08:42:20]</span> <span class="c-cyan">[PROGRESS]</span> Advancing loop
+                        sequence to Pass 2/10...
+                    </div>
+                </div>
+            </div>
+            <div class="split-text">
+                <h2>Multi-Pass Unlock Automation</h2>
+                <p>Locked, gated milestones won't freeze your track. Pilot loops through your course trees up to 10
+                    consecutive times, scraping content and resolving feedback questionnaires automatically to open
+                    next-stage prerequisites cleanly.</p>
+            </div>
+        </div>
+
+    </section>
+
+    <footer class="main-footer">
+        <div class="footer-wrap">
+
+            <div class="footer-brand">
+                <div class="footer-brand-title">Pilot</div>
+                <p class="footer-brand-desc">
+                    An open-source browser automation core engineered to simplify repetitive digital course structures
+                    natively on your machine.
+                </p>
+            </div>
+
+            <div class="footer-column">
+                <h4>Product</h4>
+                <ul>
+                    <li><a href="#features">Core Features</a></li>
+                    <li><a href="docs.html#uses">Automation Uses</a></li>
+                    <li><a href="https://github.com/TaahaSidd/Pilot/releases" target="_blank">Release Changelog</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h4>Resources</h4>
+                <ul>
+                    <li><a href="docs.html">Documentation</a></li>
+                    <li><a href="docs.html#quick-start">Quick Start Setup</a></li>
+                    <li><a href="docs.html#quiz-solver">LLM Guardrails</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h4>Developer</h4>
+                <ul>
+                    <li><a href="https://github.com/TaahaSidd/Pilot" target="_blank">GitHub Repository</a></li>
+                    <li><a href="https://github.com/TaahaSidd/Pilot/issues" target="_blank">Report System Bug</a></li>
+                    <li><a href="https://github.com/TaahaSidd" target="_blank" class="creator-link">Follow Creator →</a>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+
+        <div class="footer-bottom">
+            <span>© 2026 Pilot Automation Framework.</span>
+            <span>by <a href="https://github.com/TaahaSidd" target="_blank">Spica Labs</a></span>
+        </div>
+    </footer>
+
+    <script>
+        const reveals = document.querySelectorAll('.reveal');
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach((e) => {
+                if (e.isIntersecting) {
+                    e.target.classList.add('visible');
+                    io.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.15 });
+        reveals.forEach(el => io.observe(el));
+    </script>
+</body>
+
+</html>

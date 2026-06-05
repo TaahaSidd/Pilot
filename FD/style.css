@@ -1,0 +1,887 @@
+/* ==========================================================================
+   DESIGN TOKENS & SYSTEM VARIABLES
+   ========================================================================== */
+:root {
+    --bg: #1A1A1A;
+    --surface: #222222;
+    --surface-border: rgba(255, 255, 255, 0.05);
+    --accent: #AA00FF;
+    --accent-glow: rgba(170, 0, 255, 0.12);
+    --green: #3ecf8e;
+    --text1: #FFFFFF;
+    /* Pure crisp white font */
+    --text2: #B0B0B0;
+    /* Clean secondary text balance */
+    --text3: #555555;
+
+    /* Swapped global typography tokens to technical design styles */
+    --font-heading: 'Space Grotesk', system-ui, sans-serif;
+    --font-body: 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* ==========================================================================
+   GLOBAL RESET & BASE STYLES
+   ========================================================================== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+    background-color: var(--bg);
+    color: var(--text1);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+}
+
+body {
+    min-height: 100vh;
+    line-height: 1.5;
+    background-color: var(--bg);
+}
+
+/* ==========================================================================
+   SCROLL REVEAL UTILITIES
+   ========================================================================== */
+.reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ==========================================================================
+   NAVIGATION FRAMEWORK
+   ========================================================================== */
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(26, 26, 26, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--text1);
+    text-decoration: none;
+    font-family: var(--font-mono);
+}
+
+.nav-logo-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--accent);
+}
+
+.nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+}
+
+.nav-links a {
+    color: var(--text2);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s ease;
+}
+
+.nav-links a:hover {
+    color: var(--text1);
+}
+
+.special-link {
+    color: var(--accent) !important;
+    font-weight: 600;
+}
+
+.nav-cta {
+    color: var(--text1);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    font-family: var(--font-mono);
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.nav-cta:hover {
+    transform: translateX(3px);
+    color: var(--accent);
+}
+
+/* ==========================================================================
+   BUTTON DESIGN SYSTEM
+   ========================================================================== */
+.btn-primary,
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.75rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 4px 24px rgba(170, 0, 255, 0.3);
+}
+
+.btn-primary:hover {
+    background: rgba(170, 0, 255, 0.85);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 30px rgba(170, 0, 255, 0.45);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--text1);
+    border: 1px solid var(--surface-border);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* ==========================================================================
+   HERO SEGMENT
+   ========================================================================== */
+.hero {
+    position: relative;
+    width: 100%;
+    min-height: 85vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6rem 2rem;
+    overflow: hidden;
+    background-color: #1A1A1A;
+}
+
+/* Big Structural Background Graphic Element */
+.hero-bg-graphic {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('./hero-dash-1.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: .50;
+    mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+    -webkit-mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+    z-index: 1;
+}
+
+/* Radial Glow Behind the Main Content Wrapper */
+.hero-glow {
+    position: absolute;
+    width: 800px;
+    height: 500px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(170, 0, 255, 0.15) 0%, transparent 70%);
+    filter: blur(50px);
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* Clear content framing layer over backgrounds */
+.hero-content {
+    position: relative;
+    z-index: 3;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+/* Oversized High-Contrast Headline Sizing */
+.hero-title {
+    font-family: var(--font-heading);
+    /* Tech-focused geometric look */
+    font-size: 6rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    margin-bottom: 2rem;
+    color: var(--text1);
+    /* High contrast solid white */
+}
+
+.hero-title em {
+    font-style: normal;
+    color: var(--text1);
+    /* Keeps the automated text matching perfectly in solid white */
+    background: none;
+    -webkit-text-fill-color: initial;
+}
+
+.hero-sub {
+    font-family: var(--font-body);
+    font-size: 1.35rem;
+    color: var(--text2);
+    max-width: 650px;
+    line-height: 1.6;
+    margin-bottom: 3.5rem;
+    font-weight: 300;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 1.5rem;
+}
+
+/* Ensure secondary features also look premium */
+.split-text h2 {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+}
+
+.nav-logo,
+.footer-logo {
+    font-family: var(--font-heading);
+    font-weight: 700;
+}
+
+/* ==========================================================================
+   RESPONSIVE SCALING FOR COMPACT VIEWPORTS
+   ========================================================================== */
+@media (max-width: 900px) {
+    .hero-title {
+        font-size: 4.5rem;
+    }
+
+    .hero-sub {
+        font-size: 1.15rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero {
+        min-height: 70vh;
+        padding: 4rem 1.5rem;
+    }
+
+    .hero-title {
+        font-size: 3.25rem;
+    }
+
+    .hero-sub {
+        font-size: 1.05rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+        width: 100%;
+        max-width: 300px;
+        gap: 1rem;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+    }
+}
+
+/* ==========================================================================
+   ALTERNATING SPLIT FEATURES SECTION
+   ========================================================================== */
+.features-split-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 6rem 2rem 10rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 9rem;
+}
+
+.split-row {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 6rem;
+    align-items: center;
+}
+
+.split-row.reverse {
+    grid-template-columns: 1fr 1.15fr;
+}
+
+.split-row.reverse .split-media {
+    order: 2;
+}
+
+.split-row.reverse .split-text {
+    order: 1;
+}
+
+/* ==========================================================================
+   MOCKUP FRAME COMPONENT
+   ========================================================================== */
+.media-placeholder {
+    height: auto !important;
+    /* Allow internal padding to structure height naturally */
+    min-height: 230px;
+    background: #0d0e15 !important;
+    display: block !important;
+    /* Reset layout alignment */
+}
+
+.browser-mock {
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.ai-mock {
+    border-color: rgba(170, 0, 255, 0.2) !important;
+    box-shadow: 0 20px 40px rgba(170, 0, 255, 0.05), 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+}
+
+.local-mock {
+    border-color: rgba(0, 255, 102, 0.15) !important;
+    box-shadow: 0 20px 40px rgba(0, 255, 102, 0.02), 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+}
+
+.mock-header {
+    background: #161720 !important;
+    padding: 10px 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.window-dots {
+    display: flex;
+    gap: 6px;
+    margin-right: 16px;
+}
+
+.window-dots span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+/* Color codes for interactive terminal components */
+.dot-red {
+    background: #ff5f56;
+}
+
+.dot-yellow {
+    background: #ffbd2e;
+}
+
+.dot-green {
+    background: #27c93f;
+}
+
+.dot-muted {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.mock-header-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: #8e92b2;
+}
+
+.ai-mock .mock-header-title {
+    color: #b57cff;
+}
+
+.local-mock .mock-header-title {
+    color: #00FF66;
+}
+
+.mock-body {
+    padding: 20px !important;
+    display: block !important;
+    /* Stack terminal streams sequentially */
+    text-align: left !important;
+    line-height: 1.6 !important;
+    height: auto !important;
+}
+
+/* Color profiles for standard console logs */
+.c-blue {
+    color: #61afef;
+}
+
+.c-gray {
+    color: #abb2bf;
+}
+
+.c-green {
+    color: #98c379;
+}
+
+.c-yellow {
+    color: #e5c07b;
+}
+
+.c-purple {
+    color: #c678dd;
+}
+
+.c-cyan {
+    color: #56b6c2;
+}
+
+.c-comment {
+    color: #5c6370;
+    font-style: italic;
+}
+
+/* ==========================================================================
+   TYPOGRAPHY SPECIFICATIONS
+   ========================================================================== */
+.feature-tag {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    display: inline-block;
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+}
+
+.split-text h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--text1);
+    margin-bottom: 1.25rem;
+    line-height: 1.15;
+}
+
+.split-text p {
+    color: var(--text2);
+    font-size: 1.05rem;
+    line-height: 1.65;
+    font-weight: 300;
+}
+
+/* ==========================================================================
+   PRODUCT FOOTER
+   ========================================================================== */
+.main-footer {
+    background-color: #07080c;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 60px 20px 30px 20px;
+    font-family: var(--font-body);
+    color: #8e92b2;
+    width: 100%;
+}
+
+.footer-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 40px;
+}
+
+.footer-brand {
+    flex: 1;
+    min-width: 250px;
+}
+
+.footer-brand-title {
+    font-family: var(--font-heading);
+    font-size: 22px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 16px;
+    letter-spacing: -0.5px;
+}
+
+.footer-brand-desc {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #696c8a;
+    max-width: 300px;
+    margin-bottom: 20px;
+}
+
+.footer-column {
+    min-width: 140px;
+}
+
+.footer-column h4 {
+    font-family: var(--font-heading);
+    font-size: 14px;
+    color: #ffffff;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.footer-column ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 14px;
+}
+
+.footer-column li {
+    margin-bottom: 12px;
+}
+
+.footer-column a {
+    color: #8e92b2;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.footer-column a:hover {
+    color: #ffffff;
+}
+
+.footer-column .creator-link {
+    color: var(--accent);
+    font-weight: 500;
+}
+
+.footer-column .creator-link:hover {
+    opacity: 0.85;
+    color: var(--accent);
+}
+
+.footer-bottom {
+    max-width: 1100px;
+    margin: 40px auto 0 auto;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: #5c6370;
+    gap: 16px;
+}
+
+.footer-bottom a {
+    color: #e1e4fa;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.footer-bottom a:hover {
+    color: var(--accent);
+}
+
+/* Mobile responsive fixes for columns */
+@media (max-width: 768px) {
+    .footer-wrap {
+        flex-direction: column;
+        gap: 30px;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+/* ==========================================================================
+   RESPONSIVE VIEWPORT CONSTRAINTS
+   ========================================================================== */
+@media (max-width: 900px) {
+    .hero-title {
+        font-size: 3.5rem;
+    }
+
+    .split-row,
+    .split-row.reverse {
+        gap: 3.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    nav {
+        flex-direction: column;
+        gap: 1.25rem;
+        text-align: center;
+        padding: 1.5rem;
+    }
+
+    .nav-links {
+        gap: 1.5rem;
+    }
+
+    .hero {
+        padding-top: 5rem;
+    }
+
+    .hero-title {
+        font-size: 2.75rem;
+    }
+
+    .hero-sub {
+        font-size: 1.05rem;
+    }
+
+    .features-split-container {
+        gap: 5rem;
+        padding-bottom: 6rem;
+    }
+
+    .split-row,
+    .split-row.reverse {
+        grid-template-columns: 1fr !important;
+        gap: 2rem;
+    }
+
+    .split-row.reverse .split-media,
+    .split-row.reverse .split-text {
+        order: initial !important;
+    }
+
+    footer {
+        flex-direction: column;
+        gap: 1.5rem;
+        text-align: center;
+    }
+}
+
+
+/* ==========================================================================
+   DOCUMENTATION PAGE ARCHITECTURE LAYOUT SYSTEM
+   ========================================================================== */
+.docs-body {
+    background-color: var(--bg);
+}
+
+.docs-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 2rem 8rem 2rem;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    /* Distinct frozen sidebar tracking channel alignment */
+    gap: 4rem;
+}
+
+/* Sidebar Component Styling */
+.docs-sidebar {
+    position: sticky;
+    top: 6rem;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.sidebar-group h3 {
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    color: var(--text3);
+    margin-bottom: 0.75rem;
+    /* Removed text-transform: uppercase to match new typography guidelines */
+}
+
+.sidebar-group a {
+    display: block;
+    color: var(--text2);
+    text-decoration: none;
+    font-size: 0.95rem;
+    padding: 0.4rem 0;
+    transition: color 0.15s ease;
+}
+
+.sidebar-group a:hover,
+.sidebar-group a.active {
+    color: var(--text1);
+}
+
+.sidebar-group a.active {
+    font-weight: 500;
+    border-left: 2px solid var(--accent);
+    padding-left: 0.75rem;
+}
+
+/* Documentation Content Copy Styles */
+.docs-content {
+    max-width: 800px;
+}
+
+.docs-content h1 {
+    font-family: var(--font-heading);
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    color: var(--text1);
+    letter-spacing: -0.02em;
+}
+
+.docs-content h2 {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    color: var(--text1);
+    letter-spacing: -0.01em;
+}
+
+.docs-content p {
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    color: var(--text2);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+}
+
+.docs-content .lead {
+    font-size: 1.25rem;
+    font-weight: 300;
+    color: var(--text1);
+    line-height: 1.6;
+}
+
+/* NEW: Portal Workflow Cards Layout */
+.workflow-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin: 2.5rem 0;
+}
+
+.step-card {
+    background: #121212;
+    /* Matches the code block background layout */
+    border: 1px solid var(--surface-border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.step-card:hover {
+    border-color: rgba(170, 0, 255, 0.3);
+    /* Soft signature purple accent flash on cursor hover */
+    transform: translateY(-2px);
+}
+
+.step-card h4 {
+    font-family: var(--font-heading);
+    color: var(--text1);
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+}
+
+.step-card p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text2);
+    margin: 0;
+}
+
+.docs-divider {
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    margin: 3.5rem 0;
+}
+
+/* Technical Code Blocks Presentation Frames */
+.code-block-wrapper {
+    background: #121212;
+    border: 1px solid var(--surface-border);
+    border-radius: 8px;
+    margin: 1.5rem 0;
+    overflow: hidden;
+}
+
+.code-header {
+    background: #181818;
+    padding: 0.6rem 1.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text3);
+    border-bottom: 1px solid var(--surface-border);
+}
+
+.code-block-wrapper pre {
+    padding: 1.25rem;
+    overflow-x: auto;
+    margin: 0;
+}
+
+.code-block-wrapper code {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #e2e8f0;
+    /* Crisp console text look */
+}
+
+/* Specific Document Footer Space Constraints Override */
+.docs-footer {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* ==========================================================================
+   DOCS RESPONSIVE MOBILE MEDIA VIEWS
+   ========================================================================== */
+@media (max-width: 768px) {
+    .docs-container {
+        grid-template-columns: 1fr;
+        /* Collapses sidebar grid channel on compact phone screens */
+        gap: 2.5rem;
+        padding-top: 1.5rem;
+    }
+
+    .docs-sidebar {
+        position: relative;
+        top: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        padding-bottom: 2rem;
+    }
+
+    .docs-content h1 {
+        font-size: 2.25rem;
+    }
+
+    .workflow-steps {
+        grid-template-columns: 1fr;
+        /* Stack workflow columns linearly on mobile sizes */
+        gap: 1rem;
+    }
+}

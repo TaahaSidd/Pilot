@@ -35,6 +35,16 @@ class QuizSolver:
             attempt_btn.first.click()
             self.page.wait_for_load_state("domcontentloaded")
             self.page.wait_for_timeout(2000)
+
+            # Handle MA "Start attempt" confirmation modal
+            start_btn = self.page.locator("input#id_submitbutton")
+            if start_btn.count() > 0:
+                start_btn.click()
+                self.page.wait_for_load_state("domcontentloaded")
+                self.page.wait_for_timeout(2000)
+                log_info("Start attempt confirmed")
+
+            log_info("Attempt started")
         else:
             log_warning("No attempt button found — skipping quiz")
             return
@@ -47,6 +57,7 @@ class QuizSolver:
             log_warning("No questions found — aborting, will not submit")
             return
 
+        log_info(f"Found {count} questions")
         all_answered = True
 
         for i in range(count):
@@ -76,8 +87,7 @@ class QuizSolver:
 
                 log_quiz(q_text, f"{options[answer_index]}")
 
-                label = q.locator(
-                    "div[data-region='answer-label']").nth(answer_index)
+                label = q.locator("div[data-region='answer-label']").nth(answer_index)
                 label.click()
                 self.page.wait_for_timeout(600)
 
@@ -87,8 +97,7 @@ class QuizSolver:
 
         # Safety check
         if not all_answered:
-            log_warning(
-                "Not all questions answered — skipping submission to protect your marks")
+            log_warning("Not all questions answered — skipping submission to protect your marks")
             return
 
         # Step 3: click Finish attempt
@@ -104,10 +113,8 @@ class QuizSolver:
         # Step 4: verify all answers saved
         not_answered = self.page.locator("td:has-text('Not yet answered')")
         if not_answered.count() > 0:
-            log_warning(
-                f"{not_answered.count()} question(s) still unanswered — not submitting")
-            return_btn = self.page.locator(
-                "button:has-text('Return to attempt')")
+            log_warning(f"{not_answered.count()} question(s) still unanswered — not submitting")
+            return_btn = self.page.locator("button:has-text('Return to attempt')")
             if return_btn.count() > 0:
                 return_btn.click()
             return
@@ -124,8 +131,7 @@ class QuizSolver:
 
         # Step 6: confirm modal
         try:
-            self.page.wait_for_selector(
-                "button[data-action='save']", timeout=5000)
+            self.page.wait_for_selector("button[data-action='save']", timeout=5000)
             self.page.locator("button[data-action='save']").click()
             self.page.wait_for_timeout(2000)
             log_success("Quiz submitted")
@@ -139,19 +145,18 @@ class QuizSolver:
             return self._ask_gemini(question, options, context)
 
     def _build_prompt(self, question: str, options: list[str], context: str = "") -> str:
-        options_text = "\n".join(
-            [f"{i}. {opt}" for i, opt in enumerate(options)])
+        options_text = "\n".join([f"{i}. {opt}" for i, opt in enumerate(options)])
         context_block = f"Use this study material as context to answer:\n{context}\n\n" if context else ""
         return f"""You are answering a multiple choice exam question.
-{context_block}Reply with ONLY a single digit — the number of the correct answer (0, 1, 2, or 3).
-Do not explain. Do not write anything else. Just the number.
+        {context_block}Reply with ONLY a single digit — the number of the correct answer (0, 1, 2, or 3).
+        Do not explain. Do not write anything else. Just the number.
 
-Question: {question}
+        Question: {question}
 
-Options:
-{options_text}
+        Options:
+        {options_text}
 
-Answer (single digit only):"""
+        Answer (single digit only):"""
 
     def _parse_response(self, raw: str, options: list[str]) -> int | None:
         for char in raw:
@@ -188,8 +193,7 @@ Answer (single digit only):"""
                 if "429" in error_str:
                     match = re_module.search(r'seconds: (\d+)', error_str)
                     wait = int(match.group(1)) + 5 if match else 60
-                    log_warning(
-                        f"Rate limited — waiting {wait}s before retry {attempt+1}/3...")
+                    log_warning(f"Rate limited — waiting {wait}s before retry {attempt+1}/3...")
                     time.sleep(wait)
                 else:
                     log_error(f"Gemini error: {e}")

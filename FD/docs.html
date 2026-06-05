@@ -5,42 +5,591 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Documentation — Pilot</title>
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500&display=swap"
         rel="stylesheet">
+    <style>
+        :root {
+            --bg: #080808;
+            --bg2: #0f0f0f;
+            --bg3: #141414;
+            --border: rgba(255, 255, 255, 0.07);
+            --border2: rgba(255, 255, 255, 0.12);
+            --accent: #AA00FF;
+            --accent-dim: rgba(170, 0, 255, 0.15);
+            --accent-glow: rgba(170, 0, 255, 0.08);
+            --t1: #f5f5f5;
+            --t2: #888;
+            --t3: #444;
+            --green: #00e676;
+            --cyan: #00bcd4;
+            --yellow: #ffc107;
+            --font: 'Geist', system-ui, sans-serif;
+            --mono: 'Geist Mono', monospace;
+        }
 
-    <link rel="stylesheet" href="style.css">
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        html {
+            background: var(--bg);
+            color: var(--t1);
+            font-family: var(--font);
+            scroll-behavior: smooth;
+            overflow-x: hidden
+        }
+
+        body {
+            min-height: 100vh;
+            line-height: 1.5
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit
+        }
+
+        /* NAV */
+        .nav {
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2.5rem;
+            height: 60px;
+            background: rgba(8, 8, 8, 0.92);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-logo {
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--t1)
+        }
+
+        .nav-logo span {
+            color: var(--accent)
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none
+        }
+
+        .nav-links a {
+            font-size: 0.875rem;
+            color: var(--t2);
+            transition: color 0.15s
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--t1)
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem
+        }
+
+        .nav-gh {
+            font-size: 0.875rem;
+            font-family: var(--mono);
+            color: var(--t2);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: color 0.15s
+        }
+
+        .nav-gh:hover {
+            color: var(--t1)
+        }
+
+        /* DOCS LAYOUT */
+        .docs-layout {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            min-height: calc(100vh - 60px);
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        /* SIDEBAR */
+        .docs-sidebar {
+            position: sticky;
+            top: 60px;
+            height: calc(100vh - 60px);
+            overflow-y: auto;
+            border-right: 1px solid var(--border);
+            padding: 2rem 0;
+        }
+
+        .docs-sidebar::-webkit-scrollbar {
+            width: 4px
+        }
+
+        .docs-sidebar::-webkit-scrollbar-thumb {
+            background: var(--border2);
+            border-radius: 4px
+        }
+
+        .sidebar-section {
+            margin-bottom: 2rem;
+            padding: 0 1.25rem
+        }
+
+        .sidebar-section-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--t3);
+            letter-spacing: 0.1em;
+            margin-bottom: 0.75rem;
+            display: block;
+            padding: 0 0.25rem;
+        }
+
+        .sidebar-link {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--t2);
+            padding: 0.35rem 0.5rem;
+            border-radius: 6px;
+            transition: all 0.15s;
+            margin-bottom: 0.1rem;
+        }
+
+        .sidebar-link:hover {
+            color: var(--t1);
+            background: rgba(255, 255, 255, 0.03)
+        }
+
+        .sidebar-link.active {
+            color: var(--t1);
+            background: rgba(170, 0, 255, 0.1);
+        }
+
+        /* DOCS CONTENT */
+        .docs-content {
+            padding: 3.5rem 4rem 8rem;
+            max-width: 820px;
+        }
+
+        .docs-content section {
+            margin-bottom: 0.5rem
+        }
+
+        /* TYPOGRAPHY */
+        .docs-content h1 {
+            font-size: 2.75rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            line-height: 1.1;
+            color: var(--t1);
+            margin-bottom: 1.25rem;
+        }
+
+        .docs-content h2 {
+            font-size: 1.65rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            color: var(--t1);
+            margin-top: 3.5rem;
+            margin-bottom: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .docs-content h2:first-of-type {
+            margin-top: 0;
+            border-top: none;
+            padding-top: 0
+        }
+
+        .docs-content h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--t1);
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .docs-content p {
+            font-size: 1rem;
+            color: var(--t2);
+            line-height: 1.75;
+            margin-bottom: 1.25rem;
+            font-weight: 300;
+        }
+
+        .docs-content .lead {
+            font-size: 1.2rem;
+            color: var(--t1);
+            line-height: 1.65;
+            font-weight: 300;
+            margin-bottom: 1.5rem;
+        }
+
+        .docs-content ul,
+        .docs-content ol {
+            padding-left: 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .docs-content li {
+            font-size: 0.975rem;
+            color: var(--t2);
+            line-height: 1.7;
+            margin-bottom: 0.4rem;
+        }
+
+        .docs-content code {
+            font-family: var(--mono);
+            font-size: 0.85em;
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--t1);
+            padding: 0.15em 0.45em;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+
+        .docs-content a {
+            color: var(--accent);
+            transition: opacity 0.15s
+        }
+
+        .docs-content a:hover {
+            opacity: 0.8
+        }
+
+        /* CODE BLOCKS */
+        .code-block {
+            background: #090909;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 1.5rem 0;
+        }
+
+        .code-block-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.6rem 1.1rem;
+            background: #0e0e0e;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .code-block-label {
+            font-family: var(--mono);
+            font-size: 0.72rem;
+            color: var(--t3)
+        }
+
+        .code-block-copy {
+            background: none;
+            border: none;
+            color: var(--t3);
+            cursor: pointer;
+            font-family: var(--mono);
+            font-size: 0.72rem;
+            padding: 0;
+            transition: color 0.15s;
+        }
+
+        .code-block-copy:hover {
+            color: var(--accent)
+        }
+
+        .code-block pre {
+            padding: 1.25rem 1.4rem;
+            overflow-x: auto
+        }
+
+        .code-block pre code {
+            font-family: var(--mono);
+            font-size: 0.865rem;
+            line-height: 1.7;
+            background: none;
+            padding: 0;
+            border: none;
+            color: #e2e8f0;
+        }
+
+        .code-block pre code .c {
+            color: #4a4e5a;
+            font-style: italic
+        }
+
+        .code-block pre code .k {
+            color: #c678dd
+        }
+
+        .code-block pre code .s {
+            color: #98c379
+        }
+
+        .code-block pre code .v {
+            color: #e5c07b
+        }
+
+        .code-block pre code .t {
+            color: #61afef
+        }
+
+        .code-block pre code .g {
+            color: #98c379
+        }
+
+        .code-block pre code .cy {
+            color: #56b6c2
+        }
+
+        /* STEP CARDS */
+        .step-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1.5rem 0
+        }
+
+        .step-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.4rem;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .step-card:hover {
+            border-color: var(--border2);
+            transform: translateY(-2px)
+        }
+
+        .step-card-num {
+            font-family: var(--mono);
+            font-size: 0.72rem;
+            color: var(--accent);
+            margin-bottom: 0.65rem;
+            display: block;
+        }
+
+        .step-card h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--t1);
+            margin-bottom: 0.5rem
+        }
+
+        .step-card p {
+            font-size: 0.875rem;
+            color: var(--t2);
+            line-height: 1.6;
+            margin: 0
+        }
+
+        /* CALLOUT */
+        .callout {
+            background: rgba(170, 0, 255, 0.05);
+            border: 1px solid rgba(170, 0, 255, 0.2);
+            border-radius: 8px;
+            padding: 1.1rem 1.3rem;
+            margin: 1.5rem 0;
+        }
+
+        .callout-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--accent);
+            letter-spacing: 0.08em;
+            margin-bottom: 0.5rem;
+        }
+
+        .callout p {
+            font-size: 0.925rem;
+            color: var(--t2);
+            margin: 0;
+            line-height: 1.6
+        }
+
+        .callout.warning {
+            background: rgba(255, 193, 7, 0.05);
+            border-color: rgba(255, 193, 7, 0.2);
+        }
+
+        .callout.warning .callout-title {
+            color: var(--yellow)
+        }
+
+        /* DIVIDER */
+        .divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 2.5rem 0
+        }
+
+        /* FOOTER */
+        .docs-footer {
+            border-top: 1px solid var(--border);
+            padding: 2rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            font-family: var(--mono);
+            color: var(--t3);
+            max-width: 820px;
+            margin: 0 auto;
+        }
+
+        .docs-footer a {
+            color: var(--t2);
+            transition: color 0.15s
+        }
+
+        .docs-footer a:hover {
+            color: var(--t1)
+        }
+
+        .footer-nav-links {
+            display: flex;
+            gap: 2rem
+        }
+
+        /* MOBILE NAV TOGGLE */
+        .mobile-sidebar-toggle {
+            display: none;
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            z-index: 300;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: none;
+            cursor: pointer;
+            color: #fff;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 24px rgba(170, 0, 255, 0.4);
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* RESPONSIVE */
+        @media(max-width:900px) {
+            .docs-layout {
+                grid-template-columns: 1fr
+            }
+
+            .docs-sidebar {
+                position: fixed;
+                top: 60px;
+                left: 0;
+                bottom: 0;
+                width: 260px;
+                background: rgba(8, 8, 8, 0.97);
+                transform: translateX(-100%);
+                transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                z-index: 150;
+            }
+
+            .docs-sidebar.open {
+                transform: translateX(0)
+            }
+
+            .docs-content {
+                padding: 2rem 1.5rem 6rem
+            }
+
+            .step-cards {
+                grid-template-columns: 1fr
+            }
+
+            .mobile-sidebar-toggle {
+                display: flex
+            }
+
+            .docs-footer {
+                padding: 2rem 1.5rem;
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center
+            }
+        }
+
+        @media(max-width:640px) {
+            .nav {
+                padding: 0 1.25rem
+            }
+
+            .nav-links {
+                display: none
+            }
+
+            .docs-content h1 {
+                font-size: 2rem
+            }
+
+            .docs-content h2 {
+                font-size: 1.35rem
+            }
+        }
+    </style>
 </head>
 
-<body class="docs-body">
+<body>
 
-    <nav class="docs-nav">
+    <nav class="nav">
         <a href="index.html" class="nav-logo">Pilot</a>
         <ul class="nav-links">
+            <li><a href="index.html#how-it-works">How it works</a></li>
             <li><a href="index.html#features">Features</a></li>
-            <li><a href="docs.html" class="special-link">Docs</a></li>
+            <li><a href="docs.html" class="active">Docs</a></li>
         </ul>
-        <a href="https://github.com/TaahaSidd/Pilot" class="nav-cta">GitHub →</a>
+        <div class="nav-right">
+            <a href="https://github.com/TaahaSidd/Pilot" class="nav-gh" target="_blank">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                </svg>
+                GitHub →
+            </a>
+        </div>
     </nav>
 
-    <div class="docs-container">
+    <div class="docs-layout">
 
-        <aside class="docs-sidebar">
-            <div class="sidebar-group">
-                <h3>Getting Started</h3>
-                <a href="#introduction" class="active">Introduction</a>
-                <a href="#uses">Uses of Pilot</a>
-                <a href="#prerequisites">Prerequisites</a>
-                <a href="#quick-start">Quick Start</a>
+        <aside class="docs-sidebar" id="sidebar">
+            <div class="sidebar-section">
+                <span class="sidebar-section-label">Getting Started</span>
+                <a href="#introduction" class="sidebar-link active">Introduction</a>
+                <a href="#uses" class="sidebar-link">Uses of Pilot</a>
+                <a href="#prerequisites" class="sidebar-link">Prerequisites</a>
+                <a href="#quick-start" class="sidebar-link">Quick Start</a>
             </div>
-            <div class="sidebar-group">
-                <h3>How It Works</h3>
-                <a href="#workflow-engine">Automation Loop</a>
-                <a href="#quiz-solver">Smart QuizSolver</a>
-                <a href="#feedback-solver">Feedback Engine</a>
+            <div class="sidebar-section">
+                <span class="sidebar-section-label">How It Works</span>
+                <a href="#workflow-engine" class="sidebar-link">Automation Loop</a>
+                <a href="#quiz-solver" class="sidebar-link">Quiz Solver</a>
+                <a href="#feedback-solver" class="sidebar-link">Feedback Engine</a>
+            </div>
+            <div class="sidebar-section">
+                <span class="sidebar-section-label">Reference</span>
+                <a href="https://github.com/TaahaSidd/Pilot" target="_blank" class="sidebar-link">GitHub Repository
+                    ↗</a>
+                <a href="https://console.groq.com" target="_blank" class="sidebar-link">Groq Console ↗</a>
             </div>
         </aside>
 
@@ -48,221 +597,319 @@
 
             <section id="introduction">
                 <h1>Documentation</h1>
-                <p class="lead">Welcome to Pilot. This guide will walk you through deploying and configuring the browser
-                    automation engine in less than two minutes, executed entirely out of your native terminal window.
+                <p class="lead">Welcome to Pilot. This guide covers everything from first-time setup to how the
+                    automation engine works under the hood. Setup takes under two minutes.</p>
+                <p>Pilot navigates Amity Online course dashboards autonomously — handling reading modules, quiz
+                    resolution via Groq's Llama 3.3 70B, and feedback form completion across all your enrolled courses.
                 </p>
-                <p>Pilot navigates course material dashboards autonomously, handles read-through blocks for baseline
-                    context compilation, and processes complex assessment arrays utilizing highly optimized Llama 3.3
-                    70B models over Groq Cloud infrastructure.</p>
+
+                <div class="callout">
+                    <div class="callout-title">Open Source</div>
+                    <p>Pilot is fully open source. Read the code, fork it, or contribute at <a
+                            href="https://github.com/TaahaSidd/Pilot" target="_blank">github.com/TaahaSidd/Pilot</a>.
+                    </p>
+                </div>
             </section>
 
-            <hr class="docs-divider">
+            <hr class="divider">
 
             <section id="uses">
                 <h2>Uses of Pilot</h2>
-                <p>Pilot is engineered to abstract away repetitive administrative patterns across your student
-                    dashboard. It redirects manual, time-sink operations into automated pipelines so you can concentrate
-                    on high-priority development and learning objectives.</p>
+                <p>Pilot abstracts away the repetitive administrative layer of your student dashboard — redirecting
+                    hours of manual clicking into automated pipelines.</p>
 
-                <div class="workflow-steps">
+                <div class="step-cards">
                     <div class="step-card">
-                        <h4>Asynchronous Course Progression</h4>
-                        <p>Eliminate manual multi-clicking. Pilot takes care of navigating linearly through extensive
-                            course layout structures, reading assignments, and informational pages on your behalf.</p>
+                        <span class="step-card-num">USE CASE 01</span>
+                        <h4>Async Course Progression</h4>
+                        <p>Navigate linearly through course modules, reading assignments, and content pages
+                            automatically — no manual clicking required.</p>
                     </div>
                     <div class="step-card">
-                        <h4>Context-Aware Assessment Operations</h4>
-                        <p>Instead of copying questions one-by-one, Pilot reads active quiz screens, structures the
-                            variables into data formats, and queries them against an optimized AI core to secure swift
-                            solutions.</p>
+                        <span class="step-card-num">USE CASE 02</span>
+                        <h4>AI Quiz Resolution</h4>
+                        <p>Pilot reads active quiz screens, structures them into payloads, and queries Groq's LLM to
+                            select correct answers using on-screen context.</p>
                     </div>
                     <div class="step-card">
-                        <h4>Administrative Survey Resolution</h4>
-                        <p>Bypass unskippable system gates. Pilot autofills repetitive mid-module satisfaction cards,
-                            region queries, and feedback boxes so subsequent reading blocks unlock instantly.</p>
+                        <span class="step-card-num">USE CASE 03</span>
+                        <h4>Survey & Feedback Bypass</h4>
+                        <p>Auto-fills mandatory mid-module satisfaction cards, region selectors, and feedback forms so
+                            gated content unlocks instantly.</p>
+                    </div>
+                    <div class="step-card">
+                        <span class="step-card-num">USE CASE 04</span>
+                        <h4>Multi-Course Sessions</h4>
+                        <p>Runs across all enrolled courses in a single session — tracking progress and resuming from
+                            incomplete modules automatically.</p>
                     </div>
                 </div>
             </section>
 
-            <hr class="docs-divider">
+            <hr class="divider">
 
             <section id="prerequisites">
                 <h2>Prerequisites</h2>
-                <p>To run Pilot successfully, you must provide your own API keys and platform access details. Gather the
-                    following items before starting the execution script:</p>
+                <p>Before running Pilot, gather the following:</p>
 
-                <div class="workflow-steps">
-
+                <div class="step-cards">
                     <div class="step-card">
-                        <h4>1. Amity Amigo Credentials</h4>
-                        <p>You need your official Amity University student email identifier (e.g.,
-                            <code>your.name@s.amity.edu</code>) and corresponding portal password. Pilot uses these
-                            parameters to authenticating sessions smoothly inside Playwright core.
-                        </p>
+                        <span class="step-card-num">REQUIRED 01</span>
+                        <h4>Amity Amigo Credentials</h4>
+                        <p>Your Amity student email (e.g. <code>name@s.amity.edu</code>) and portal password. Used to
+                            authenticate the browser session.</p>
                     </div>
-
                     <div class="step-card">
-                        <h4>2. Groq API Access Key</h4>
-                        <p>Pilot handles evaluation queries using your personal model operational limits. Generate a
-                            functional application secret via your account dashboard.</p>
-                        <p style="margin-top: 0.75rem;"><a href="https://console.groq.com" target="_blank"
-                                style="color: var(--accent); font-weight: 500; text-decoration: none; font-size: 0.9rem;">Get
-                                Key from Groq Console →</a></p>
+                        <span class="step-card-num">REQUIRED 02</span>
+                        <h4>Groq API Key</h4>
+                        <p>Generate a key at <a href="https://console.groq.com" target="_blank">console.groq.com</a>.
+                            Free tier is sufficient for typical usage.</p>
                     </div>
-
                     <div class="step-card">
-                        <h4>3. Python Environment</h4>
-                        <p>Verify that your host machine has a clean distribution of Python 3.8 or higher fully
-                            initialized and registered to your local system console pathway mapping array.</p>
+                        <span class="step-card-num">REQUIRED 03</span>
+                        <h4>Python 3.8+</h4>
+                        <p>Verify with <code>python --version</code>. Any version from 3.8 onward works.</p>
                     </div>
-
+                    <div class="step-card">
+                        <span class="step-card-num">REQUIRED 04</span>
+                        <h4>Git</h4>
+                        <p>Needed to clone the repository. Alternatively, download the ZIP from GitHub.</p>
+                    </div>
                 </div>
             </section>
 
-            <hr class="docs-divider">
+            <hr class="divider">
 
             <section id="quick-start">
-                <h2>Quick Start Guide</h2>
-                <p>Forget handling hidden environment configuration files or leaving plain-text keys exposed on your
-                    local drive storage. Pilot prompts you interactively within your execution process console stream.
+                <h2>Quick Start</h2>
+                <p>No hidden config files or plain-text credential storage. Pilot prompts you interactively at runtime.
                 </p>
 
-                <h3>Step 1: Fetch Project & Environments</h3>
-                <p>Launch your terminal environment and input the subsequent deployment blocks to set up the workspace
-                    repository and install core packages:</p>
+                <h3>Step 1 — Clone and install</h3>
 
-                <div class="code-block-wrapper">
-                    <div class="code-header">Terminal Console</div>
-                    <pre><code># Clone the source repository
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-label">Terminal</span>
+                        <button class="code-block-copy" onclick="copyCode(this)">copy</button>
+                    </div>
+                    <pre><code><span class="c"># Clone the repository</span>
 git clone https://github.com/TaahaSidd/Pilot.git
-
-# Step directly into the working directory root
 cd Pilot
 
-# Install core interface, engine dependencies, and browser binaries
+<span class="c"># Install Python dependencies</span>
 pip install -r requirements.txt
+
+<span class="c"># Install the Chromium browser binary</span>
 playwright install chromium</code></pre>
                 </div>
 
-                <h3>Step 2: Trigger the Engine</h3>
-                <p>Launch the root initialization routine to spin up the automation loop wrapper:</p>
+                <h3>Step 2 — Run Pilot</h3>
 
-                <div class="code-block-wrapper">
-                    <div class="code-header">Terminal Console</div>
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-label">Terminal</span>
+                        <button class="code-block-copy" onclick="copyCode(this)">copy</button>
+                    </div>
                     <pre><code>python main.py</code></pre>
                 </div>
 
-                <h3>Step 3: Direct Console Authorization</h3>
-                <p>Provide your unique token and Amigo portal details directly into the terminal window when prompted by
-                    the application script:</p>
+                <h3>Step 3 — Enter credentials</h3>
+                <p>Pilot will prompt you for three things in the terminal. Nothing is written to disk.</p>
 
-                <div class="code-block-wrapper">
-                    <div class="code-header">Interactive Terminal Prompts</div>
-                    <pre><code>[PILOT] Enter your GROQ API Key: gsk_••••••••••••••••••••••••
-[PILOT] Enter Student Email Address: username@s.amity.edu
-[PILOT] Enter Student Portal Password: ••••••••••••
-[PILOT] Spin-up sequence validated. Launching automated browser view...</code></pre>
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-label">Interactive prompts</span>
+                    </div>
+                    <pre><code><span class="t">[PILOT]</span> Enter your Groq API key: <span class="g">gsk_••••••••••••••••••••••••</span>
+<span class="t">[PILOT]</span> Enter student email: <span class="v">user@s.amity.edu</span>
+<span class="t">[PILOT]</span> Enter portal password: <span class="g">••••••••••••</span>
+
+<span class="c"># credentials held in session memory only</span>
+<span class="g">[OK]</span> Spin-up validated. Launching browser...</code></pre>
                 </div>
 
-                <blockquote>
-                    <strong>Visual Security Control Verification:</strong> Your submitted credential strings remain
-                    fully volatile inside the current session memory buffer. Once the automation browser renders on
-                    screen, it auto-fills your user parameters. Complete the localized visual CAPTCHA graphic step
-                    manually on the webpage, press <strong>ENTER</strong> inside your terminal dashboard, and hand over
-                    control.
-                </blockquote>
+                <div class="callout warning">
+                    <div class="callout-title">Manual CAPTCHA step</div>
+                    <p>After the browser opens and your credentials are filled, you'll need to manually complete the
+                        visual CAPTCHA on the Amigo login page. Once done, press <strong>Enter</strong> in the terminal
+                        to hand control to Pilot.</p>
+                </div>
+
+                <h3>Step 4 — Let it run</h3>
+                <p>Pilot scans your courses, identifies incomplete modules, and begins the automation loop. You'll see
+                    live progress in the terminal. When it finishes, a completion summary is printed for each course.
+                </p>
             </section>
 
-            <hr class="docs-divider">
+            <hr class="divider">
 
             <section id="workflow-engine">
-                <h2>The Automation Workflow</h2>
-                <p>Once initialization clears, the task automation routine processes target user curriculum structures
-                    through a smart execution pipeline:</p>
+                <h2>The Automation Loop</h2>
+                <p>Once the browser session is active, Pilot works through your courses via a structured pipeline:</p>
 
-                <div class="workflow-steps">
+                <div class="step-cards">
                     <div class="step-card">
-                        <h4>1. Target Evaluation</h4>
-                        <p>Pilot cross-examines the course listing indexes and skips 100% completed materials, focusing
-                            processing time only on active sections.</p>
+                        <span class="step-card-num">Phase 01</span>
+                        <h4>Course Scan</h4>
+                        <p>Pilot reads the course listing, checks completion percentages, and skips anything already at
+                            100%.</p>
                     </div>
                     <div class="step-card">
-                        <h4>2. Context Aggregation</h4>
-                        <p>During textbook reading passes, Pilot scrapes text representations straight into short-term
-                            execution memory matrices to feed context data into subsequent quizzes.</p>
+                        <span class="step-card-num">Phase 02</span>
+                        <h4>Context Collection</h4>
+                        <p>During reading modules, Pilot scrapes visible text into short-term memory — used as quiz
+                            context in the next phase.</p>
                     </div>
                     <div class="step-card">
-                        <h4>3. Relational Multi-Pass Loops</h4>
-                        <p>Since progression configurations routinely gate subsequent tests behind prior items, Pilot
-                            loops through execution pipelines up to 10 distinct iterations to handle elements as they
-                            unlock.</p>
+                        <span class="step-card-num">Phase 03</span>
+                        <h4>Quiz & Feedback</h4>
+                        <p>Quizzes are resolved via Groq LLM inference. Feedback forms are auto-filled with compliant
+                            rating values.</p>
                     </div>
+                    <div class="step-card">
+                        <span class="step-card-num">Phase 04</span>
+                        <h4>Multi-Pass Unlock</h4>
+                        <p>After each pass, newly unlocked modules are picked up. Up to 10 passes run per session to
+                            fully clear gated content.</p>
+                    </div>
+                </div>
+
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-label">runtime_orchestrator.log — example output</span>
+                    </div>
+                    <pre><code><span class="c">[08:42:11]</span> <span class="t">[ENGINE]</span>  Pass 1/10: mapping course layout...
+<span class="c">[08:42:15]</span> <span class="k">[ROUTINE]</span> Gateway module detected — processing
+<span class="c">[08:42:19]</span> <span class="g">[FEEDBACK]</span> Rating form: 9/10 submitted
+<span class="c">[08:42:20]</span> <span class="cy">[UNLOCK]</span>  Next stage opened
+<span class="c">[08:42:20]</span> <span class="cy">[PROGRESS]</span> Advancing to Pass 2/10
+<span class="c">[08:42:31]</span> <span class="g">[QUIZ]</span>    4/4 answers selected → submitted
+<span class="c">[08:42:45]</span> <span class="v">[DONE]</span>    Course 1/6: 100% ✓</code></pre>
                 </div>
             </section>
 
-            <hr class="docs-divider">
+            <hr class="divider">
 
             <section id="quiz-solver">
-                <h2>Smart QuizSolver</h2>
-                <p>The internal <code>QuizSolver</code> reads multiple-choice options on your screen, parses layout
-                    trees into structural evaluation syntax maps, and ships them directly to the ultra-fast Groq
-                    framework executing Llama 3.3 70B models.</p>
+                <h2>Quiz Solver</h2>
+                <p>The internal <code>QuizSolver</code> reads the active multiple-choice quiz, structures the question
+                    and options into a payload, and sends it to Groq's Llama 3.3 70B model. The reading material
+                    accumulated during content passes is included as context.</p>
 
-                <p><strong>Fail-Safe Grade Guardrails:</strong> Academic progress remains fully protected. If Pilot
-                    encounters custom layout styles it can't clear, or spots blank questions on a page, it stops
-                    processing to prevent faulty answer sets from hurting your grades.</p>
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-label">inference_engine.py — simplified</span>
+                    </div>
+                    <pre><code><span class="k">import</span> <span class="v">groq_cloud</span>
+
+<span class="c"># Payload assembled from on-screen quiz + reading buffer</span>
+payload = {
+  <span class="s">"model"</span>: <span class="s">"llama-3.3-70b-specdec"</span>,
+  <span class="s">"hardware"</span>: <span class="s">"Groq LPU Inference"</span>,
+  <span class="s">"question"</span>: scraped_question,
+  <span class="s">"options"</span>: scraped_options,
+  <span class="s">"context"</span>: reading_material_buffer
+}
+
+answer = groq_cloud.infer(payload)
+<span class="c"># ~240ms response time on average</span>
+<span class="g">→ Answer selected and submitted</span></code></pre>
+                </div>
+
+                <h3>Fail-safe guardrails</h3>
+                <p>Grade protection is built in. The QuizSolver halts and skips submission if:</p>
+                <ul>
+                    <li>A question field is blank or undetected</li>
+                    <li>The page layout doesn't match expected quiz structure</li>
+                    <li>Fewer options are found than required</li>
+                </ul>
+                <p>In these cases Pilot logs a warning and moves to the next module rather than submitting a bad answer.
+                </p>
             </section>
 
-            <hr class="docs-divider">
+            <hr class="divider">
 
             <section id="feedback-solver">
                 <h2>Feedback Engine</h2>
-                <p>To prevent progression locks due to mandatory survey fields, the integrated
-                    <code>FeedbackSolver</code> automates standard rating systems cleanly:
-                </p>
+                <p>The <code>FeedbackSolver</code> handles mandatory survey forms that gate progression. Without it,
+                    Pilot would stall at every feedback checkpoint.</p>
 
+                <p>The engine handles three field types:</p>
                 <ul>
-                    <li>Enforces standard system location inputs across country and region selectors.</li>
-                    <li>Fills matrix choice loops safely using high tier review numbers (9/10 fields).</li>
-                    <li>Populates open textbox components using human-like, realistic strings to satisfy system minimum
-                        character criteria.</li>
+                    <li><strong>Location selectors</strong> — fills standard country and region dropdowns</li>
+                    <li><strong>Rating matrices</strong> — selects high-tier scores (9/10) across all rating fields</li>
+                    <li><strong>Open text fields</strong> — populates with human-like, minimum-length strings</li>
                 </ul>
+
+                <div class="callout">
+                    <div class="callout-title">Why 9/10?</div>
+                    <p>Pilot uses 9/10 on rating forms to satisfy system requirements while maintaining a realistic,
+                        non-suspicious score distribution. Using 10/10 universally can sometimes flag automated sessions
+                        on certain portal implementations.</p>
+                </div>
             </section>
 
         </main>
+
     </div>
 
-    <footer class="docs-footer">
-        <div class="footer-logo">Pilot Automation</div>
-        <span class="footer-copy">© 2026 · Powered by Spica Labs</span>
-    </footer>
+    <div class="docs-footer">
+        <span>© 2026 Pilot · by <a href="https://github.com/TaahaSidd" target="_blank">Spica Labs</a></span>
+        <div class="footer-nav-links">
+            <a href="index.html">Home</a>
+            <a href="https://github.com/TaahaSidd/Pilot" target="_blank">GitHub</a>
+            <a href="https://github.com/TaahaSidd/Pilot/issues" target="_blank">Issues</a>
+        </div>
+    </div>
+
+    <button class="mobile-sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">☰</button>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const sidebarLinks = document.querySelectorAll('.docs-sidebar a');
-            const sections = document.querySelectorAll('.docs-content section');
+        // Sidebar active state on scroll
+        const links = document.querySelectorAll('.sidebar-link[href^="#"]');
+        const sections = document.querySelectorAll('.docs-content section[id]');
 
-            const observerOptions = {
-                root: null,
-                rootMargin: '-20% 0px -50% 0px',
-                threshold: 0
-            };
+        const io = new IntersectionObserver(entries => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    links.forEach(l => l.classList.remove('active'));
+                    const active = document.querySelector(`.sidebar-link[href="#${e.target.id}"]`);
+                    if (active) active.classList.add('active');
+                }
+            });
+        }, { rootMargin: '-20% 0px -60% 0px', threshold: 0 });
+        sections.forEach(s => io.observe(s));
 
-            const observerCallback = (entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const id = entry.target.getAttribute('id');
-                        sidebarLinks.forEach(link => link.classList.remove('active'));
-                        const activeLink = document.querySelector(`.docs-sidebar a[href="#${id}"]`);
-                        if (activeLink) {
-                            activeLink.classList.add('active');
-                        }
-                    }
-                });
-            };
+        // Copy code buttons
+        function copyCode(btn) {
+            const pre = btn.closest('.code-block').querySelector('pre');
+            navigator.clipboard.writeText(pre.innerText);
+            btn.textContent = 'copied!';
+            setTimeout(() => btn.textContent = 'copy', 1500);
+        }
 
-            const observer = new IntersectionObserver(observerCallback, observerOptions);
-            sections.forEach(section => observer.observe(section));
+        // Mobile sidebar toggle
+        const sidebar = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('sidebarToggle');
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            toggleBtn.textContent = sidebar.classList.contains('open') ? '✕' : '☰';
+        });
+        document.addEventListener('click', e => {
+            if (!sidebar.contains(e.target) && e.target !== toggleBtn) {
+                sidebar.classList.remove('open');
+                toggleBtn.textContent = '☰';
+            }
+        });
+
+        // Smooth scroll for sidebar links
+        links.forEach(l => {
+            l.addEventListener('click', e => {
+                if (window.innerWidth <= 900) {
+                    sidebar.classList.remove('open');
+                    toggleBtn.textContent = '☰';
+                }
+            });
         });
     </script>
 </body>

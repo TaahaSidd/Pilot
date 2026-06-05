@@ -1,6 +1,7 @@
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
 import re
 from workflow.quiz_solver import QuizSolver
+from workflow.feedback_solver import FeedbackSolver
 from pilot_ui import (
     log_info, log_success, log_warning, log_error,
     log_page, log_quiz, log_skip, log_course, log_module_progress,
@@ -37,11 +38,9 @@ class Workflow:
                 course_id = href.rstrip("/").split("=")[-1]
                 title = f"Course {course_id}"
                 try:
-                    card = self.page.locator(
-                        f"[id*='course-info-container-{course_id}']")
+                    card = self.page.locator(f"[id*='course-info-container-{course_id}']")
                     if card.count() > 0:
-                        heading = card.locator(
-                            "h3, h4, strong, .card-title, [class*='title']").first
+                        heading = card.locator("h3, h4, strong, .card-title, [class*='title']").first
                         if heading.count() > 0:
                             title = heading.inner_text().strip()
                 except:
@@ -49,12 +48,10 @@ class Workflow:
 
                 completion_pct = 0
                 try:
-                    card = self.page.locator(
-                        f"[id*='course-info-container-{course_id}']")
+                    card = self.page.locator(f"[id*='course-info-container-{course_id}']")
                     if card.count() > 0:
                         text = card.inner_text()
-                        match = re.search(
-                            r'(\d+)%\s*Course Completed', text, re.IGNORECASE)
+                        match = re.search(r'(\d+)%\s*Course Completed', text, re.IGNORECASE)
                         if match:
                             completion_pct = int(match.group(1))
                 except:
@@ -75,17 +72,12 @@ class Workflow:
         self.page.wait_for_timeout(2000)
         modules = []
 
-        items = self.page.locator(
-            "li.courseindex-item:has(a.courseindex-link[href*='/mod/'])")
+        items = self.page.locator("li.courseindex-item:has(a.courseindex-link[href*='/mod/'])")
         count = items.count()
 
         for i in range(count):
             try:
                 item = items.nth(i)
-
-                classes = item.get_attribute("class") or ""
-                if "dimmed" in classes:
-                    continue
 
                 link = item.locator("a.courseindex-link")
                 href = link.get_attribute("href") or ""
@@ -104,6 +96,11 @@ class Workflow:
                     mtype = "RESOURCE"
                 else:
                     mtype = "OTHER"
+
+                # Skip dimmed non-quiz, non-feedback modules
+                classes = item.get_attribute("class") or ""
+                if "dimmed" in classes and mtype not in ("QUIZ", "FEEDBACK"):
+                    continue
 
                 completion_span = item.locator("span.completioninfo")
                 span_class = completion_span.get_attribute("class") or ""
@@ -141,6 +138,9 @@ class Workflow:
         elif module["type"] == "QUIZ":
             solver = QuizSolver(self.page)
             solver.solve(module["url"], context=self.last_page_content)
+        elif module["type"] == "FEEDBACK":
+            solver = FeedbackSolver(self.page)
+            solver.solve(module["url"])
         else:
             log_skip(f"{module['type']} → {module['title']}")
 
@@ -152,7 +152,7 @@ class Workflow:
 
         max_passes = 10
         passes = 0
-        last_pending_count = -1  # track if progress is being made
+        last_pending_count = -1
 
         while passes < max_passes:
             passes += 1
@@ -165,14 +165,13 @@ class Workflow:
 
             pending = [
                 m for m in modules
-                if not m["completed"] and m["type"] in ("PAGE", "QUIZ")
+                if not m["completed"] and m["type"] in ("PAGE", "QUIZ", "FEEDBACK")
             ]
 
             if not pending:
                 log_success("Course complete — nothing pending")
                 return
 
-            # If pending count hasn't changed since last pass — nothing new unlocked
             if len(pending) == last_pending_count:
                 log_info("No new modules unlocked — moving to next course")
                 return
@@ -205,8 +204,7 @@ class Workflow:
         log_info(f"{len(pending)} course(s) to process")
 
         for idx, course in enumerate(pending):
-            log_course(course["title"], course["completion"],
-                       idx + 1, len(pending))
+            log_course(course["title"], course["completion"], idx + 1, len(pending))
             try:
                 self.process_course(course)
             except Exception as e:

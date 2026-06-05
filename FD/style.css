@@ -1,3 +1,4 @@
+
 /* ==========================================================================
    DESIGN TOKENS & SYSTEM VARIABLES
    ========================================================================== */
@@ -9,12 +10,9 @@
     --accent-glow: rgba(170, 0, 255, 0.12);
     --green: #3ecf8e;
     --text1: #FFFFFF;
-    /* Pure crisp white font */
     --text2: #B0B0B0;
-    /* Clean secondary text balance */
     --text3: #555555;
 
-    /* Swapped global typography tokens to technical design styles */
     --font-heading: 'Space Grotesk', system-ui, sans-serif;
     --font-body: 'Inter', system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
@@ -35,6 +33,7 @@ html {
     color: var(--text1);
     font-family: var(--font-body);
     overflow-x: hidden;
+    scroll-padding-top: 100px;
 }
 
 body {
@@ -59,9 +58,10 @@ body {
 }
 
 /* ==========================================================================
-   NAVIGATION FRAMEWORK
+   NAVIGATION FRAMEWORK (SHARED)
    ========================================================================== */
-nav {
+nav,
+.docs-nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -80,11 +80,10 @@ nav {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    font-family: var(--font-heading);
     font-weight: 700;
-    letter-spacing: 0.05em;
     color: var(--text1);
     text-decoration: none;
-    font-family: var(--font-mono);
 }
 
 .nav-logo-dot {
@@ -99,6 +98,8 @@ nav {
     display: flex;
     gap: 2.5rem;
     list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
 .nav-links a {
@@ -185,7 +186,6 @@ nav {
     background-color: #1A1A1A;
 }
 
-/* Big Structural Background Graphic Element */
 .hero-bg-graphic {
     position: absolute;
     inset: 0;
@@ -201,7 +201,6 @@ nav {
     z-index: 1;
 }
 
-/* Radial Glow Behind the Main Content Wrapper */
 .hero-glow {
     position: absolute;
     width: 800px;
@@ -215,7 +214,6 @@ nav {
     pointer-events: none;
 }
 
-/* Clear content framing layer over backgrounds */
 .hero-content {
     position: relative;
     z-index: 3;
@@ -226,23 +224,19 @@ nav {
     text-align: center;
 }
 
-/* Oversized High-Contrast Headline Sizing */
 .hero-title {
     font-family: var(--font-heading);
-    /* Tech-focused geometric look */
     font-size: 6rem;
     font-weight: 800;
     letter-spacing: -0.03em;
     line-height: 1.05;
     margin-bottom: 2rem;
     color: var(--text1);
-    /* High contrast solid white */
 }
 
 .hero-title em {
     font-style: normal;
     color: var(--text1);
-    /* Keeps the automated text matching perfectly in solid white */
     background: none;
     -webkit-text-fill-color: initial;
 }
@@ -260,59 +254,6 @@ nav {
 .hero-actions {
     display: flex;
     gap: 1.5rem;
-}
-
-/* Ensure secondary features also look premium */
-.split-text h2 {
-    font-family: var(--font-heading);
-    font-size: 2.5rem;
-}
-
-.nav-logo,
-.footer-logo {
-    font-family: var(--font-heading);
-    font-weight: 700;
-}
-
-/* ==========================================================================
-   RESPONSIVE SCALING FOR COMPACT VIEWPORTS
-   ========================================================================== */
-@media (max-width: 900px) {
-    .hero-title {
-        font-size: 4.5rem;
-    }
-
-    .hero-sub {
-        font-size: 1.15rem;
-    }
-}
-
-@media (max-width: 768px) {
-    .hero {
-        min-height: 70vh;
-        padding: 4rem 1.5rem;
-    }
-
-    .hero-title {
-        font-size: 3.25rem;
-    }
-
-    .hero-sub {
-        font-size: 1.05rem;
-        margin-bottom: 2.5rem;
-    }
-
-    .hero-actions {
-        flex-direction: column;
-        width: 100%;
-        max-width: 300px;
-        gap: 1rem;
-    }
-
-    .btn-primary,
-    .btn-secondary {
-        width: 100%;
-    }
 }
 
 /* ==========================================================================
@@ -351,25 +292,29 @@ nav {
    ========================================================================== */
 .media-placeholder {
     height: auto !important;
-    /* Allow internal padding to structure height naturally */
     min-height: 230px;
     background: #0d0e15 !important;
     display: block !important;
-    /* Reset layout alignment */
 }
 
 .browser-mock {
-    border-color: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 .ai-mock {
-    border-color: rgba(170, 0, 255, 0.2) !important;
+    border: 1px solid rgba(170, 0, 255, 0.2) !important;
     box-shadow: 0 20px 40px rgba(170, 0, 255, 0.05), 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 .local-mock {
-    border-color: rgba(0, 255, 102, 0.15) !important;
+    border: 1px solid rgba(0, 255, 102, 0.15) !important;
     box-shadow: 0 20px 40px rgba(0, 255, 102, 0.02), 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 .mock-header {
@@ -394,7 +339,6 @@ nav {
     display: inline-block;
 }
 
-/* Color codes for interactive terminal components */
 .dot-red {
     background: #ff5f56;
 }
@@ -428,13 +372,11 @@ nav {
 .mock-body {
     padding: 20px !important;
     display: block !important;
-    /* Stack terminal streams sequentially */
     text-align: left !important;
     line-height: 1.6 !important;
     height: auto !important;
 }
 
-/* Color profiles for standard console logs */
 .c-blue {
     color: #61afef;
 }
@@ -479,6 +421,7 @@ nav {
 }
 
 .split-text h2 {
+    font-family: var(--font-heading);
     font-size: 2.5rem;
     font-weight: 700;
     letter-spacing: -0.03em;
@@ -495,9 +438,195 @@ nav {
 }
 
 /* ==========================================================================
-   PRODUCT FOOTER
+   DOCUMENTATION MASTER WORKSPACE LAYOUT (DESKTOP DEFAULT)
    ========================================================================== */
-.main-footer {
+.docs-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 2rem 8rem 2rem;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 4rem;
+}
+
+.docs-sidebar {
+    position: sticky;
+    top: 6rem;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    z-index: 10;
+}
+
+.sidebar-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.sidebar-group h3 {
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    color: var(--text3);
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+}
+
+.sidebar-group a {
+    display: block;
+    color: var(--text2);
+    text-decoration: none;
+    font-size: 0.95rem;
+    padding: 0.4rem 0;
+    transition: all 0.15s ease;
+}
+
+.sidebar-group a:hover,
+.sidebar-group a.active {
+    color: var(--text1);
+}
+
+.sidebar-group a.active {
+    font-weight: 500;
+    border-left: 2px solid var(--accent);
+    padding-left: 0.75rem;
+}
+
+.docs-content {
+    max-width: 800px;
+}
+
+.docs-content h1 {
+    font-family: var(--font-heading);
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    color: var(--text1);
+    letter-spacing: -0.02em;
+}
+
+.docs-content h2 {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    color: var(--text1);
+    letter-spacing: -0.01em;
+}
+
+.docs-content h3 {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    color: var(--text1);
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+.docs-content p {
+    font-size: 1.05rem;
+    color: var(--text2);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+}
+
+.docs-content .lead {
+    font-size: 1.25rem;
+    font-weight: 300;
+    color: var(--text1);
+    line-height: 1.6;
+}
+
+.workflow-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin: 2.5rem 0;
+}
+
+.step-card {
+    background: #222222;
+    border: 1px solid var(--surface-border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.step-card:hover {
+    border-color: rgba(170, 0, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.step-card h4 {
+    font-family: var(--font-heading);
+    color: var(--text1);
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+}
+
+.step-card p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text2);
+    margin: 0;
+}
+
+.docs-divider {
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    margin: 3.5rem 0;
+}
+
+.code-block-wrapper {
+    background: #121212;
+    border: 1px solid var(--surface-border);
+    border-radius: 8px;
+    margin: 1.5rem 0;
+    overflow: hidden;
+}
+
+.code-header {
+    background: #181818;
+    padding: 0.6rem 1.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text3);
+    border-bottom: 1px solid var(--surface-border);
+}
+
+.code-block-wrapper pre {
+    padding: 1.25rem;
+    overflow-x: auto;
+    margin: 0;
+}
+
+.code-block-wrapper code {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #e2e8f0;
+}
+
+blockquote {
+    border-left: 3px solid var(--accent);
+    background: rgba(170, 0, 255, 0.03);
+    padding: 1.25rem 1.5rem;
+    margin: 2rem 0;
+    border-radius: 0 8px 8px 0;
+}
+
+blockquote strong {
+    color: var(--text1);
+}
+
+/* ==========================================================================
+   PRODUCT FOOTER ENCLOSURES (SHARED)
+   ========================================================================== */
+.main-footer,
+.docs-footer {
     background-color: #07080c;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
     padding: 60px 20px 30px 20px;
@@ -520,7 +649,8 @@ nav {
     min-width: 250px;
 }
 
-.footer-brand-title {
+.footer-brand-title,
+.footer-logo {
     font-family: var(--font-heading);
     font-size: 22px;
     font-weight: 700;
@@ -605,21 +735,8 @@ nav {
     color: var(--accent);
 }
 
-/* Mobile responsive fixes for columns */
-@media (max-width: 768px) {
-    .footer-wrap {
-        flex-direction: column;
-        gap: 30px;
-    }
-
-    .footer-bottom {
-        flex-direction: column;
-        text-align: center;
-    }
-}
-
 /* ==========================================================================
-   RESPONSIVE VIEWPORT CONSTRAINTS
+   RESPONSIVE LAYOUT SCALING (DESKTOP BREAKPOINTS)
    ========================================================================== */
 @media (max-width: 900px) {
     .hero-title {
@@ -632,20 +749,46 @@ nav {
     }
 }
 
+/* ==========================================================================
+   STRICT MOBILE MEDIA QUERY ISOLATION (Max-Width: 768px)
+   ========================================================================== */
 @media (max-width: 768px) {
-    nav {
-        flex-direction: column;
-        gap: 1.25rem;
-        text-align: center;
-        padding: 1.5rem;
+
+    /* Prevent technical logs/tokens blowing past layout edges */
+    code,
+    pre,
+    p,
+    a,
+    span {
+        word-wrap: break-word;
+        word-break: break-word;
+        white-space: pre-wrap;
+    }
+
+    .code-block-wrapper pre code {
+        white-space: pre;
+    }
+
+    /* 1. Mobile Menu Navigation Stack */
+    nav,
+    .docs-nav {
+        flex-direction: column !important;
+        gap: 1.25rem !important;
+        text-align: center !important;
+        padding: 1.5rem !important;
+        position: relative !important;
     }
 
     .nav-links {
         gap: 1.5rem;
+        padding: 0;
+        justify-content: center;
     }
 
+    /* 2. Hero Component Scaling */
     .hero {
-        padding-top: 5rem;
+        min-height: 70vh;
+        padding: 4rem 1.5rem;
     }
 
     .hero-title {
@@ -654,8 +797,22 @@ nav {
 
     .hero-sub {
         font-size: 1.05rem;
+        margin-bottom: 2.5rem;
     }
 
+    .hero-actions {
+        flex-direction: column;
+        width: 100%;
+        max-width: 300px;
+        gap: 1rem;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+    }
+
+    /* 3. Product Presentation Cleanups */
     .features-split-container {
         gap: 5rem;
         padding-bottom: 6rem;
@@ -672,216 +829,106 @@ nav {
         order: initial !important;
     }
 
-    footer {
-        flex-direction: column;
-        gap: 1.5rem;
-        text-align: center;
-    }
-}
-
-
-/* ==========================================================================
-   DOCUMENTATION PAGE ARCHITECTURE LAYOUT SYSTEM
-   ========================================================================== */
-.docs-body {
-    background-color: var(--bg);
-}
-
-.docs-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 3rem 2rem 8rem 2rem;
-    display: grid;
-    grid-template-columns: 260px 1fr;
-    /* Distinct frozen sidebar tracking channel alignment */
-    gap: 4rem;
-}
-
-/* Sidebar Component Styling */
-.docs-sidebar {
-    position: sticky;
-    top: 6rem;
-    height: fit-content;
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-}
-
-.sidebar-group h3 {
-    font-family: var(--font-heading);
-    font-size: 0.85rem;
-    letter-spacing: 0.05em;
-    color: var(--text3);
-    margin-bottom: 0.75rem;
-    /* Removed text-transform: uppercase to match new typography guidelines */
-}
-
-.sidebar-group a {
-    display: block;
-    color: var(--text2);
-    text-decoration: none;
-    font-size: 0.95rem;
-    padding: 0.4rem 0;
-    transition: color 0.15s ease;
-}
-
-.sidebar-group a:hover,
-.sidebar-group a.active {
-    color: var(--text1);
-}
-
-.sidebar-group a.active {
-    font-weight: 500;
-    border-left: 2px solid var(--accent);
-    padding-left: 0.75rem;
-}
-
-/* Documentation Content Copy Styles */
-.docs-content {
-    max-width: 800px;
-}
-
-.docs-content h1 {
-    font-family: var(--font-heading);
-    font-size: 3rem;
-    font-weight: 800;
-    margin-bottom: 1rem;
-    color: var(--text1);
-    letter-spacing: -0.02em;
-}
-
-.docs-content h2 {
-    font-family: var(--font-heading);
-    font-size: 1.75rem;
-    font-weight: 700;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-    color: var(--text1);
-    letter-spacing: -0.01em;
-}
-
-.docs-content p {
-    font-family: var(--font-body);
-    font-size: 1.05rem;
-    color: var(--text2);
-    line-height: 1.7;
-    margin-bottom: 1.5rem;
-}
-
-.docs-content .lead {
-    font-size: 1.25rem;
-    font-weight: 300;
-    color: var(--text1);
-    line-height: 1.6;
-}
-
-/* NEW: Portal Workflow Cards Layout */
-.workflow-steps {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1.5rem;
-    margin: 2.5rem 0;
-}
-
-.step-card {
-    background: #121212;
-    /* Matches the code block background layout */
-    border: 1px solid var(--surface-border);
-    border-radius: 8px;
-    padding: 1.5rem;
-    transition: transform 0.2s ease, border-color 0.2s ease;
-}
-
-.step-card:hover {
-    border-color: rgba(170, 0, 255, 0.3);
-    /* Soft signature purple accent flash on cursor hover */
-    transform: translateY(-2px);
-}
-
-.step-card h4 {
-    font-family: var(--font-heading);
-    color: var(--text1);
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-bottom: 0.75rem;
-}
-
-.step-card p {
-    font-size: 0.95rem;
-    line-height: 1.6;
-    color: var(--text2);
-    margin: 0;
-}
-
-.docs-divider {
-    border: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.04);
-    margin: 3.5rem 0;
-}
-
-/* Technical Code Blocks Presentation Frames */
-.code-block-wrapper {
-    background: #121212;
-    border: 1px solid var(--surface-border);
-    border-radius: 8px;
-    margin: 1.5rem 0;
-    overflow: hidden;
-}
-
-.code-header {
-    background: #181818;
-    padding: 0.6rem 1.25rem;
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--text3);
-    border-bottom: 1px solid var(--surface-border);
-}
-
-.code-block-wrapper pre {
-    padding: 1.25rem;
-    overflow-x: auto;
-    margin: 0;
-}
-
-.code-block-wrapper code {
-    font-family: var(--font-mono);
-    font-size: 0.9rem;
-    line-height: 1.6;
-    color: #e2e8f0;
-    /* Crisp console text look */
-}
-
-/* Specific Document Footer Space Constraints Override */
-.docs-footer {
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-/* ==========================================================================
-   DOCS RESPONSIVE MOBILE MEDIA VIEWS
-   ========================================================================== */
-@media (max-width: 768px) {
+    /* 4. Documentation Layout Linear Transition */
     .docs-container {
-        grid-template-columns: 1fr;
-        /* Collapses sidebar grid channel on compact phone screens */
-        gap: 2.5rem;
-        padding-top: 1.5rem;
+        grid-template-columns: 1fr !important;
+        gap: 2rem !important;
+        padding: 1.5rem 1rem 6rem 1rem !important;
+    }
+
+    /* 5. Mobile Sidebar Segment Slider Mapping */
+    .docs-sidebar {
+        position: sticky !important;
+        top: 0;
+        z-index: 90;
+        background: rgba(26, 26, 26, 0.95);
+        backdrop-filter: blur(8px);
+        flex-direction: row !important;
+        gap: 1.5rem !important;
+        padding: 1rem !important;
+        margin: 0 -1rem !important;
+        overflow-x: auto;
+        white-space: nowrap;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .docs-sidebar::-webkit-scrollbar {
+        display: none;
     }
 
     .docs-sidebar {
-        position: relative;
-        top: 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-        padding-bottom: 2rem;
+        scrollbar-width: none;
+    }
+
+    .sidebar-group {
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 1rem !important;
+    }
+
+    .sidebar-group h3 {
+        display: none !important;
+    }
+
+    .sidebar-group a {
+        display: inline-block !important;
+        padding: 0.3rem 0.8rem !important;
+        font-size: 0.85rem !important;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+    }
+
+    .sidebar-group a.active {
+        border-left: none !important;
+        padding-left: 0.8rem !important;
+        background: var(--accent);
+        color: #ffffff !important;
+        box-shadow: 0 2px 10px rgba(170, 0, 255, 0.2);
+    }
+
+    /* 6. Typography Constraints Tuning */
+    .docs-content {
+        max-width: 100% !important;
     }
 
     .docs-content h1 {
-        font-size: 2.25rem;
+        font-size: 2.25rem !important;
+        letter-spacing: -0.03em !important;
+        line-height: 1.1 !important;
     }
 
-    .workflow-steps {
-        grid-template-columns: 1fr;
-        /* Stack workflow columns linearly on mobile sizes */
-        gap: 1rem;
+    .docs-content h2 {
+        font-size: 1.5rem !important;
+    }
+
+    .docs-content p {
+        font-size: 0.95rem !important;
+        line-height: 1.6 !important;
+    }
+
+    .docs-content .lead {
+        font-size: 1.1rem !important;
+    }
+
+    blockquote {
+        padding: 1rem !important;
+        font-size: 0.9rem !important;
+    }
+
+    /* 7. Footer Cleanups */
+    .footer-wrap {
+        flex-direction: column;
+        gap: 30px;
+    }
+
+    .footer-bottom,
+    .main-footer,
+    .docs-footer {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
     }
 }
+

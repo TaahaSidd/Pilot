@@ -29,12 +29,16 @@ class FeedbackSolver:
             log_success("Feedback already submitted — skipping")
             return
 
-        # Handle Country dropdown if present
-        country_select = self.page.locator("select#id_multichoice_27947")
+        # Handle Country dropdown if present (select India)
+        country_select = self.page.locator(
+            "select[name^='multichoice_']").first
         if country_select.count() > 0:
-            country_select.select_option(value="78")  # India
-            log_info("Country set to India")
-            self.page.wait_for_timeout(300)
+            # Check if it's actually a country dropdown by looking for India option
+            india_option = country_select.locator("option[value='78']")
+            if india_option.count() > 0:
+                country_select.select_option(value="78")  # India
+                log_info("Country set to India")
+                self.page.wait_for_timeout(300)
 
         # Handle all radio groups (scale 1-10) — select 9
         question_groups = self.page.locator(

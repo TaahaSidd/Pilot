@@ -1,5 +1,6 @@
 from core.browser import Browser
 from core.session import Session
+from core.setup import is_configured, run_onboarding, load_config
 from workflow.workflow import Workflow
 from pilot_ui import (
     display_banner, show_menu, show_settings_menu,
@@ -13,6 +14,15 @@ def run():
     browser = None
 
     try:
+        # First time setup
+        if not is_configured():
+            run_onboarding()
+            # Reload config after setup
+            data = load_config()
+            config.GROQ_API_KEY = data["groq_api_key"]
+            config.USERNAME = data["username"]
+            config.PASSWORD = data["password"]
+
         while True:
             choice = show_menu()
 
@@ -24,12 +34,12 @@ def run():
                 while True:
                     setting = show_settings_menu(config.AI_PROVIDER)
                     if setting == "1":
-                        config.AI_PROVIDER = "groq"
-                        log_success("AI Provider set to Groq")
+                        run_onboarding()
+                        data = load_config()
+                        config.GROQ_API_KEY = data["groq_api_key"]
+                        config.USERNAME = data["username"]
+                        config.PASSWORD = data["password"]
                     elif setting == "2":
-                        config.AI_PROVIDER = "gemini"
-                        log_success("AI Provider set to Gemini")
-                    elif setting == "3":
                         break
 
             elif choice == "1":

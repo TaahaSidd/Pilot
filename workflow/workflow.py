@@ -24,6 +24,9 @@ class Workflow:
         log_info("Scanning courses...")
         courses = []
 
+        # Course IDs to skip
+        SKIP_COURSE_IDS = ["4548"]
+
         buttons = self.page.locator("a.view-course-btn")
         count = buttons.count()
         log_info(f"Found {count} courses")
@@ -36,11 +39,19 @@ class Workflow:
                     continue
 
                 course_id = href.rstrip("/").split("=")[-1]
+
+                # Skip unwanted courses
+                if course_id in SKIP_COURSE_IDS:
+                    log_info(f"Skipping Free Certificate Courses (id={course_id})")
+                    continue
+
                 title = f"Course {course_id}"
                 try:
-                    card = self.page.locator(f"[id*='course-info-container-{course_id}']")
+                    card = self.page.locator(
+                        f"[id*='course-info-container-{course_id}']")
                     if card.count() > 0:
-                        heading = card.locator("h3, h4, strong, .card-title, [class*='title']").first
+                        heading = card.locator(
+                            "h3, h4, strong, .card-title, [class*='title']").first
                         if heading.count() > 0:
                             title = heading.inner_text().strip()
                 except:
@@ -48,10 +59,12 @@ class Workflow:
 
                 completion_pct = 0
                 try:
-                    card = self.page.locator(f"[id*='course-info-container-{course_id}']")
+                    card = self.page.locator(
+                        f"[id*='course-info-container-{course_id}']")
                     if card.count() > 0:
                         text = card.inner_text()
-                        match = re.search(r'(\d+)%\s*Course Completed', text, re.IGNORECASE)
+                        match = re.search(
+                            r'(\d+)%\s*Course Completed', text, re.IGNORECASE)
                         if match:
                             completion_pct = int(match.group(1))
                 except:
@@ -72,7 +85,8 @@ class Workflow:
         self.page.wait_for_timeout(2000)
         modules = []
 
-        items = self.page.locator("li.courseindex-item:has(a.courseindex-link[href*='/mod/'])")
+        items = self.page.locator(
+            "li.courseindex-item:has(a.courseindex-link[href*='/mod/'])")
         count = items.count()
 
         for i in range(count):
@@ -180,7 +194,8 @@ class Workflow:
             log_info(f"Pass {passes}: {len(pending)} modules to process")
 
             for i, module in enumerate(pending):
-                log_module_progress(i + 1, len(pending), module["type"], module["title"])
+                log_module_progress(i + 1, len(pending),
+                                    module["type"], module["title"])
                 try:
                     self.handle_module(module)
                 except PlaywrightTimeoutError:
@@ -188,7 +203,8 @@ class Workflow:
                 except Exception as e:
                     log_error(f"{module['title']}: {e}")
 
-            log_info(f"Pass {passes} complete — rescanning for newly unlocked modules...")
+            log_info(
+                f"Pass {passes} complete — rescanning for newly unlocked modules...")
 
     def start(self):
         log_info("Workflow started")
@@ -204,7 +220,8 @@ class Workflow:
         log_info(f"{len(pending)} course(s) to process")
 
         for idx, course in enumerate(pending):
-            log_course(course["title"], course["completion"], idx + 1, len(pending))
+            log_course(course["title"], course["completion"],
+                       idx + 1, len(pending))
             try:
                 self.process_course(course)
             except Exception as e:

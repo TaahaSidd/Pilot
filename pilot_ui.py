@@ -57,18 +57,15 @@ def show_menu() -> str:
 
 
 def show_settings_menu(current_provider: str) -> str:
-    """Show AI provider selection menu."""
     console.print(Panel(
         f"\n"
-        f"  [bold {PURPLE}][1][/bold {PURPLE}]  Groq  [dim](Llama 3.3 70B — recommended)[/dim]\n\n"
-        f"  [bold {PURPLE}][2][/bold {PURPLE}]  Gemini  [dim](2.0 Flash)[/dim]\n\n"
-        f"  [bold {PURPLE}][3][/bold {PURPLE}]  Back\n\n"
-        f"  Current: [bold {PURPLE}]{current_provider.upper()}[/bold {PURPLE}]\n",
-        title="[bold white]AI Provider[/bold white]",
+        f"  [bold {PURPLE}][1][/bold {PURPLE}]  Reset credentials\n\n"
+        f"  [bold {PURPLE}][2][/bold {PURPLE}]  Back\n",
+        title="[bold white]Settings[/bold white]",
         border_style=PURPLE,
         width=50
     ))
-    return Prompt.ask(f"[bold {PURPLE}]>[/bold {PURPLE}]", choices=["1", "2", "3"])
+    return Prompt.ask(f"[bold {PURPLE}]>[/bold {PURPLE}]", choices=["1", "2"])
 
 
 def log_info(message: str):

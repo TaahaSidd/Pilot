@@ -13,3 +13,6 @@ profile/
 
 # VsCode settings
 .vscode/
+
+#User config file
+user_config.json

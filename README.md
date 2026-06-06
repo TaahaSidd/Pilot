@@ -1,77 +1,105 @@
 <img width="5520" height="1872" alt="Banner-Pilot" src="https://github.com/user-attachments/assets/25c8d1e2-a995-4a79-b3bc-963a090b43b2" />
 
-# Pilot 
+# Pilot
 
-Pilot is an AI-powered browser automation platform that combines web automation with large language models to execute repetitive online workflows.
+Pilot is an open-source browser automation tool for Amity Online students. It navigates course modules, answers quizzes using Groq's Llama 3.3 70B, and submits feedback forms — automatically.
 
-By integrating browser control, workflow orchestration, and AI reasoning, Pilot can navigate websites, extract information, process content, and perform actions on behalf of the user.
+> Full documentation at [pilotcli.netlify.app](https://pilotcli.netlify.app)
 
-The project serves as an experimental platform for building intelligent browser agents capable of reducing manual effort while keeping users in control of critical decisions.
+---
 
+## Quickstart
 
-# Features
+```bash
+# Clone the repo
+git clone https://github.com/TaahaSidd/Pilot.git
+cd Pilot
 
-- Browser automation powered by Playwright
-- AI-assisted decision making
-- Automatic workflow execution
-- Session persistence using browser profiles
-- Handles multi-step web processes
-- Progress tracking and logging
-- Human-in-the-loop support for CAPTCHA/login steps
-- Extensible workflow architecture
+# Install dependencies
+pip install -r requirements.txt
 
-## Example Workflow
+# Install Chromium browser
+playwright install chromium
 
-Pilot can:
+# Run
+python main.py
+```
 
-1. Open a website
-2. Navigate through pages
-3. Read content
-4. Send content to an AI model
-5. Process the response
-6. Fill forms automatically
-7. Submit actions
-8. Generate progress reports
+On first run, Pilot will ask for your Groq API key and Amity portal credentials. These are saved locally and never shared.
+
+---
+
+## What Pilot does
+
+- Scans all enrolled courses and skips anything already at 100%
+- Visits every incomplete reading module automatically
+- Answers mini quizzes and module assessments using Groq LLM inference
+- Auto-fills feedback forms and rating surveys
+- Runs up to 10 passes per session to unlock gated content
+- Built-in guardrails — never submits a quiz if answers are missing
+
+---
+
+## Requirements
+
+- Python 3.8+
+- A free [Groq API key](https://console.groq.com)
+- Your Amity student email and portal password
+
+---
 
 ## Project Structure
-
 ```
+
 Pilot/
 ├── core/
-├── workflows/
-├── profile/
-├── config/
+│   ├── browser.py
+│   ├── session.py
+│   └── setup.py
+├── workflow/
+│   ├── workflow.py
+│   ├── quiz_solver.py
+│   └── feedback_solver.py
+├── pilot_ui.py
+├── config.py
 ├── main.py
+└── requirements.txt
+
 ```
-## Why Pilot?
 
-Many online workflows involve repetitive actions that consume time without providing additional value.
-
-Pilot explores how AI and browser automation can be combined to reduce manual effort while keeping the user in control.
+---
 
 ## Built With
 
-- Python
-- Playwright
-- Groq API
-- Gemini API
-- Rich
+- [Playwright](https://playwright.dev/python/) — browser automation
+- [Groq](https://console.groq.com) — LLM inference (Llama 3.3 70B)
+- [Rich](https://github.com/Textualize/rich) — terminal UI
+
+---
 
 ## Roadmap
 
 - [x] Browser automation
-- [x] Session profiles
-- [x] AI integration
-- [x] Workflow engine
+- [x] Session persistence
+- [x] AI quiz solver
+- [x] Feedback form engine
+- [x] Multi-pass unlock loop
+- [x] CLI with onboarding
+- [ ] Module assessment support
+- [ ] Notes generator
 - [ ] Plugin system
-- [ ] Multi-provider AI routing
-- [ ] Workflow marketplace
 - [ ] Desktop GUI
-- [ ] Cloud execution
+
+---
 
 ## Disclaimer
 
-Pilot is intended for personal productivity and workflow automation.
+Pilot is intended for personal productivity. Users are responsible for ensuring their use complies with Amity Online's terms of service.
 
-Users are responsible for ensuring their use complies with the terms and policies of the websites and services they interact with.
+---
 
+## Links
+
+- [Documentation](https://pilotcli.netlify.app/docs)
+- [Report a bug](https://github.com/TaahaSidd/Pilot/issues)
+- Built by [Spica Labs](https://github.com/TaahaSidd)

@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Documentation — Pilot</title>
+    <title>Documentation | Pilot</title>
+    <link rel="icon" type="image/png" href="Favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -599,7 +600,7 @@
                 <h1>Documentation</h1>
                 <p class="lead">Welcome to Pilot. This guide covers everything from first-time setup to how the
                     automation engine works under the hood. Setup takes under two minutes.</p>
-                <p>Pilot navigates Amity Online course dashboards autonomously — handling reading modules, quiz
+                <p>Pilot navigates Amity Online course dashboards autonomously handling reading modules, quiz
                     resolution via Groq's Llama 3.3 70B, and feedback form completion across all your enrolled courses.
                 </p>
 
@@ -615,32 +616,28 @@
 
             <section id="uses">
                 <h2>Uses of Pilot</h2>
-                <p>Pilot abstracts away the repetitive administrative layer of your student dashboard — redirecting
+                <p>Pilot abstracts away the repetitive administrative layer of your student dashboard redirecting
                     hours of manual clicking into automated pipelines.</p>
 
                 <div class="step-cards">
                     <div class="step-card">
-                        <span class="step-card-num">USE CASE 01</span>
                         <h4>Async Course Progression</h4>
                         <p>Navigate linearly through course modules, reading assignments, and content pages
-                            automatically — no manual clicking required.</p>
+                            automatically no manual clicking required.</p>
                     </div>
                     <div class="step-card">
-                        <span class="step-card-num">USE CASE 02</span>
                         <h4>AI Quiz Resolution</h4>
                         <p>Pilot reads active quiz screens, structures them into payloads, and queries Groq's LLM to
                             select correct answers using on-screen context.</p>
                     </div>
                     <div class="step-card">
-                        <span class="step-card-num">USE CASE 03</span>
                         <h4>Survey & Feedback Bypass</h4>
                         <p>Auto-fills mandatory mid-module satisfaction cards, region selectors, and feedback forms so
                             gated content unlocks instantly.</p>
                     </div>
                     <div class="step-card">
-                        <span class="step-card-num">USE CASE 04</span>
                         <h4>Multi-Course Sessions</h4>
-                        <p>Runs across all enrolled courses in a single session — tracking progress and resuming from
+                        <p>Runs across all enrolled courses in a single session tracking progress and resuming from
                             incomplete modules automatically.</p>
                     </div>
                 </div>
@@ -654,24 +651,20 @@
 
                 <div class="step-cards">
                     <div class="step-card">
-                        <span class="step-card-num">REQUIRED 01</span>
                         <h4>Amity Amigo Credentials</h4>
                         <p>Your Amity student email (e.g. <code>name@s.amity.edu</code>) and portal password. Used to
                             authenticate the browser session.</p>
                     </div>
                     <div class="step-card">
-                        <span class="step-card-num">REQUIRED 02</span>
                         <h4>Groq API Key</h4>
                         <p>Generate a key at <a href="https://console.groq.com" target="_blank">console.groq.com</a>.
                             Free tier is sufficient for typical usage.</p>
                     </div>
                     <div class="step-card">
-                        <span class="step-card-num">REQUIRED 03</span>
                         <h4>Python 3.8+</h4>
                         <p>Verify with <code>python --version</code>. Any version from 3.8 onward works.</p>
                     </div>
                     <div class="step-card">
-                        <span class="step-card-num">REQUIRED 04</span>
                         <h4>Git</h4>
                         <p>Needed to clone the repository. Alternatively, download the ZIP from GitHub.</p>
                     </div>
@@ -685,7 +678,7 @@
                 <p>No hidden config files or plain-text credential storage. Pilot prompts you interactively at runtime.
                 </p>
 
-                <h3>Step 1 — Clone and install</h3>
+                <h3>Step 1 Clone and install</h3>
 
                 <div class="code-block">
                     <div class="code-block-header">
@@ -757,7 +750,7 @@ playwright install chromium</code></pre>
                     <div class="step-card">
                         <span class="step-card-num">Phase 02</span>
                         <h4>Context Collection</h4>
-                        <p>During reading modules, Pilot scrapes visible text into short-term memory — used as quiz
+                        <p>During reading modules, Pilot scrapes visible text into short-term memory used as quiz
                             context in the next phase.</p>
                     </div>
                     <div class="step-card">
@@ -776,10 +769,10 @@ playwright install chromium</code></pre>
 
                 <div class="code-block">
                     <div class="code-block-header">
-                        <span class="code-block-label">runtime_orchestrator.log — example output</span>
+                        <span class="code-block-label">runtime_orchestrator.log example output</span>
                     </div>
                     <pre><code><span class="c">[08:42:11]</span> <span class="t">[ENGINE]</span>  Pass 1/10: mapping course layout...
-<span class="c">[08:42:15]</span> <span class="k">[ROUTINE]</span> Gateway module detected — processing
+<span class="c">[08:42:15]</span> <span class="k">[ROUTINE]</span> Gateway module detected processing
 <span class="c">[08:42:19]</span> <span class="g">[FEEDBACK]</span> Rating form: 9/10 submitted
 <span class="c">[08:42:20]</span> <span class="cy">[UNLOCK]</span>  Next stage opened
 <span class="c">[08:42:20]</span> <span class="cy">[PROGRESS]</span> Advancing to Pass 2/10
@@ -798,7 +791,7 @@ playwright install chromium</code></pre>
 
                 <div class="code-block">
                     <div class="code-block-header">
-                        <span class="code-block-label">inference_engine.py — simplified</span>
+                        <span class="code-block-label">inference_engine.py simplified</span>
                     </div>
                     <pre><code><span class="k">import</span> <span class="v">groq_cloud</span>
 
@@ -836,9 +829,9 @@ answer = groq_cloud.infer(payload)
 
                 <p>The engine handles three field types:</p>
                 <ul>
-                    <li><strong>Location selectors</strong> — fills standard country and region dropdowns</li>
-                    <li><strong>Rating matrices</strong> — selects high-tier scores (9/10) across all rating fields</li>
-                    <li><strong>Open text fields</strong> — populates with human-like, minimum-length strings</li>
+                    <li><strong>Location selectors</strong> fills standard country and region dropdowns</li>
+                    <li><strong>Rating matrices</strong> selects high-tier scores (9/10) across all rating fields</li>
+                    <li><strong>Open text fields</strong> populates with human-like, minimum-length strings</li>
                 </ul>
 
                 <div class="callout">

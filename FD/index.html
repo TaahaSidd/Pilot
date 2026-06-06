@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pilot — AI Automation for Amity Online</title>
+    <title>Pilot | AI Automation for Amity Online</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="icon" type="image/png" href="Favicon.png">
@@ -997,7 +997,7 @@
                 <div class="t-dot r"></div>
                 <div class="t-dot y"></div>
                 <div class="t-dot g"></div>
-                <div class="t-title">bash — pilot session</div>
+                <div class="t-title">bash pilot session</div>
             </div>
             <div class="terminal-body">
                 <span class="t-line"><span class="t-prompt">$ </span><span class="t-cmd">python main.py</span></span>
@@ -1009,8 +1009,8 @@
                 <span class="t-line"><span class="t-tag">[PILOT]</span> <span class="t-label">Enter portal password:
                     </span><span class="t-val-g">••••••••••••</span></span>
                 <span class="t-blank"></span>
-                <span class="t-line t-comment"># credentials stored in volatile session memory only — zero disk
-                    write</span>
+                <span class="t-line t-comment"># credentials saved locally on your machine never shared
+                    externally</span>
                 <span class="t-line"><span class="t-success">[OK]</span> <span class="t-label">Spin-up sequence
                         validated. Launching browser...</span></span>
                 <span class="t-blank"></span>
@@ -1026,7 +1026,7 @@
                 <span class="t-line"><span class="t-success">[DONE]</span> <span class="t-label">Data Structures:
                     </span><span class="t-val-g">100%</span></span>
                 <span class="t-blank"></span>
-                <span class="t-line t-comment"># 5 courses remaining — multi-pass loop continues...</span>
+                <span class="t-line t-comment"># 5 courses remaining multi-pass loop continues...</span>
             </div>
         </div>
     </div>
@@ -1043,13 +1043,14 @@
             <div class="workflow-step">
                 <span class="step-num">01 / Setup</span>
                 <div class="step-h">Enter credentials</div>
-                <p class="step-p">Provide your Groq API key and Amity portal credentials via secure terminal prompts. No
-                    config files, no plain-text storage.</p>
+                <p class="step-p">Credentials are saved locally on your machine in an encrypted config
+                    file never sent anywhere except your Groq API calls.</p>
+
             </div>
             <div class="workflow-step">
                 <span class="step-num">02 / Scan</span>
                 <div class="step-h">Pilot maps your courses</div>
-                <p class="step-p">Pilot opens a real Chromium browser, logs in, and scans all available courses —
+                <p class="step-p">Pilot opens a real Chromium browser, logs in, and scans all available courses
                     skipping anything already at 100%.</p>
             </div>
             <div class="workflow-step">
@@ -1094,7 +1095,7 @@ payload = {
                 <p>Pilot reads the active quiz screen and passes question + context from the current reading material
                     into Groq's Llama 3.3 70B. Responses come back in ~240ms.</p>
                 <p>Built-in guardrails halt submission if questions are malformed or layouts don't match expected
-                    patterns — protecting your grades.</p>
+                    patterns protecting your grades.</p>
             </div>
         </div>
 
@@ -1132,7 +1133,7 @@ payload = {
                         <span style="background:#ffbd2e"></span>
                         <span style="background:#28c840"></span>
                     </div>
-                    <span class="fn">bash — secure_auth</span>
+                    <span class="fn">bash secure_auth</span>
                 </div>
                 <pre><span style="color:#61afef">[PILOT]</span> <span style="color:#888">Enter Groq API Key:</span>
 <span style="color:#98c379">gsk_••••••••••••••••••••••••</span>
@@ -1151,7 +1152,7 @@ payload = {
                 <p>No <code
                         style="font-family:var(--mono);font-size:0.9em;background:rgba(255,255,255,0.06);padding:0.1em 0.4em;border-radius:4px">.env</code>
                     files, no config storage, no plain-text anything. Pilot prompts you at runtime and keeps everything
-                    in volatile session memory — gone the moment the process ends.</p>
+                    in volatile session memory gone the moment the process ends.</p>
                 <p>Runs entirely on your local machine inside a real Chromium browser. Nothing is sent to external
                     servers except your Groq API calls.</p>
             </div>
@@ -1178,7 +1179,7 @@ payload = {
             </div>
             <div class="feature-cell">
                 <div class="feature-h">Module Navigation</div>
-                <p class="feature-p">Opens and processes incomplete learning modules automatically — reading content
+                <p class="feature-p">Opens and processes incomplete learning modules automatically reading content
                     pages end to end.</p>
             </div>
             <div class="feature-cell">
@@ -1197,17 +1198,18 @@ payload = {
                     mandatory progression blocks.</p>
             </div>
             <div class="feature-cell">
-                <div class="feature-h">Zero-Persistence Auth</div>
-                <p class="feature-p">Credentials live only in runtime memory — no files written to disk, ever.</p>
+                <div class="feature-h">Local-Only Auth</div>
+                <p class="feature-p">Credentials are stored locally on your machine only never sent to external
+                    servers except Groq API calls for quiz inference.</p>
             </div>
             <div class="feature-cell">
                 <div class="feature-h">Real Browser</div>
-                <p class="feature-p">Operates inside a real Chromium instance via Playwright — not fragile API scraping.
+                <p class="feature-p">Operates inside a real Chromium instance via Playwright not fragile API scraping.
                 </p>
             </div>
             <div class="feature-cell">
                 <div class="feature-h">Groq LPU Speed</div>
-                <p class="feature-p">Groq's LPU inference delivers ~240ms quiz resolution — fast enough to never be the
+                <p class="feature-p">Groq's LPU inference delivers ~240ms quiz resolution fast enough to never be the
                     bottleneck.</p>
             </div>
         </div>
@@ -1225,7 +1227,7 @@ payload = {
                 <div class="faq-body">
                     <div class="faq-body-inner">Pilot is an open-source browser automation tool built specifically for
                         Amity Online students. It uses Playwright to control a real Chromium browser and Groq's Llama
-                        3.3 70B to process quizzes — automating the repetitive clicking, module navigation, and quiz
+                        3.3 70B to process quizzes automating the repetitive clicking, module navigation, and quiz
                         workflows inside the Amigo portal.</div>
                 </div>
             </div>
@@ -1234,16 +1236,17 @@ payload = {
                 <div class="faq-body">
                     <div class="faq-body-inner">Yes. Pilot uses Groq Cloud for AI inference. You'll need a free Groq
                         account to generate an API key. Get one at <a href="https://console.groq.com" target="_blank"
-                            style="color:var(--accent)">console.groq.com</a> — it's free and takes about 30 seconds.
+                            style="color:var(--accent)">console.groq.com</a> it's free and takes about 30 seconds.
                     </div>
                 </div>
             </div>
             <div class="faq-item">
                 <div class="faq-q">Is my password stored anywhere?<span class="arrow">+</span></div>
                 <div class="faq-body">
-                    <div class="faq-body-inner">No. Pilot never writes credentials to disk. Your Groq key, email, and
-                        password are entered interactively at runtime and kept only in volatile process memory. When the
-                        script ends, they're gone.</div>
+                    <div class="faq-body-inner">Pilot saves your credentials locally on your machine in a config file so
+                        you only need to enter them once. They are never sent to any external server only your Groq
+                        API key is used for quiz inference via Groq Cloud. You can reset credentials anytime from the
+                        Settings menu.</div>
                 </div>
             </div>
             <div class="faq-item">
@@ -1267,7 +1270,7 @@ payload = {
                 <div class="faq-q">Does it work on Windows / Mac / Linux?<span class="arrow">+</span></div>
                 <div class="faq-body">
                     <div class="faq-body-inner">Yes. Pilot is a Python script and runs wherever Python and Playwright
-                        are supported — which includes Windows, macOS, and Linux.</div>
+                        are supported which includes Windows, macOS, and Linux.</div>
                 </div>
             </div>
         </div>
@@ -1320,7 +1323,7 @@ payload = {
             </div>
         </div>
         <div class="footer-bottom">
-            <span>© 2026 Pilot Automation · by <a href="https://github.com/TaahaSidd" target="_blank">Spica
+            <span>© 2026 Pilot Automation · by <a href="https://spicalabs.netlify.app/" target="_blank">Spica
                     Labs</a></span>
             <span>Built for Amity Online students</span>
         </div>

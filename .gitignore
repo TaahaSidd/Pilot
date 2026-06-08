@@ -16,3 +16,6 @@ profile/
 
 #User config file
 user_config.json
+
+# Generated notes
+notes/

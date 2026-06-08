@@ -43,17 +43,17 @@ def display_banner():
 
 
 def show_menu() -> str:
-    """Show main menu and return user choice."""
     console.print(Panel(
         "\n"
-        f"  [bold {PURPLE}][1][/bold {PURPLE}]  Start Pilot\n\n"
-        f"  [bold {PURPLE}][2][/bold {PURPLE}]  Settings\n\n"
-        f"  [bold {PURPLE}][3][/bold {PURPLE}]  Exit\n",
+        f"  [bold {PURPLE}][1][/bold {PURPLE}]  Complete Modules\n\n"
+        f"  [bold {PURPLE}][2][/bold {PURPLE}]  Generate Notes\n\n"
+        f"  [bold {PURPLE}][3][/bold {PURPLE}]  Settings\n\n"
+        f"  [bold {PURPLE}][4][/bold {PURPLE}]  Exit\n",
         title="[bold white]Main Menu[/bold white]",
         border_style=PURPLE,
         width=40
     ))
-    return Prompt.ask(f"[bold {PURPLE}]>[/bold {PURPLE}]", choices=["1", "2", "3"])
+    return Prompt.ask(f"[bold {PURPLE}]>[/bold {PURPLE}]", choices=["1", "2", "3", "4"])
 
 
 def show_settings_menu(current_provider: str) -> str:

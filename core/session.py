@@ -21,6 +21,15 @@ class Session:
 
     def wait_for_manual_login(self):
         confirm_login()
+        # After user presses ENTER, wait for dashboard to actually load
+        self.page.wait_for_load_state("domcontentloaded")
+        self.page.wait_for_timeout(3000)
+
+        # If still on login page, navigate to dashboard directly
+        if "login" in self.page.url.lower():
+            self.page.goto(URL + "/my/")
+            self.page.wait_for_load_state("domcontentloaded")
+            self.page.wait_for_timeout(3000)
 
     def ensure_logged_in(self):
         log_info("Checking session...")
@@ -40,4 +49,12 @@ class Session:
         if self.is_logged_in():
             log_success("Login successful — session will persist for next run")
         else:
-            log_warning("Not on dashboard after login — check manually")
+            # Force navigate to dashboard
+            log_warning("Forcing navigation to dashboard...")
+            self.page.goto(URL + "/my/")
+            self.page.wait_for_load_state("domcontentloaded")
+            self.page.wait_for_timeout(3000)
+            if self.is_logged_in():
+                log_success("Now on dashboard")
+            else:
+                log_warning("Still not on dashboard — check manually")

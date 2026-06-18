@@ -18,7 +18,7 @@ def is_configured() -> bool:
     try:
         with open(CONFIG_FILE) as f:
             data = json.load(f)
-        return all(k in data for k in ("groq_api_key", "username", "password"))
+        return all(k in data for k in ("groq_api_key", "username", "password", "phone_number"))
     except:
         return False
 
@@ -48,10 +48,15 @@ def run_onboarding():
     console.print(f"[bold {PURPLE}]AMIGO Portal Password[/bold {PURPLE}]")
     password = Prompt.ask("  >")
 
+    console.print(f"[bold {PURPLE}]Enter your phone number (for feedback forms)[/bold {PURPLE}]")
+    phone_number = Prompt.ask("  >")
+    
+
     save_config({
         "groq_api_key": groq_key,
         "username": username,
-        "password": password
+        "password": password,
+        "phone_number" : phone_number
     })
 
     log_success("Setup complete — credentials saved locally")

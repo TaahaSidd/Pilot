@@ -25,7 +25,7 @@ class Workflow:
         courses = []
 
         # Course IDs to skip
-        SKIP_COURSE_IDS = ["4548"]
+        # SKIP_COURSE_IDS = ["4548"]
 
         buttons = self.page.locator("a.view-course-btn")
         count = buttons.count()
@@ -41,9 +41,9 @@ class Workflow:
                 course_id = href.rstrip("/").split("=")[-1]
 
                 # Skip unwanted courses
-                if course_id in SKIP_COURSE_IDS:
-                    log_info(f"Skipping Free Certificate Courses (id={course_id})")
-                    continue
+                # if course_id in SKIP_COURSE_IDS:
+                #     log_info(f"Skipping Free Certificate Courses (id={course_id})")
+                #     continue
 
                 title = f"Course {course_id}"
                 try:

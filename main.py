@@ -21,6 +21,7 @@ def run():
             config.GROQ_API_KEY = data["groq_api_key"]
             config.USERNAME = data["username"]
             config.PASSWORD = data["password"]
+            config.PHONE_NUMBER = data["phone_number"]
 
         while True:
             choice = show_menu()
@@ -38,6 +39,7 @@ def run():
                         config.GROQ_API_KEY = data["groq_api_key"]
                         config.USERNAME = data["username"]
                         config.PASSWORD = data["password"]
+                        config.PHONE_NUMBER = data["phone_number"]
                     elif setting == "2":
                         break
 

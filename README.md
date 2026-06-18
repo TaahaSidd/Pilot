@@ -88,8 +88,8 @@ Pilot/
 - [x] Feedback form engine
 - [x] Multi-pass unlock loop
 - [x] CLI with onboarding
-- [ ] Module assessment support
-- [ ] Notes generator
+- [x] Notes generator
+- [x] Certificate Completion
 - [ ] Plugin system
 - [ ] Desktop GUI
 

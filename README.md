@@ -59,7 +59,10 @@ Pilot/
 ├── workflow/
 │   ├── workflow.py
 │   ├── quiz_solver.py
-│   └── feedback_solver.py
+│   ├── feedback_solver.py
+│   └── notes_engine.py
+├── notes/
+│   └── (generated per user — gitignored)
 ├── pilot_ui.py
 ├── config.py
 ├── main.py

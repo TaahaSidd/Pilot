@@ -5,1343 +5,248 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="./Favicon.png">
-    <title>Pilot | AI Automation for Amity Online</title>
+    <title>Pilot — Browser automation for Amity Online</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
         rel="stylesheet">
-    <style>
-        :root {
-            --bg: #080808;
-            --bg2: #0f0f0f;
-            --bg3: #141414;
-            --border: rgba(255, 255, 255, 0.07);
-            --border2: rgba(255, 255, 255, 0.12);
-            --accent: #AA00FF;
-            --accent-dim: rgba(170, 0, 255, 0.15);
-            --accent-glow: rgba(170, 0, 255, 0.08);
-            --t1: #f5f5f5;
-            --t2: #888;
-            --t3: #444;
-            --green: #00e676;
-            --cyan: #00bcd4;
-            --yellow: #ffc107;
-            --font: 'Geist', system-ui, sans-serif;
-            --mono: 'Geist Mono', monospace;
-        }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0
-        }
-
-        html {
-            background: var(--bg);
-            color: var(--t1);
-            font-family: var(--font);
-            scroll-behavior: smooth;
-            overflow-x: hidden
-        }
-
-        body {
-            min-height: 100vh;
-            line-height: 1.5
-        }
-
-        a {
-            text-decoration: none;
-            color: inherit
-        }
-
-        /* NAV */
-        .nav {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 2.5rem;
-            height: 60px;
-            background: rgba(8, 8, 8, 0.85);
-            backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .nav-logo {
-            font-size: 1.1rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            color: var(--t1)
-        }
-
-        .nav-logo span {
-            color: var(--accent)
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            list-style: none
-        }
-
-        .nav-links a {
-            font-size: 0.875rem;
-            color: var(--t2);
-            transition: color 0.15s
-        }
-
-        .nav-links a:hover,
-        .nav-links a.active {
-            color: var(--t1)
-        }
-
-        .nav-right {
-            display: flex;
-            align-items: center;
-            gap: 1.25rem
-        }
-
-        .nav-badge {
-            font-size: 0.75rem;
-            font-weight: 500;
-            background: var(--accent-dim);
-            color: var(--accent);
-            border: 1px solid rgba(170, 0, 255, 0.3);
-            padding: 0.25rem 0.75rem;
-            border-radius: 99px;
-        }
-
-        .nav-gh {
-            font-size: 0.875rem;
-            font-family: var(--mono);
-            color: var(--t2);
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            transition: color 0.15s;
-        }
-
-        .nav-gh:hover {
-            color: var(--t1)
-        }
-
-        /* HERO */
-        .hero {
-            min-height: 92vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 6rem 2rem;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero-noise {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            z-index: 0;
-            background-image:
-                radial-gradient(ellipse 80% 50% at 50% -10%, rgba(170, 0, 255, 0.12) 0%, transparent 70%),
-                radial-gradient(ellipse 40% 40% at 80% 80%, rgba(170, 0, 255, 0.04) 0%, transparent 60%);
-        }
-
-
-        .hero-content {
-            position: relative;
-            z-index: 1;
-            max-width: 860px;
-            margin: 0 auto
-        }
-
-        .hero-eyebrow {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.8rem;
-            font-family: var(--mono);
-            color: var(--accent);
-            border: 1px solid rgba(170, 0, 255, 0.25);
-            background: var(--accent-glow);
-            padding: 0.3rem 0.9rem;
-            border-radius: 99px;
-            margin-bottom: 2.5rem;
-            letter-spacing: 0.06em;
-        }
-
-        .hero-eyebrow::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--accent);
-            animation: pulse 2s infinite
-        }
-
-        @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 1
-            }
-
-            50% {
-                opacity: 0.3
-            }
-        }
-
-        .hero-h1 {
-            font-size: clamp(3.2rem, 7vw, 5.5rem);
-            font-weight: 800;
-            letter-spacing: -0.04em;
-            line-height: 1.0;
-            color: var(--t1);
-            margin-bottom: 1.75rem;
-        }
-
-        .hero-h1 em {
-            font-style: normal;
-            color: var(--accent)
-        }
-
-        .hero-sub {
-            font-size: 1.2rem;
-            color: var(--t2);
-            max-width: 600px;
-            margin: 0 auto 3rem;
-            line-height: 1.65;
-            font-weight: 300;
-        }
-
-        .hero-actions {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-            margin-bottom: 3.5rem
-        }
-
-        .btn-primary {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.7rem 1.6rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            background: var(--accent);
-            color: #fff;
-            box-shadow: 0 0 24px rgba(170, 0, 255, 0.35);
-            transition: all 0.2s;
-        }
-
-        .btn-primary:hover {
-            background: #c400ff;
-            box-shadow: 0 0 36px rgba(170, 0, 255, 0.5);
-            transform: translateY(-1px)
-        }
-
-        .btn-ghost {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.7rem 1.6rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: var(--t1);
-            border: 1px solid var(--border2);
-            background: transparent;
-            transition: all 0.2s;
-        }
-
-        .btn-ghost:hover {
-            background: rgba(255, 255, 255, 0.04);
-            border-color: rgba(255, 255, 255, 0.2)
-        }
-
-        .hero-install {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.75rem;
-            background: var(--bg2);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 0.65rem 1.25rem;
-            font-family: var(--mono);
-            font-size: 0.85rem;
-            color: var(--t2);
-        }
-
-        .hero-install-label {
-            color: var(--t3);
-            margin-right: 0.25rem
-        }
-
-        .hero-install code {
-            color: var(--t1)
-        }
-
-        .hero-install-copy {
-            background: none;
-            border: none;
-            color: var(--t3);
-            cursor: pointer;
-            font-size: 0.8rem;
-            font-family: var(--mono);
-            padding: 0;
-            transition: color 0.15s;
-        }
-
-        .hero-install-copy:hover {
-            color: var(--accent)
-        }
-
-        .hero-scroll {
-            position: absolute;
-            bottom: 2.5rem;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.7rem;
-            color: var(--t3);
-            font-family: var(--mono);
-            letter-spacing: 0.08em;
-            animation: bob 2.5s ease-in-out infinite;
-        }
-
-        @keyframes bob {
-
-            0%,
-            100% {
-                transform: translateX(-50%) translateY(0)
-            }
-
-            50% {
-                transform: translateX(-50%) translateY(6px)
-            }
-        }
-
-        .scroll-arrow {
-            width: 1px;
-            height: 32px;
-            background: linear-gradient(to bottom, var(--t3), transparent)
-        }
-
-        /* TERMINAL DEMO */
-        .terminal-section {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 0 2rem 7rem;
-        }
-
-        .terminal {
-            background: #0a0a0a;
-            border: 1px solid var(--border2);
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(170, 0, 255, 0.04);
-        }
-
-        .terminal-bar {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.9rem 1.25rem;
-            background: #111;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .t-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%
-        }
-
-        .t-dot.r {
-            background: #ff5f57
-        }
-
-        .t-dot.y {
-            background: #ffbd2e
-        }
-
-        .t-dot.g {
-            background: #28c840
-        }
-
-        .t-title {
-            flex: 1;
-            text-align: center;
-            font-family: var(--mono);
-            font-size: 0.78rem;
-            color: var(--t3)
-        }
-
-        .terminal-body {
-            padding: 1.5rem 1.75rem;
-            font-family: var(--mono);
-            font-size: 0.85rem;
-            line-height: 1.8
-        }
-
-        .t-line {
-            display: block;
-            margin-bottom: 0.1rem
-        }
-
-        .t-prompt {
-            color: var(--t3)
-        }
-
-        .t-cmd {
-            color: var(--t1)
-        }
-
-        .t-tag {
-            color: #61afef;
-            font-weight: 500
-        }
-
-        .t-label {
-            color: #888
-        }
-
-        .t-val-g {
-            color: #98c379
-        }
-
-        .t-val-y {
-            color: #e5c07b
-        }
-
-        .t-val-p {
-            color: #c678dd
-        }
-
-        .t-val-c {
-            color: #56b6c2
-        }
-
-        .t-comment {
-            color: #4a4e5a;
-            font-style: italic
-        }
-
-        .t-success {
-            color: var(--green)
-        }
-
-        .t-info {
-            color: #61afef
-        }
-
-        .t-blank {
-            height: 0.6rem;
-            display: block
-        }
-
-        /* SECTION COMMON */
-        .section {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 6rem 2rem
-        }
-
-        .section-label {
-            font-family: var(--mono);
-            font-size: 0.72rem;
-            color: var(--accent);
-            letter-spacing: 0.12em;
-            margin-bottom: 1rem;
-            display: block;
-        }
-
-        .section-h2 {
-            font-size: clamp(2rem, 4vw, 3rem);
-            font-weight: 800;
-            letter-spacing: -0.035em;
-            line-height: 1.1;
-            color: var(--t1);
-            margin-bottom: 1.25rem;
-        }
-
-        .section-h2 em {
-            font-style: normal;
-            color: var(--accent)
-        }
-
-        .section-sub {
-            font-size: 1.05rem;
-            color: var(--t2);
-            max-width: 560px;
-            line-height: 1.65;
-            font-weight: 300
-        }
-
-        .section-divider {
-            border: none;
-            border-top: 1px solid var(--border);
-            margin: 0
-        }
-
-        /* WORKFLOW STEPS */
-        .workflow {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
-            margin-top: 3rem;
-        }
-
-        .workflow-step {
-            background: var(--bg2);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.75rem;
-            position: relative;
-            overflow: hidden;
-            transition: border-color 0.2s, transform 0.2s;
-        }
-
-        .workflow-step:hover {
-            border-color: var(--border2);
-            transform: translateY(-2px)
-        }
-
-        .workflow-step::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--accent), transparent);
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-
-        .workflow-step:hover::before {
-            opacity: 1
-        }
-
-        .step-num {
-            font-family: var(--mono);
-            font-size: 0.78rem;
-            color: var(--accent);
-            margin-bottom: 1rem;
-            display: block;
-        }
-
-        .step-h {
-            font-size: 1.05rem;
-            font-weight: 600;
-            color: var(--t1);
-            margin-bottom: 0.65rem;
-            letter-spacing: -0.01em
-        }
-
-        .step-p {
-            font-size: 0.9rem;
-            color: var(--t2);
-            line-height: 1.6
-        }
-
-        /* SPLIT FEATURES */
-        .split-section {
-            padding: 0 2rem 6rem;
-            max-width: 1100px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 6rem
-        }
-
-        .split-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 5rem;
-            align-items: center
-        }
-
-        .split-row.rev .split-text {
-            order: -1
-        }
-
-        .split-text .section-h2 {
-            font-size: 2rem;
-            margin-bottom: 1rem
-        }
-
-        .split-text p {
-            font-size: 1rem;
-            color: var(--t2);
-            line-height: 1.7;
-            font-weight: 300;
-            margin-bottom: 1rem
-        }
-
-        .split-text p:last-child {
-            margin-bottom: 0
-        }
-
-        .split-code {
-            background: #090909;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .split-code .code-bar {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.1rem;
-            background: #0e0e0e;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .split-code .code-bar .dots {
-            display: flex;
-            gap: 5px
-        }
-
-        .split-code .code-bar .dots span {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%
-        }
-
-        .split-code .code-bar .fn {
-            font-family: var(--mono);
-            font-size: 0.75rem;
-            color: var(--t3);
-            margin-left: 0.5rem
-        }
-
-        .split-code pre {
-            padding: 1.25rem 1.4rem;
-            font-family: var(--mono);
-            font-size: 0.82rem;
-            line-height: 1.75;
-            overflow-x: auto
-        }
-
-        /* FEATURE GRID */
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1px;
-            background: var(--border);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            overflow: hidden;
-            margin-top: 3rem;
-        }
-
-        .feature-cell {
-            background: var(--bg);
-            padding: 2rem;
-            transition: background 0.2s;
-        }
-
-        .feature-cell:hover {
-            background: var(--bg2)
-        }
-
-        .feature-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            background: var(--accent-dim);
-            border: 1px solid rgba(170, 0, 255, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1rem;
-            font-size: 1rem;
-        }
-
-        .feature-h {
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: var(--t1);
-            margin-bottom: 0.5rem
-        }
-
-        .feature-p {
-            font-size: 0.875rem;
-            color: var(--t2);
-            line-height: 1.6
-        }
-
-        /* FAQ */
-        .faq-list {
-            margin-top: 3rem;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            overflow: hidden
-        }
-
-        .faq-item {
-            border-bottom: 1px solid var(--border)
-        }
-
-        .faq-item:last-child {
-            border-bottom: none
-        }
-
-        .faq-q {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.25rem 1.5rem;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 500;
-            color: var(--t1);
-            transition: color 0.15s;
-            user-select: none;
-        }
-
-        .faq-q:hover {
-            color: var(--accent)
-        }
-
-        .faq-q .arrow {
-            font-size: 1.1rem;
-            color: var(--t3);
-            transition: transform 0.25s
-        }
-
-        .faq-item.open .faq-q .arrow {
-            transform: rotate(45deg);
-            color: var(--accent)
-        }
-
-        .faq-body {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .faq-body-inner {
-            padding: 0 1.5rem 1.5rem;
-            font-size: 0.95rem;
-            color: var(--t2);
-            line-height: 1.7
-        }
-
-        .faq-body-inner code {
-            font-family: var(--mono);
-            font-size: 0.85em;
-            background: rgba(255, 255, 255, 0.06);
-            padding: 0.1em 0.4em;
-            border-radius: 4px;
-        }
-
-        .faq-item.open .faq-body {
-            max-height: 300px
-        }
-
-        /* CTA BANNER */
-        .cta-section {
-            margin: 0 2rem 6rem;
-            border-radius: 16px;
-            background: var(--bg2);
-            border: 1px solid var(--border);
-            padding: 4rem 3rem;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .cta-section::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            background: radial-gradient(ellipse 60% 100% at 50% 100%, rgba(170, 0, 255, 0.07) 0%, transparent 70%);
-        }
-
-        .cta-section .section-h2 {
-            margin: 0 auto 1rem;
-            max-width: 600px
-        }
-
-        .cta-section .section-sub {
-            margin: 0 auto 2.5rem
-        }
-
-        .cta-section .hero-install {
-            display: inline-flex;
-            margin: 0 auto
-        }
-
-        /* FOOTER */
-        footer {
-            border-top: 1px solid var(--border);
-            padding: 3.5rem 2.5rem;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .footer-inner {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 3rem;
-            margin-bottom: 3rem
-        }
-
-        .footer-brand-name {
-            font-size: 1.1rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            margin-bottom: 0.75rem
-        }
-
-        .footer-brand-name span {
-            color: var(--accent)
-        }
-
-        .footer-desc {
-            font-size: 0.875rem;
-            color: var(--t2);
-            line-height: 1.6;
-            max-width: 280px
-        }
-
-        .footer-col h4 {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--t1);
-            letter-spacing: 0.06em;
-            margin-bottom: 1.25rem
-        }
-
-        .footer-col ul {
-            list-style: none
-        }
-
-        .footer-col li {
-            margin-bottom: 0.75rem
-        }
-
-        .footer-col a {
-            font-size: 0.875rem;
-            color: var(--t2);
-            transition: color 0.15s
-        }
-
-        .footer-col a:hover {
-            color: var(--t1)
-        }
-
-        .footer-bottom {
-            padding-top: 2rem;
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.8rem;
-            color: var(--t3);
-            font-family: var(--mono);
-        }
-
-        .footer-bottom a {
-            color: var(--t2);
-            transition: color 0.15s
-        }
-
-        .footer-bottom a:hover {
-            color: var(--t1)
-        }
-
-        /* REVEAL */
-        .reveal {
-            opacity: 0;
-            transform: translateY(18px);
-            transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1)
-        }
-
-        .reveal.in {
-            opacity: 1;
-            transform: none
-        }
-
-        /* RESPONSIVE */
-        @media(max-width:900px) {
-            .workflow {
-                grid-template-columns: 1fr 1fr
-            }
-
-            .feature-grid {
-                grid-template-columns: 1fr 1fr
-            }
-
-            .split-row {
-                grid-template-columns: 1fr;
-                gap: 2.5rem
-            }
-
-            .split-row.rev .split-text {
-                order: 0
-            }
-
-            .footer-inner {
-                grid-template-columns: 1fr 1fr;
-                gap: 2rem
-            }
-        }
-
-        @media(max-width:640px) {
-            .nav {
-                padding: 0 1.25rem
-            }
-
-            .nav-links {
-                display: none
-            }
-
-            .hero {
-                padding: 5rem 1.25rem 4rem
-            }
-
-            .hero-h1 {
-                font-size: 2.6rem
-            }
-
-            .workflow {
-                grid-template-columns: 1fr;
-                gap: 1rem
-            }
-
-            .feature-grid {
-                grid-template-columns: 1fr
-            }
-
-            .footer-inner {
-                grid-template-columns: 1fr
-            }
-
-            .footer-bottom {
-                flex-direction: column;
-                gap: 0.75rem;
-                text-align: center
-            }
-
-            .cta-section {
-                margin: 0 1rem 4rem;
-                padding: 3rem 1.5rem
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
 
     <nav class="nav">
-        <a href="#" class="nav-logo">Pilot</a>
+        <div class="nav-left">
+            <a href="#" class="nav-logo">Pilot</a>
+        </div>
         <ul class="nav-links">
-            <li><a href="#how-it-works">How it works</a></li>
+            <li><a href="#about">What is Pilot</a></li>
             <li><a href="#features">Features</a></li>
             <li><a href="#faq">FAQ</a></li>
-            <li><a href="docs.html" class="active">Docs</a></li>
+            <li><a href="docs.html">Docs</a></li>
         </ul>
-        <div class="nav-right">
-            <a href="https://github.com/TaahaSidd/Pilot" class="nav-gh" target="_blank">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path
-                        d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-                </svg>
-                GitHub →
-            </a>
-        </div>
+        <a href="https://github.com/TaahaSidd/Pilot" class="nav-gh" target="_blank" aria-label="GitHub Repository">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path
+                    d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+            </svg>
+            GitHub
+        </a>
     </nav>
 
-    <section class="hero">
-        <div class="hero-noise"></div>
-        <div class="hero-grid"></div>
-        <div class="hero-content">
-            <h1 class="hero-h1">Stop clicking.<br><em>Let Pilot handle it.</em></h1>
-            <p class="hero-sub">An open-source browser automation tool for Amity Online students. Pilot navigates course
-                modules, processes content, and answers quizzes for you.</p>
-            <div class="hero-actions">
-                <a href="docs.html" class="btn-primary">Get Started →</a>
-                <a href="https://github.com/TaahaSidd/Pilot" class="btn-ghost" target="_blank">View on GitHub</a>
-            </div>
-            <div class="hero-install">
-                <span class="hero-install-label">run</span>
-                <code>python main.py</code>
-                <button class="hero-install-copy"
-                    onclick="navigator.clipboard.writeText('python main.py');this.textContent='copied!';setTimeout(()=>this.textContent='copy',1500)">copy</button>
-            </div>
-        </div>
-        <div class="hero-scroll">
-            SCROLL
-            <div class="scroll-arrow"></div>
-        </div>
-    </section>
+    <div class="hero-container">
+        <section class="hero-wrap reveal">
+            <div class="hero">
+                <h1 class="hero-title">Pilot operates the Amity Online portal so you don't have to.</h1>
+                <p class="hero-sub">A local Python agent that drives Chromium via Playwright to read course content and
+                    resolve quizzes automatically using an LLM.</p>
 
-    <div class="terminal-section reveal">
-        <div class="terminal">
-            <div class="terminal-bar">
-                <div class="t-dot r"></div>
-                <div class="t-dot y"></div>
-                <div class="t-dot g"></div>
-                <div class="t-title">bash pilot session</div>
+                <div class="hero-actions">
+                    <a href="https://github.com/TaahaSidd/Pilot" class="btn" target="_blank">Get started</a>
+                    <a href="#features" class="link-arrow">Explore features →</a>
+                </div>
             </div>
-            <div class="terminal-body">
-                <span class="t-line"><span class="t-prompt">$ </span><span class="t-cmd">python main.py</span></span>
-                <span class="t-blank"></span>
-                <span class="t-line"><span class="t-tag">[PILOT]</span> <span class="t-label">Enter your Groq API key:
-                    </span><span class="t-val-g">gsk_••••••••••••••••••••••••</span></span>
-                <span class="t-line"><span class="t-tag">[PILOT]</span> <span class="t-label">Enter student email:
-                    </span><span class="t-val-y">user@s.amity.edu</span></span>
-                <span class="t-line"><span class="t-tag">[PILOT]</span> <span class="t-label">Enter portal password:
-                    </span><span class="t-val-g">••••••••••••</span></span>
-                <span class="t-blank"></span>
-                <span class="t-line t-comment"># credentials saved locally on your machine never shared
-                    externally</span>
-                <span class="t-line"><span class="t-success">[OK]</span> <span class="t-label">Spin-up sequence
-                        validated. Launching browser...</span></span>
-                <span class="t-blank"></span>
-                <span class="t-line"><span class="t-info">[SCAN]</span> <span class="t-label">Discovered </span><span
-                        class="t-val-p">6 courses</span><span class="t-label"> · </span><span class="t-val-y">23
-                        incomplete modules</span></span>
-                <span class="t-line"><span class="t-info">[PASS 1/10]</span> <span class="t-label">Processing
-                    </span><span class="t-val-g">Data Structures</span><span class="t-label"> → </span><span
-                        class="t-val-c">module 3/8...</span></span>
-                <span class="t-line"><span class="t-info">[QUIZ]</span> <span class="t-label">Groq LLM inference →
-                    </span><span class="t-val-g">4/4 answers selected</span><span class="t-label"> · </span><span
-                        class="t-val-c">~240ms</span></span>
-                <span class="t-line"><span class="t-success">[DONE]</span> <span class="t-label">Data Structures:
-                    </span><span class="t-val-g">100%</span></span>
-                <span class="t-blank"></span>
-                <span class="t-line t-comment"># 5 courses remaining multi-pass loop continues...</span>
-            </div>
-        </div>
+        </section>
     </div>
 
-    <hr class="section-divider">
+    <main>
+        <hr class="rule">
 
-    <section class="section" id="how-it-works">
-        <div class="reveal">
-            <h2 class="section-h2">Three inputs.<br>Everything else is <em>automatic.</em></h2>
-            <p class="section-sub">Pilot needs your Groq key, email, and password. That's it. After setup, it handles
-                the rest.</p>
-        </div>
-        <div class="workflow reveal">
-            <div class="workflow-step">
-                <div class="step-h">Enter credentials</div>
-                <p class="step-p">Credentials are saved locally on your machine in an encrypted config
-                    file never sent anywhere except your Groq API calls.</p>
-
+        <section class="section doc reveal" id="about">
+            <div class="eyebrow">What is Pilot</div>
+            <div class="prose">
+                <p>Pilot is a narrow automation agent built for one platform: the Amity Amigo learning portal. Instead
+                    of dealing with repetitive interface navigation, Pilot automates your workflows locally by handling
+                    your common tasks directly through code: parsing course modules, solving internal validation
+                    checkpoints with LLMs, and checking off pending forms completely behind the scenes.</p>
             </div>
-            <div class="workflow-step">
-                <div class="step-h">Pilot maps your courses</div>
-                <p class="step-p">Pilot opens a real Chromium browser, logs in, and scans all available courses
-                    skipping anything already at 100%.</p>
-            </div>
-            <div class="workflow-step">
-                <div class="step-h">Automated loop runs</div>
-                <p class="step-p">Modules, quizzes, and feedback forms are processed across all courses. Up to 10 passes
-                    unlock gated content as it opens.</p>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <hr class="section-divider">
+        <hr class="rule">
 
-    <section class="split-section" id="features">
+        <div class="features-full-section-wrapper" id="features">
+            <div class="section-gradient-backdrop"></div>
 
-        <div class="split-row reveal">
-            <div class="split-code">
-                <div class="code-bar">
-                    <div class="dots">
-                        <span style="background:#ff5f57"></span>
-                        <span style="background:#ffbd2e"></span>
-                        <span style="background:#28c840"></span>
+            <div class="sticky-features-section doc-wide">
+                <div class="features-sticky-left">
+                    <div class="reveal">
+                        <div class="eyebrow">Capabilities</div>
+                        <h2>Short, concise and built for intent.</h2>
+                        <p class="section-subtext">Everything you need to automate your local dashboard interactions
+                            without the architectural noise.</p>
                     </div>
-                    <span class="fn">inference_engine.log</span>
                 </div>
-                <pre><span style="color:#c678dd">import</span> <span style="color:#e5c07b">groq_cloud</span>
 
-<span style="color:#4a4e5a"># quiz payload assembled from on-screen context</span>
-payload = {
-  <span style="color:#98c379">"model"</span>: <span style="color:#98c379">"llama-3.3-70b-specdec"</span>,
-  <span style="color:#98c379">"question"</span>: scraped_question,
-  <span style="color:#98c379">"options"</span>: scraped_options,
-  <span style="color:#98c379">"context"</span>: reading_material_buffer
-}
-
-<span style="color:#4a4e5a"># ~240ms response time on Groq LPU</span>
-<span style="color:#56b6c2">answer</span> = groq_cloud.infer(payload)
-<span style="color:#98c379">→ Llama-3.3-70B selected: option B</span></pre>
-            </div>
-            <div class="split-text">
-                <h2 class="section-h2">Fast, accurate quiz resolution</h2>
-                <p>Pilot reads the active quiz screen and passes question + context from the current reading material
-                    into Groq's Llama 3.3 70B. Responses come back in ~240ms.</p>
-                <p>Built-in guardrails halt submission if questions are malformed or layouts don't match expected
-                    patterns protecting your grades.</p>
-            </div>
-        </div>
-
-        <div class="split-row rev reveal">
-            <div class="split-text">
-                <h2 class="section-h2">Gated content? It loops through.</h2>
-                <p>Many Amigo courses lock modules behind prior completions. Pilot's loop engine runs up to 10
-                    consecutive passes per session, picking up newly unlocked content on each cycle.</p>
-                <p>Feedback forms, mandatory surveys, and rating blocks are filled automatically so nothing gets stuck.
-                </p>
-            </div>
-            <div class="split-code">
-                <div class="code-bar">
-                    <div class="dots">
-                        <span style="background:rgba(255,255,255,0.15)"></span>
-                        <span style="background:rgba(255,255,255,0.15)"></span>
-                        <span style="background:rgba(255,255,255,0.15)"></span>
+                <div class="features-scroll-right">
+                    <div class="feature-text-block active-scroll-panel">
+                        <h3>Course Discovery</h3>
+                        <p>Scans the home dashboard automatically, reads raw completion data metrics directly from
+                            interface containers, and cleanly filters out modules hitting 100 percent completion scores.
+                        </p>
                     </div>
-                    <span class="fn">runtime_orchestrator.log</span>
-                </div>
-                <pre><span style="color:#4a4e5a">[08:42:11]</span> <span style="color:#61afef">[ENGINE]</span> Pass 1/10: mapping course tree...
-<span style="color:#4a4e5a">[08:42:15]</span> <span style="color:#c678dd">[ROUTINE]</span> Gateway module detected
-<span style="color:#4a4e5a">[08:42:19]</span> <span style="color:#98c379">[FEEDBACK]</span> Rating form processed (9/10)
-<span style="color:#4a4e5a">[08:42:20]</span> <span style="color:#56b6c2">[UNLOCK]</span> Next stage opened → Pass 2/10
-<span style="color:#4a4e5a">[08:42:31]</span> <span style="color:#98c379">[QUIZ]</span> 4/4 answers → submitted
-<span style="color:#4a4e5a">[08:42:45]</span> <span style="color:#e5c07b">[PROGRESS]</span> Course 2/6: 100% ✓</pre>
-            </div>
-        </div>
 
-        <div class="split-row reveal">
-            <div class="split-code">
-                <div class="code-bar">
-                    <div class="dots">
-                        <span style="background:#ff5f57"></span>
-                        <span style="background:#ffbd2e"></span>
-                        <span style="background:#28c840"></span>
+                    <div class="feature-text-block">
+                        <h3>Local Security</h3>
+                        <p>Keeps your records and setup preferences stored inside local files on disk. Zero external
+                            data transmission beyond core API calls.</p>
                     </div>
-                    <span class="fn">bash secure_auth</span>
-                </div>
-                <pre><span style="color:#61afef">[PILOT]</span> <span style="color:#888">Enter Groq API Key:</span>
-<span style="color:#98c379">gsk_••••••••••••••••••••••••</span>
 
-<span style="color:#61afef">[PILOT]</span> <span style="color:#888">Enter student email:</span>
-<span style="color:#e5c07b">user@s.amity.edu</span>
+                    <div class="feature-text-block">
+                        <h3>Feedback Forms</h3>
+                        <p>Locates and maps layout structures across dropmenus, standard input tags, and checkboxes,
+                            dynamically selecting structural options for seamless programmatic submission runs.</p>
+                    </div>
 
-<span style="color:#61afef">[PILOT]</span> <span style="color:#888">Enter portal password:</span>
-<span style="color:#98c379">••••••••••••</span>
-
-<span style="color:#4a4e5a"># zero .env / config file footprint</span>
-<span style="color:#98c379">[OK] Session memory only. Launching...</span></pre>
-            </div>
-            <div class="split-text">
-                <h2 class="section-h2">Your credentials never touch disk</h2>
-                <p>No <code
-                        style="font-family:var(--mono);font-size:0.9em;background:rgba(255,255,255,0.06);padding:0.1em 0.4em;border-radius:4px">.env</code>
-                    files, no config storage, no plain-text anything. Pilot prompts you at runtime and keeps everything
-                    in volatile session memory gone the moment the process ends.</p>
-                <p>Runs entirely on your local machine inside a real Chromium browser. Nothing is sent to external
-                    servers except your Groq API calls.</p>
-            </div>
-        </div>
-
-    </section>
-
-    <hr class="section-divider">
-
-    <section class="section">
-        <div class="reveal">
-            <h2 class="section-h2">Everything Pilot does</h2>
-        </div>
-        <div class="feature-grid reveal">
-            <div class="feature-cell">
-                <div class="feature-h">Course Discovery</div>
-                <p class="feature-p">Automatically detects all available courses in your Amigo portal and skips any
-                    already at 100%.</p>
-            </div>
-            <div class="feature-cell">
-                <div class="feature-h">Progress Tracking</div>
-                <p class="feature-p">Shows real-time completion percentages for every course as the automation loop
-                    runs.</p>
-            </div>
-            <div class="feature-cell">
-                <div class="feature-h">Module Navigation</div>
-                <p class="feature-p">Opens and processes incomplete learning modules automatically reading content
-                    pages end to end.</p>
-            </div>
-            <div class="feature-cell">
-                <div class="feature-h">Quiz Automation</div>
-                <p class="feature-p">Uses Groq's Llama 3.3 70B to analyze quiz questions and select answers using
-                    on-screen reading material as context.</p>
-            </div>
-            <div class="feature-cell">
-                <div class="feature-h">Multi-Pass Loops</div>
-                <p class="feature-p">Runs up to 10 consecutive passes per session, unlocking gated content as it becomes
-                    available.</p>
-            </div>
-            <div class="feature-cell">
-                <div class="feature-h">Feedback Engine</div>
-                <p class="feature-p">Auto-fills rating matrices, region selectors, and open-text survey fields to clear
-                    mandatory progression blocks.</p>
-            </div>
-            <div class="feature-cell">
-                <div class="feature-h">Local-Only Auth</div>
-                <p class="feature-p">Credentials are stored locally on your machine only never sent to external
-                    servers except Groq API calls for quiz inference.</p>
-            </div>
-            <div class="feature-cell">
-                <div class="feature-h">Real Browser</div>
-                <p class="feature-p">Operates inside a real Chromium instance via Playwright not fragile API scraping.
-                </p>
-            </div>
-            <div class="feature-cell">
-                <div class="feature-h">Groq LPU Speed</div>
-                <p class="feature-p">Groq's LPU inference delivers ~240ms quiz resolution fast enough to never be the
-                    bottleneck.</p>
-            </div>
-        </div>
-    </section>
-
-    <hr class="section-divider">
-
-    <section class="section" id="faq">
-        <div class="reveal">
-            <h2 class="section-h2">Common questions</h2>
-        </div>
-        <div class="faq-list reveal">
-            <div class="faq-item">
-                <div class="faq-q">What is Pilot?<span class="arrow">+</span></div>
-                <div class="faq-body">
-                    <div class="faq-body-inner">Pilot is an open-source browser automation tool built specifically for
-                        Amity Online students. It uses Playwright to control a real Chromium browser and Groq's Llama
-                        3.3 70B to process quizzes automating the repetitive clicking, module navigation, and quiz
-                        workflows inside the Amigo portal.</div>
-                </div>
-            </div>
-            <div class="faq-item">
-                <div class="faq-q">Do I need a Groq account?<span class="arrow">+</span></div>
-                <div class="faq-body">
-                    <div class="faq-body-inner">Yes. Pilot uses Groq Cloud for AI inference. You'll need a free Groq
-                        account to generate an API key. Get one at <a href="https://console.groq.com" target="_blank"
-                            style="color:var(--accent)">console.groq.com</a> it's free and takes about 30 seconds.
+                    <div class="feature-text-block">
+                        <h3>Quiz Resolution</h3>
+                        <p>Pipes actual page text contexts along with question payloads straight into premium reasoning
+                            instances, running structural option selections in direct parallel speeds.</p>
                     </div>
                 </div>
             </div>
-            <div class="faq-item">
-                <div class="faq-q">Is my password stored anywhere?<span class="arrow">+</span></div>
-                <div class="faq-body">
-                    <div class="faq-body-inner">Pilot saves your credentials locally on your machine in a config file so
-                        you only need to enter them once. They are never sent to any external server only your Groq
-                        API key is used for quiz inference via Groq Cloud. You can reset credentials anytime from the
-                        Settings menu.</div>
+        </div>
+
+        <hr class="rule">
+
+        <section class="section doc reveal" id="faq">
+            <div class="eyebrow">FAQ</div>
+            <div class="faq-list">
+                <div class="faq-item">
+                    <div class="faq-trigger">
+                        <span>How does Pilot pass credentials securely?</span>
+                        <svg class="faq-icon" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.5">
+                            <path d="m6 9 6 6 6-6" />
+                        </svg>
+                    </div>
+                    <div class="faq-content">
+                        <p>Pilot uses a local environment file on your computer. Your username and password never leave
+                            your machine or pass through proxy servers—they are supplied directly to your local Chromium
+                            driver.</p>
+                    </div>
                 </div>
-            </div>
-            <div class="faq-item">
-                <div class="faq-q">What Python version do I need?<span class="arrow">+</span></div>
-                <div class="faq-body">
-                    <div class="faq-body-inner">Python 3.8 or higher. Run <code>python --version</code> to check.
-                        Install dependencies with <code>pip install -r requirements.txt</code> then
-                        <code>playwright install chromium</code>.
+
+                <div class="faq-item">
+                    <div class="faq-trigger">
+                        <span>Does this require a paid LLM API key?</span>
+                        <svg class="faq-icon" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.5">
+                            <path d="m6 9 6 6 6-6" />
+                        </svg>
+                    </div>
+                    <div class="faq-content">
+                        <p>No. By default, Pilot connects to Groq API using free tier keys to query open-weights models
+                            like Llama 3.3, delivering low-latency inference speeds at zero operational cost.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-trigger">
+                        <span>Can it run undetected on the portal?</span>
+                        <svg class="faq-icon" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.5">
+                            <path d="m6 9 6 6 6-6" />
+                        </svg>
+                    </div>
+                    <div class="faq-content">
+                        <p>Pilot uses realistic user-agent profiles, dynamic delays between button interactions, and
+                            human-like movement sequences to remain within standard system usage boundaries.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-trigger">
+                        <span>What happens if an LLM answers a quiz incorrectly?</span>
+                        <svg class="faq-icon" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.5">
+                            <path d="m6 9 6 6 6-6" />
+                        </svg>
+                    </div>
+                    <div class="faq-content">
+                        <p>Pilot runs structural checks on form submissions. If an evaluation iteration falls below
+                            threshold metrics, the session saves local contextual states, allowing you to manually
+                            override or re-run specific blocks from the CLI engine.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-trigger">
+                        <span>How does the agent handle sudden portal UI layout updates?</span>
+                        <svg class="faq-icon" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.5">
+                            <path d="m6 9 6 6 6-6" />
+                        </svg>
+                    </div>
+                    <div class="faq-content">
+                        <p>Instead of relying strictly on hardcoded XPath positions, Pilot matches data targets based on
+                            resilient structural markers and relative text anchors, keeping the local workflow engine
+                            stable when minor layout variations shift.</p>
                     </div>
                 </div>
             </div>
-            <div class="faq-item">
-                <div class="faq-q">Will it hurt my grades?<span class="arrow">+</span></div>
-                <div class="faq-body">
-                    <div class="faq-body-inner">Pilot has built-in guardrails. If the QuizSolver encounters a malformed
-                        question, blank fields, or an unrecognized layout, it halts submission rather than submitting a
-                        bad answer. It won't guess blindly.</div>
+        </section>
+
+        <section class="full-accent-section">
+            <div class="doc reveal">
+                <div class="accent-cta-content">
+                    <h2>Clone it, configure it, run it.</h2>
+                    <p>Setup is the three values above. Everything after that is the agent's job.</p>
+                    <div class="hero-actions">
+                        <a href="https://github.com/TaahaSidd/Pilot" class="btn btn-dark" target="_blank">View on
+                            GitHub</a>
+                    </div>
                 </div>
             </div>
-            <div class="faq-item">
-                <div class="faq-q">Does it work on Windows / Mac / Linux?<span class="arrow">+</span></div>
-                <div class="faq-body">
-                    <div class="faq-body-inner">Yes. Pilot is a Python script and runs wherever Python and Playwright
-                        are supported which includes Windows, macOS, and Linux.</div>
+        </section>
+    </main>
+
+    <footer class="mega-footer">
+        <div class="mega-footer-wrap">
+            <div class="mf-brand-col">
+                <a href="#" class="mf-logo">Pilot</a>
+                <p class="mf-desc">Automated workflows for modern students. Local execution engine configured for
+                    targeted academic portal tracking systems.</p>
+            </div>
+
+            <div class="mf-links-grid">
+                <div class="mf-link-group">
+                    <h4>Project</h4>
+                    <ul>
+                        <li><a href="https://github.com/TaahaSidd/Pilot" target="_blank">Source Code</a></li>
+                        <li><a href="https://github.com/TaahaSidd/Pilot/releases" target="_blank">Releases</a></li>
+                        <li><a href="https://github.com/TaahaSidd/Pilot/issues" target="_blank">Issue Tracker</a></li>
+                    </ul>
+                </div>
+                <div class="mf-link-group">
+                    <h4>Documentation</h4>
+                    <ul>
+                        <li><a href="docs.html">Quickstart Guide</a></li>
+                        <li><a href="docs.html#config">Configuration JSON</a></li>
+                        <li><a href="docs.html#architecture">Architecture Info</a></li>
+                    </ul>
+                </div>
+                <div class="mf-link-group">
+                    <h4>Organization</h4>
+                    <ul>
+                        <li><a href="https://spicalabs.netlify.app/" target="_blank">Spica Labs</a></li>
+                        <li><a href="https://spicalabs.netlify.app/#work" target="_blank">Our Portfolio</a></li>
+                    </ul>
                 </div>
             </div>
         </div>
-    </section>
 
-    <div class="cta-section reveal">
-        <h2 class="section-h2">Automate your Amity workflow</h2>
-        <p class="section-sub">Clone the repo, run the setup, and let Pilot handle the rest.</p>
-        <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:2rem">
-            <a href="docs.html" class="btn-primary">Read the Docs →</a>
-            <a href="https://github.com/TaahaSidd/Pilot" class="btn-ghost" target="_blank">GitHub Repository</a>
-        </div>
-        <div class="hero-install" style="display:inline-flex;margin:0 auto">
-            <span class="hero-install-label">quickstart</span>
-            <code>git clone github.com/TaahaSidd/Pilot && python main.py</code>
-        </div>
-    </div>
-
-    <footer>
-        <div class="footer-inner">
-            <div>
-                <div class="footer-brand-name">Pilot</div>
-                <p class="footer-desc">Open-source browser automation for Amity Online students. Built to eliminate
-                    repetitive course navigation, module completion, and quiz workflows.</p>
+        <div class="mega-footer-bottom">
+            <div class="mf-bottom-inner">
+                <span class="copy-text">&copy; 2026 Spica Labs. Open source under MIT guidelines.</span>
+                <span class="credits-text">Engineered for Amity Online students.</span>
             </div>
-            <div class="footer-col">
-                <h4>Product</h4>
-                <ul>
-                    <li><a href="#how-it-works">How it works</a></li>
-                    <li><a href="#features">Features</a></li>
-                    <li><a href="https://github.com/TaahaSidd/Pilot/releases" target="_blank">Changelog</a></li>
-                </ul>
-            </div>
-            <div class="footer-col">
-                <h4>Resources</h4>
-                <ul>
-                    <li><a href="docs.html">Documentation</a></li>
-                    <li><a href="docs.html#quick-start">Quick Start</a></li>
-                    <li><a href="docs.html#quiz-solver">Quiz Solver</a></li>
-                </ul>
-            </div>
-            <div class="footer-col">
-                <h4>Developer</h4>
-                <ul>
-                    <li><a href="https://github.com/TaahaSidd/Pilot" target="_blank">GitHub</a></li>
-                    <li><a href="https://github.com/TaahaSidd/Pilot/issues" target="_blank">Report a Bug</a></li>
-                    <li><a href="https://github.com/TaahaSidd" target="_blank" style="color:var(--accent)">Follow
-                            Creator →</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <span>© 2026 Pilot Automation · by <a href="https://spicalabs.netlify.app/" target="_blank">Spica
-                    Labs</a></span>
-            <span>Built for Amity Online students</span>
         </div>
     </footer>
 
-    <script>
-        // Scroll reveal
-        const io = new IntersectionObserver(entries => {
-            entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target) } });
-        }, { threshold: 0.1 });
-        document.querySelectorAll('.reveal').forEach(el => io.observe(el));
-
-        // FAQ accordion
-        document.querySelectorAll('.faq-q').forEach(q => {
-            q.addEventListener('click', () => {
-                const item = q.parentElement;
-                const wasOpen = item.classList.contains('open');
-                document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
-                if (!wasOpen) item.classList.add('open');
-            });
-        });
-    </script>
+    <script src="./scripts.js"></script>
 </body>
 
 </html>

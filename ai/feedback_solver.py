@@ -1,4 +1,4 @@
-from pilot_ui import log_info, log_success, log_warning, log_error
+from ui.pilot_ui import log_info, log_success, log_warning, log_error
 import config
 
 

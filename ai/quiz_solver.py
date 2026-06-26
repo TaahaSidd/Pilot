@@ -3,7 +3,7 @@ import re as re_module
 import google.generativeai as genai
 from groq import Groq
 from config import GEMINI_API_KEY, GROQ_API_KEY, AI_PROVIDER
-from pilot_ui import log_info, log_success, log_warning, log_error, log_quiz
+from ui.pilot_ui import log_info, log_success, log_warning, log_error, log_quiz
 
 # Setup Gemini
 genai.configure(api_key=GEMINI_API_KEY)

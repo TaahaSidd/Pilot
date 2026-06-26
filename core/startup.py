@@ -1,6 +1,6 @@
 import os
 import json
-from pilot_ui import log_info, log_success, log_warning
+from ui.pilot_ui import log_info, log_success, log_warning
 from rich.prompt import Prompt
 from rich.console import Console
 

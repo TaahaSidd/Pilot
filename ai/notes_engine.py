@@ -2,7 +2,7 @@ import os
 import re
 from groq import Groq
 from config import GROQ_API_KEY
-from pilot_ui import log_info, log_success, log_warning, log_error
+from ui.pilot_ui import log_info, log_success, log_warning, log_error
 
 groq_client = Groq(api_key=GROQ_API_KEY)
 

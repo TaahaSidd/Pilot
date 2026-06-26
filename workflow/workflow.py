@@ -1,8 +1,8 @@
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
 import re
-from workflow.quiz_solver import QuizSolver
-from workflow.feedback_solver import FeedbackSolver
-from pilot_ui import (
+from ai.quiz_solver import QuizSolver
+from ai.feedback_solver import FeedbackSolver
+from ui.pilot_ui import (
     log_info, log_success, log_warning, log_error,
     log_page, log_quiz, log_skip, log_course, log_module_progress,
     show_course_summary

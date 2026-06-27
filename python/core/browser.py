@@ -1,8 +1,6 @@
 import os
 from playwright.sync_api import sync_playwright
-from python.ui.pilot_ui import log_info
-
-
+from ui.pilot_ui import log_info
 class Browser:
     def __init__(self):
         self.p = sync_playwright().start()

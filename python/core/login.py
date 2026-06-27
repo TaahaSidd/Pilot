@@ -1,4 +1,4 @@
-from config import USERNAME, PASSWORD
+from python.config import USERNAME, PASSWORD
 
 class Login:
     def __init__(self,page):

@@ -1,6 +1,6 @@
 import os
 from playwright.sync_api import sync_playwright
-from ui.pilot_ui import log_info
+from python.ui.pilot_ui import log_info
 
 
 class Browser:

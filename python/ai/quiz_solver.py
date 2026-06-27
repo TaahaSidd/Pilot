@@ -2,8 +2,8 @@ import time
 import re as re_module
 import google.generativeai as genai
 from groq import Groq
-from config import GEMINI_API_KEY, GROQ_API_KEY, AI_PROVIDER
-from ui.pilot_ui import log_info, log_success, log_warning, log_error, log_quiz
+from python.config import GEMINI_API_KEY, GROQ_API_KEY, AI_PROVIDER
+from python.ui.pilot_ui import log_info, log_success, log_warning, log_error, log_quiz
 
 # Setup Gemini
 genai.configure(api_key=GEMINI_API_KEY)

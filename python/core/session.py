@@ -1,5 +1,5 @@
-from config import URL, USERNAME, PASSWORD
-from ui.pilot_ui import log_info, log_success, log_warning, confirm_login
+from python.config import URL, USERNAME, PASSWORD
+from python.ui.pilot_ui import log_info, log_success, log_warning, confirm_login
 
 
 class Session:

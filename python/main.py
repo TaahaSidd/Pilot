@@ -1,13 +1,13 @@
-from core.browser import Browser
-from core.session import Session
-from core.startup import is_configured, run_onboarding, load_config
-from workflow.workflow import Workflow
-from ai.notes_engine import NotesEngine
-from ui.pilot_ui import (
+from python.core.browser import Browser
+from python.core.session import Session
+from python.core.startup import is_configured, run_onboarding, load_config
+from python.workflow.workflow import Workflow
+from python.ai.notes_engine import NotesEngine
+from python.ui.pilot_ui import (
     display_banner, show_menu, show_settings_menu,
     show_completion_banner, log_info, log_success, log_warning
 )
-import config
+import python.config as config
 
 
 def run():

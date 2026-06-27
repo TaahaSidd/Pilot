@@ -1,8 +1,8 @@
 import os
 import re
 from groq import Groq
-from config import GROQ_API_KEY
-from ui.pilot_ui import log_info, log_success, log_warning, log_error
+from python.config import GROQ_API_KEY
+from python.ui.pilot_ui import log_info, log_success, log_warning, log_error
 
 groq_client = Groq(api_key=GROQ_API_KEY)
 
@@ -94,7 +94,7 @@ class NotesEngine:
         os.makedirs(NOTES_DIR, exist_ok=True)
 
         # Verify we're on dashboard before scanning
-        from config import URL
+        from python.config import URL
         current_url = self.page.url
         if "/my/" not in current_url.lower() and "dashboard" not in current_url.lower():
             log_info("Navigating to dashboard...")
@@ -104,7 +104,7 @@ class NotesEngine:
 
         log_info(f"Current URL: {self.page.url}")
 
-        from workflow.workflow import Workflow
+        from python.workflow.workflow import Workflow
         wf = Workflow(self.page)
         wf.stabilize_page()
         courses = wf.get_course_urls()

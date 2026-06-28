@@ -1,3 +1,4 @@
+import threading
 import warnings
 import os
 import time
@@ -19,6 +20,14 @@ console = Console()
 
 PURPLE = "#AA00FF"
 DIM = "dim white"
+
+
+# ──────────────────────────────────────────────────────────────────
+# Broadcast hook — lets server.py mirror every log line to connected
+# WebSocket clients. CLI behavior is completely unaffected: nothing
+# below changes how any log_* function prints to the terminal. This
+# only adds a second, optional destination for the same message.
+# ──────────────────────────────────────────────────────────────────
 
 _broadcast_queue: "queue.Queue | None" = None
 
@@ -48,6 +57,33 @@ def _broadcast(level: str, message: str):
         _broadcast_queue.put_nowait({"level": level, "message": message})
     except Exception:
         pass
+
+
+# ──────────────────────────────────────────────────────────────────
+# Server-mode login wait — lets confirm_login() block the BACKGROUND
+# THREAD (never the asyncio event loop) until server.py's
+# POST /workflow/confirm-login route releases it. CLI mode never sets
+# this, so confirm_login() falls through to the original Prompt.ask
+# behavior untouched.
+# ──────────────────────────────────────────────────────────────────
+
+
+_login_event: "threading.Event | None" = None
+
+
+def prepare_server_login_wait() -> "threading.Event":
+    """Called by server.py right before starting a workflow run on
+    its background thread."""
+    global _login_event
+    _login_event = threading.Event()
+    return _login_event
+
+
+def clear_server_login_wait():
+    """Called by server.py once a run finishes (success or error) so
+    a stale event from a previous run can't leak into the next one."""
+    global _login_event
+    _login_event = None
 
 
 def display_banner():
@@ -208,6 +244,19 @@ def show_completion_banner():
 
 
 def confirm_login():
+    if _login_event is not None:
+        # Server mode — broadcast that we're waiting, then block this
+        # background thread (NOT the asyncio event loop) until
+        # POST /workflow/confirm-login sets the event.
+        _broadcast(
+            "action_required",
+            "Manual login required — solve the CAPTCHA in the browser window, "
+            "then confirm in the dashboard."
+        )
+        _login_event.wait()
+        return
+
+    # CLI mode — exact original behavior, untouched.
     console.print(Panel(
         f"\n  [bold white]Manual Login Required[/bold white]\n\n"
         f"  [dim]Credentials have been filled in for you.[/dim]\n"
@@ -215,6 +264,5 @@ def confirm_login():
         border_style=PURPLE,
         width=55
     ))
-    _broadcast("action_required", "Manual login required — solve the CAPTCHA, then continue.")
     Prompt.ask(
         f"  [{PURPLE}]Press ENTER once you are on the dashboard[/{PURPLE}]")

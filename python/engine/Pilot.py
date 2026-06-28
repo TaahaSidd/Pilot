@@ -5,8 +5,9 @@ from workflow.workflow import Workflow
 from ai.notes_engine import NotesEngine
 from ui.pilot_ui import (
     display_banner, show_menu, show_settings_menu,
-    show_completion_banner, log_info, log_success, log_warning, log_error
+    show_completion_banner, log_info, log_success, log_warning, log_error, prepare_server_login_wait, clear_server_login_wait
 )
+
 import config
 
 
@@ -72,6 +73,17 @@ class Pilot:
                 self.page = None
                 self.session = None
 
+    # ── Browser visibility (server mode) ────────────────────────
+    # Manual show/hide toggle for the dashboard's "Show Browser"
+    # button. Uses Playwright's own bring_to_front() — cross-platform,
+    # no OS-specific window-handle code.
+
+    def bring_browser_to_front(self):
+        if self.page:
+            self.page.bring_to_front()
+            return True
+        return False
+
     # ── Actions ──────────────────────────────────────────────────
     # These now set self.status, so a server running this on a thread
     # can answer "what's it doing right now" without touching internals.
@@ -90,6 +102,25 @@ class Pilot:
             log_error(f"Workflow failed: {e}")
         finally:
             self.close_browser()
+
+    def start_workflow_server_mode(self):
+        """Used by server.py instead of start_workflow(). Identical
+        flow, but preps the login-wait event first so confirm_login()
+        blocks on POST /workflow/confirm-login instead of stdin."""
+        from ui.pilot_ui import prepare_server_login_wait, clear_server_login_wait, log_info
+
+        login_event = prepare_server_login_wait()
+
+        try:
+            self.start_workflow()
+
+        except Exception as e:
+            self.error = str(e)
+            raise e
+        finally:
+            clear_server_login_wait()
+
+        return login_event
 
     def generate_notes(self):
         self.status = "running"
@@ -117,7 +148,7 @@ class Pilot:
     def exit(self):
         log_info("Goodbye!")
 
-    # ── CLI menu loop ────────────────────────────────────────────
+# ── CLI menu loop ────────────────────────────────────────────
 
     def _menu_loop(self):
         actions = {

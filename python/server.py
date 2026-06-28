@@ -10,7 +10,7 @@ from pydantic import BaseModel
 
 from engine.Pilot import Pilot
 from core.startup import is_configured, run_onboarding, save_config, load_config
-import ui.pilot_ui as broadcast
+from ui import pilot_ui
 import config
 
 
@@ -67,13 +67,15 @@ def _run_in_thread(target_fn):
     if pilot.status == "running":
         return False
 
-    broadcast.attach_broadcast_queue(_log_queue)
+    # FIX: Point to the imported pilot_ui module namespace
+    pilot_ui.attach_broadcast_queue(_log_queue)
 
     def runner():
         try:
             target_fn()
         finally:
-            broadcast.detach_broadcast_queue()
+            # FIX: Point to the imported pilot_ui module namespace
+            pilot_ui.detach_broadcast_queue()
 
     _worker_thread = threading.Thread(target=runner, daemon=True)
     _worker_thread.start()
@@ -95,10 +97,50 @@ def get_status():
 
 @app.post("/workflow/start")
 def start_workflow():
-    started = _run_in_thread(pilot.start_workflow)
-    if not started:
+    if pilot.status == "running":
         return {"started": False, "reason": "A run is already in progress."}
+
+    # FIX: Point to the imported pilot_ui module namespace
+    pilot_ui.attach_broadcast_queue(_log_queue)
+
+    def runner():
+        try:
+            pilot.start_workflow_server_mode()
+        finally:
+            # FIX: Point to the imported pilot_ui module namespace
+            pilot_ui.detach_broadcast_queue()
+
+    global _worker_thread
+    _worker_thread = threading.Thread(target=runner, daemon=True)
+    _worker_thread.start()
     return {"started": True}
+
+
+@app.post("/workflow/confirm-login")
+def confirm_login():
+    """Called by the dashboard once the user has solved the CAPTCHA
+    inside the visible Chromium window. Releases the background
+    thread that's blocked waiting inside confirm_login() in
+    pilot_ui.py — this is the server-mode replacement for the CLI's
+    'press Enter' prompt."""
+    if pilot_ui._login_event is None:
+        return {"confirmed": False, "reason": "No login wait is currently active."}
+    pilot_ui._login_event.set()
+    return {"confirmed": True}
+
+
+@app.post("/browser/toggle")
+def toggle_browser():
+    """Brings the running Chromium window to the front. There is no
+    'hide' counterpart by design — Playwright can't reliably minimize
+    a window across platforms, and forcing one via OS APIs is exactly
+    the fragility we chose to avoid. The user can minimize it
+    themselves like any other window; this button just helps them
+    find it again."""
+    brought_forward = pilot.bring_browser_to_front()
+    if not brought_forward:
+        return {"toggled": False, "reason": "No browser window is currently open."}
+    return {"toggled": True}
 
 
 @app.post("/notes/start")
@@ -175,39 +217,6 @@ async def _pump_log_queue():
                 stale.append(ws)
         for ws in stale:
             _ws_clients.discard(ws)
-            
-@app.post("/workflow/simulate-logs")
-def simulate_logs():
-    """Simulates a background thread writing to the queue so we can test 
-    the WebSocket streaming pipeline without opening a real browser."""
-    if pilot.status == "running":
-        return {"started": False, "reason": "A run is already in progress."}
-        
-    broadcast.attach_broadcast_queue(_log_queue)
-    pilot.status = "running"
-
-    def dummy_runner():
-        try:
-            # Simulate a mini multi-pass loop across your Amity courses
-            broadcast.log_info("Initializing Mock Pilot Engine...")
-            time.sleep(1.5)
-            broadcast.log_info("Simulating session authentication success...")
-            time.sleep(1.5)
-            broadcast.log_info("Processing Course 1: Full Stack Java Development...")
-            time.sleep(2.0)
-            broadcast.log_success("Successfully extracted notes for Module 1!")
-            time.sleep(1.0)
-            pilot.status = "done"
-        except Exception as e:
-            pilot.status = "error"
-            pilot.error = str(e)
-        finally:
-            broadcast.detach_broadcast_queue()
-
-    # Spin it off on the worker thread just like the real workflow
-    thread = threading.Thread(target=dummy_runner, daemon=True)
-    thread.start()
-    return {"started": True, "simulation": "active"}
 
 
 @app.on_event("startup")

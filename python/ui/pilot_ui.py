@@ -1,6 +1,7 @@
 import warnings
 import os
 import time
+import queue
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
@@ -18,6 +19,35 @@ console = Console()
 
 PURPLE = "#AA00FF"
 DIM = "dim white"
+
+_broadcast_queue: "queue.Queue | None" = None
+
+
+def attach_broadcast_queue(q: "queue.Queue"):
+    """Called by server.py before starting a Pilot run on its
+    background thread. CLI usage never calls this, so plain
+    `python main.py` runs are unaffected."""
+    global _broadcast_queue
+    _broadcast_queue = q
+
+
+def detach_broadcast_queue():
+    """Called by server.py once a run finishes, so a stale queue
+    from a previous run can't leak into the next one."""
+    global _broadcast_queue
+    _broadcast_queue = None
+
+
+def _broadcast(level: str, message: str):
+    """Push a structured log event onto the queue if one is attached.
+    Never raises — a broadcast failure must never break the CLI or
+    the automation run itself."""
+    if _broadcast_queue is None:
+        return
+    try:
+        _broadcast_queue.put_nowait({"level": level, "message": message})
+    except Exception:
+        pass
 
 
 def display_banner():
@@ -70,36 +100,44 @@ def show_settings_menu(current_provider: str) -> str:
 
 def log_info(message: str):
     console.print(f"[{PURPLE}][PILOT][/{PURPLE}] {message}")
+    _broadcast("info", message)
 
 
 def log_success(message: str):
     console.print(f"[bold green]✓[/bold green] {message}")
+    _broadcast("success", message)
 
 
 def log_warning(message: str):
     console.print(f"[bold yellow]⚠[/bold yellow]  {message}")
+    _broadcast("warning", message)
 
 
 def log_error(message: str):
     console.print(f"[bold red]✗[/bold red]  {message}")
+    _broadcast("error", message)
 
 
 def log_skip(message: str):
     console.print(f"[dim]→ SKIP  {message}[/dim]")
+    _broadcast("skip", message)
 
 
 def log_page(title: str):
     console.print(
         f"[bold {PURPLE}]●[/bold {PURPLE}]  [white]PAGE[/white]  {title}")
+    _broadcast("page", title)
 
 
 def log_quiz(title: str, ai_answer: str = ""):
     if ai_answer:
         console.print(
             f"[bold {PURPLE}]●[/bold {PURPLE}]  [white]QUIZ[/white]  {title}  [dim]→ {ai_answer}[/dim]")
+        _broadcast("quiz", f"{title} → {ai_answer}")
     else:
         console.print(
             f"[bold {PURPLE}]●[/bold {PURPLE}]  [white]QUIZ[/white]  {title}")
+        _broadcast("quiz", title)
 
 
 def log_course(title: str, completion: int, current: int, total: int):
@@ -110,6 +148,7 @@ def log_course(title: str, completion: int, current: int, total: int):
         f"\n[bold white]Course {current}/{total}[/bold white]  {bar}  "
         f"[bold {PURPLE}]{completion}%[/bold {PURPLE}]  [white]{title}[/white]"
     )
+    _broadcast("course", f"Course {current}/{total} — {title} ({completion}%)")
 
 
 def log_module_progress(current: int, total: int, mtype: str, title: str):
@@ -117,6 +156,7 @@ def log_module_progress(current: int, total: int, mtype: str, title: str):
         f"  [dim]{current}/{total}[/dim]  "
         f"[bold {PURPLE}]{mtype:<6}[/bold {PURPLE}]  {title}"
     )
+    _broadcast("module", f"{current}/{total} {mtype} — {title}")
 
 
 def show_course_summary(courses: list[dict]):
@@ -148,6 +188,13 @@ def show_course_summary(courses: list[dict]):
     console.print(table)
     console.print()
 
+    # mirror a plain-text summary to the broadcast queue — rich Table
+    # objects don't serialize to JSON for the WebSocket, so send the
+    # same data as plain rows instead
+    _broadcast("summary", [
+        {"title": c["title"], "completion": c["completion"]} for c in courses
+    ])
+
 
 def show_completion_banner():
     console.print(Panel(
@@ -157,6 +204,7 @@ def show_completion_banner():
         border_style="green",
         padding=(1, 4)
     ))
+    _broadcast("success", "All courses processed!")
 
 
 def confirm_login():
@@ -167,5 +215,6 @@ def confirm_login():
         border_style=PURPLE,
         width=55
     ))
+    _broadcast("action_required", "Manual login required — solve the CAPTCHA, then continue.")
     Prompt.ask(
         f"  [{PURPLE}]Press ENTER once you are on the dashboard[/{PURPLE}]")

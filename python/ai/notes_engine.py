@@ -119,8 +119,7 @@ class NotesEngine:
 
         log_success("Notes generation complete — saved to /notes/")
 
-    log_success(f"Notes generation complete — saved to /notes/")
-
+    
     def _process_course(self, course: dict):
         log_info(f"Processing → {course['title']}")
         self.page.goto(course["url"])

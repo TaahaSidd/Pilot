@@ -5,7 +5,7 @@ from workflow.workflow import Workflow
 from ai.notes_engine import NotesEngine
 from ui.pilot_ui import (
     display_banner, show_menu, show_settings_menu,
-    show_completion_banner, log_info, log_success, log_warning
+    show_completion_banner, log_info, log_success, log_warning, log_error
 )
 import config
 
@@ -13,8 +13,9 @@ import config
 class Pilot:
     """
     Orchestrates every Pilot action: session creation, workflow runs,
-    notes generation, and settings. This is the single entry point for
-    both the CLI menu and any future GUI front-end.
+    notes generation, and settings. Used by the CLI (app.py) and the
+    background-thread runner inside server.py — same class, same
+    methods, no duplicated logic either place.
     """
 
     def __init__(self):
@@ -22,11 +23,14 @@ class Pilot:
         self.page = None
         self.session = None
 
-    # ── Lifecycle ────────────────────────────────────────────────
+        # status tracking — read by server.py's /status endpoint.
+        # CLI usage ignores these entirely.
+        self.status = "idle"   # idle | running | done | error
+        self.error = None
+
+    # ── Lifecycle (CLI) ──────────────────────────────────────────
 
     def start(self):
-        """CLI entry point. Shows the banner, ensures config exists,
-        then drops into the interactive menu loop."""
         display_banner()
         try:
             self._ensure_configured()
@@ -42,7 +46,6 @@ class Pilot:
             self.load_user_config()
 
     def load_user_config(self):
-        """Single source of truth for pulling saved credentials into config.py."""
         data = load_config()
         config.GROQ_API_KEY = data["groq_api_key"]
         config.USERNAME = data["username"]
@@ -52,8 +55,6 @@ class Pilot:
     # ── Session management ───────────────────────────────────────
 
     def create_session(self):
-        """Launch a browser and log in. Call this immediately before
-        any action that needs an authenticated page."""
         self.browser = Browser()
         self.page = self.browser.page
         self.session = Session(self.page)
@@ -72,17 +73,37 @@ class Pilot:
                 self.session = None
 
     # ── Actions ──────────────────────────────────────────────────
+    # These now set self.status, so a server running this on a thread
+    # can answer "what's it doing right now" without touching internals.
 
     def start_workflow(self):
-        self.create_session()
-        Workflow(self.page).start()
-        show_completion_banner()
-        self.close_browser()
+        self.status = "running"
+        self.error = None
+        try:
+            self.create_session()
+            Workflow(self.page).start()
+            show_completion_banner()
+            self.status = "done"
+        except Exception as e:
+            self.status = "error"
+            self.error = str(e)
+            log_error(f"Workflow failed: {e}")
+        finally:
+            self.close_browser()
 
     def generate_notes(self):
-        self.create_session()
-        NotesEngine(self.page).run()
-        self.close_browser()
+        self.status = "running"
+        self.error = None
+        try:
+            self.create_session()
+            NotesEngine(self.page).run()
+            self.status = "done"
+        except Exception as e:
+            self.status = "error"
+            self.error = str(e)
+            log_error(f"Notes generation failed: {e}")
+        finally:
+            self.close_browser()
 
     def settings(self):
         while True:

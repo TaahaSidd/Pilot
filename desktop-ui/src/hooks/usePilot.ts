@@ -1,6 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+    pilotApi,
+    ApiError,
+    NetworkError,
+    type PilotStatus,
+    type StartResponse,
+    type ConfirmLoginResponse,
+    type ToggleBrowserResponse,
+} from "../api/api";
 
-const API_BASE = "http://127.0.0.1:8000";
 const WS_URL = "ws://127.0.0.1:8000/logs";
 
 const STATUS_POLL_INTERVAL_MS = 2000;
@@ -8,18 +16,11 @@ const WS_RECONNECT_BASE_MS = 1000;
 const WS_RECONNECT_MAX_MS = 15000;
 
 // ──────────────────────────────────────────────────────────────────
-// Types — mirror server.py's actual response/event shapes exactly.
-// If you add fields server-side, add them here too; don't let this
-// drift from server.py's Pydantic models.
+// usePilot owns LIVE, STATEFUL session data: polling, a persistent
+// WebSocket connection, and derived state built from message
+// history (awaitingLogin). api.ts owns single, stateless requests.
+// This hook is a CONSUMER of api.ts, not a duplicate of it.
 // ──────────────────────────────────────────────────────────────────
-
-export type PilotStatus = "idle" | "running" | "done" | "error";
-
-export interface StatusResponse {
-    status: PilotStatus;
-    error: string | null;
-    configured: boolean;
-}
 
 export type LogLevel =
     | "info"
@@ -44,6 +45,15 @@ export interface LogEvent {
 
 export type WsConnectionState = "connecting" | "open" | "closed";
 
+// One course's real, last-known state — derived from the "summary"
+// broadcast event (show_course_summary in pilot_ui.py), which carries
+// [{title, completion}, ...] for every run. This is the only place
+// course data comes from; there is no separate "courses API."
+export interface CourseSummary {
+    title: string;
+    completion: number;
+}
+
 interface UsePilotResult {
     // status polling
     status: PilotStatus;
@@ -59,29 +69,35 @@ interface UsePilotResult {
     // the one piece of derived UI state this hook owns deliberately
     awaitingLogin: boolean;
 
-    // actions
-    startWorkflow: () => Promise<{ started: boolean; reason?: string }>;
-    startNotes: () => Promise<{ started: boolean; reason?: string }>;
-    confirmLogin: () => Promise<{ confirmed: boolean; reason?: string }>;
-    toggleBrowser: () => Promise<{ toggled: boolean; reason?: string }>;
+    // derived from log history — real data, not fabricated stats.
+    // courses is null until the first "summary" event of THIS session
+    // has arrived (i.e. a workflow has run at least once since the
+    // dashboard was opened) — components must handle that null case
+    // rather than assuming data is always present.
+    courses: CourseSummary[] | null;
+    modulesCompletedThisRun: number;
+
+    // best-effort "what's happening right now" text, parsed from the
+    // most recent "course"/"module" log message. This is a string
+    // scrape, not structured data — log_course/log_module_progress in
+    // pilot_ui.py format these as human-readable text, not JSON
+    // fields, so if that formatting ever changes, update the parsing
+    // regex below to match. null until at least one such log has
+    // arrived this session.
+    currentCourseText: string | null;
+    currentModuleText: string | null;
+
+    // actions — each forwards to api.ts, hook just reacts to the result
+    startWorkflow: () => Promise<StartResponse>;
+    startNotes: () => Promise<StartResponse>;
+    confirmLogin: () => Promise<ConfirmLoginResponse>;
+    toggleBrowser: () => Promise<ToggleBrowserResponse>;
 }
 
 let _idCounter = 0;
 function nextId(): string {
     _idCounter += 1;
     return `log_${_idCounter}_${Date.now()}`;
-}
-
-async function postJson<T>(path: string, body?: unknown): Promise<T> {
-    const res = await fetch(`${API_BASE}${path}`, {
-        method: "POST",
-        headers: body ? { "Content-Type": "application/json" } : undefined,
-        body: body ? JSON.stringify(body) : undefined,
-    });
-    if (!res.ok) {
-        throw new Error(`${path} failed: ${res.status} ${res.statusText}`);
-    }
-    return res.json() as Promise<T>;
 }
 
 /**
@@ -103,6 +119,10 @@ export function usePilot(): UsePilotResult {
     const [logs, setLogs] = useState<LogEvent[]>([]);
     const [wsState, setWsState] = useState<WsConnectionState>("connecting");
     const [awaitingLogin, setAwaitingLogin] = useState(false);
+    const [courses, setCourses] = useState<CourseSummary[] | null>(null);
+    const [modulesCompletedThisRun, setModulesCompletedThisRun] = useState(0);
+    const [currentCourseText, setCurrentCourseText] = useState<string | null>(null);
+    const [currentModuleText, setCurrentModuleText] = useState<string | null>(null);
 
     const wsRef = useRef<WebSocket | null>(null);
     const reconnectAttemptRef = useRef(0);
@@ -113,9 +133,7 @@ export function usePilot(): UsePilotResult {
 
     const pollStatus = useCallback(async () => {
         try {
-            const res = await fetch(`${API_BASE}/status`);
-            if (!res.ok) throw new Error(`status ${res.status}`);
-            const data: StatusResponse = await res.json();
+            const data = await pilotApi.getStatus();
 
             setStatus(data.status);
             setStatusError(data.error);
@@ -128,9 +146,10 @@ export function usePilot(): UsePilotResult {
                 setAwaitingLogin(false);
             }
         } catch {
-            // a single missed poll isn't fatal — the next interval tries
-            // again. We don't surface transient network blips as statusError,
-            // since that field is reserved for the server's own pilot.error.
+            // a single missed poll isn't fatal (NetworkError or ApiError
+            // both land here) — the next interval tries again. We don't
+            // surface transient blips as statusError, since that field
+            // is reserved for the server's own pilot.error.
         } finally {
             setStatusLoading(false);
         }
@@ -153,6 +172,11 @@ export function usePilot(): UsePilotResult {
     // Each socket gets a token; only the socket matching the CURRENT
     // token is allowed to touch state. A superseded socket's handlers
     // become no-ops the moment a newer one is created.
+    //
+    // Note: the WebSocket connection itself is NOT routed through
+    // api.ts — that module only handles request/response HTTP calls.
+    // A persistent streaming connection is a genuinely different
+    // concern and stays here.
 
     const socketIdRef = useRef(0);
 
@@ -185,6 +209,52 @@ export function usePilot(): UsePilotResult {
 
             if (parsed.level === "action_required") {
                 setAwaitingLogin(true);
+            }
+
+            // "summary" carries the FULL real course list from
+            // show_course_summary — replace, don't merge, since it's
+            // always a complete snapshot, not a partial update.
+            if (parsed.level === "summary" && Array.isArray(parsed.message)) {
+                const valid = (parsed.message as unknown[]).filter(
+                    (item): item is CourseSummary =>
+                        typeof item === "object" &&
+                        item !== null &&
+                        "title" in item &&
+                        "completion" in item
+                );
+                setCourses(valid);
+            }
+
+            // each "module" event represents one module being
+            // processed during the CURRENT run — count them as a
+            // simple "activity this session" signal. This resets to
+            // 0 only on a fresh page load, not between runs, since
+            // there's currently no per-run boundary marker to reset on.
+            if (parsed.level === "module") {
+                setModulesCompletedThisRun((prev) => prev + 1);
+
+                // log_module_progress formats as:
+                //   "{current}/{total} {mtype} — {title}"
+                // e.g. "3/17 PAGE — E-Tutorial | Basics of AI"
+                // Best-effort: just take the text after the em-dash as
+                // the human-readable "current task" — if the format
+                // ever changes in pilot_ui.py, update this to match.
+                if (typeof parsed.message === "string") {
+                    const dashSplit = parsed.message.split("—");
+                    setCurrentModuleText(
+                        dashSplit.length > 1 ? dashSplit[1].trim() : parsed.message
+                    );
+                }
+            }
+
+            // log_course formats as:
+            //   "Course {current}/{total} — {title} ({completion}%)"
+            // Same best-effort string parse as above.
+            if (parsed.level === "course" && typeof parsed.message === "string") {
+                const dashSplit = parsed.message.split("—");
+                setCurrentCourseText(
+                    dashSplit.length > 1 ? dashSplit[1].trim() : parsed.message
+                );
             }
         };
 
@@ -223,12 +293,10 @@ export function usePilot(): UsePilotResult {
 
     const clearLogs = useCallback(() => setLogs([]), []);
 
-    // ── Actions ──────────────────────────────────────────────────
+    // ── Actions — each just forwards to api.ts, then reacts ──────
 
     const startWorkflow = useCallback(async () => {
-        const result = await postJson<{ started: boolean; reason?: string }>(
-            "/workflow/start"
-        );
+        const result = await pilotApi.startWorkflow();
         if (result.started) {
             await pollStatus();
         }
@@ -236,9 +304,7 @@ export function usePilot(): UsePilotResult {
     }, [pollStatus]);
 
     const startNotes = useCallback(async () => {
-        const result = await postJson<{ started: boolean; reason?: string }>(
-            "/notes/start"
-        );
+        const result = await pilotApi.startNotes();
         if (result.started) {
             await pollStatus();
         }
@@ -246,9 +312,7 @@ export function usePilot(): UsePilotResult {
     }, [pollStatus]);
 
     const confirmLogin = useCallback(async () => {
-        const result = await postJson<{ confirmed: boolean; reason?: string }>(
-            "/workflow/confirm-login"
-        );
+        const result = await pilotApi.confirmLogin();
         if (result.confirmed) {
             setAwaitingLogin(false);
         }
@@ -256,7 +320,7 @@ export function usePilot(): UsePilotResult {
     }, []);
 
     const toggleBrowser = useCallback(async () => {
-        return postJson<{ toggled: boolean; reason?: string }>("/browser/toggle");
+        return pilotApi.toggleBrowser();
     }, []);
 
     return {
@@ -268,6 +332,10 @@ export function usePilot(): UsePilotResult {
         clearLogs,
         wsState,
         awaitingLogin,
+        courses,
+        modulesCompletedThisRun,
+        currentCourseText,
+        currentModuleText,
         startWorkflow,
         startNotes,
         confirmLogin,
@@ -281,6 +349,12 @@ function _stripId(parsed: {
 }): Omit<LogEvent, "_id"> {
     return {
         level: parsed.level,
-        message: parsed.message
+        message: parsed.message,
     };
 }
+
+// re-exported so screens that catch errors from usePilot's actions
+// can check `err instanceof ApiError` / `NetworkError` without a
+// separate import from api.ts
+export { ApiError, NetworkError };
+export type { PilotStatus };

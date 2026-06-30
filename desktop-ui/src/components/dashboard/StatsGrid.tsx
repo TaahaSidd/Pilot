@@ -1,60 +1,88 @@
 // src/components/dashboard/StatsGrid.tsx
 import React from 'react';
 import { StatCard } from './StatCard';
-import { Activity, ShieldCheck, Cpu, Database } from 'lucide-react';
+import { ListChecks, Layers, Activity } from 'lucide-react';
+import type { PilotStatus, CourseSummary } from '../../hooks/usePilot';
 
 interface StatsGridProps {
-    status: string;
+    status: PilotStatus;
+    statusError: string | null;
     configured: boolean;
-    logsLength: number;
+    courses: CourseSummary[] | null;
+    modulesCompletedThisRun: number;
 }
 
-export function StatsGrid({ status, configured, logsLength }: StatsGridProps) {
+const STATUS_LABEL: Record<PilotStatus, string> = {
+    idle: 'Idle',
+    running: 'Running',
+    done: 'Completed',
+    error: 'Failed',
+};
+
+export function StatsGrid({
+    status,
+    statusError,
+    configured,
+    courses,
+    modulesCompletedThisRun,
+}: StatsGridProps) {
+    const coursesInProgress = courses
+        ? courses.filter((c) => c.completion < 100).length
+        : null;
+    const coursesComplete = courses
+        ? courses.filter((c) => c.completion === 100).length
+        : null;
+
     return (
-        <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gap: '16px',
-            marginBottom: '32px'
-        }}>
-            {/* 1. Hours Saved */}
+        <div
+            style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                gap: '16px',
+                marginBottom: '32px',
+            }}
+        >
+            {/* 1. Last run status — directly from /status, no fabrication */}
             <StatCard
-                title="Hours Saved"
-                value="142.5"
+                title="Last Run Status"
+                value={!configured ? 'Not set up' : STATUS_LABEL[status]}
                 icon={Activity}
                 subtext={
-                    <div style={{ marginTop: '8px', width: '100%', height: '4px', backgroundColor: 'var(--border)', borderRadius: '2px', overflow: 'hidden' }}>
-                        <div style={{ width: '72%', height: '100%', backgroundColor: 'var(--accent)' }} />
-                    </div>
+                    status === 'error' && statusError ? (
+                        <span style={{ color: 'var(--error)' }}>{statusError}</span>
+                    ) : (
+                        'Pulled live from the running agent'
+                    )
                 }
             />
 
-            {/* 2. Modules Completed */}
+            {/* 2. Course progress — from the real "summary" broadcast.
+                 null courses means no run has reported a summary yet
+                 this session — show an honest "—" rather than 0, since
+                 0 would falsely imply "checked, none in progress." */}
             <StatCard
-                title="Modules Completed"
-                value="24"
-                icon={ShieldCheck}
+                title="Courses In Progress"
+                value={coursesInProgress === null ? '—' : String(coursesInProgress)}
+                icon={Layers}
                 subtext={
-                    <span style={{ color: 'var(--tertiary)', fontWeight: 500 }}>
-                        +3 since yesterday
-                    </span>
+                    coursesComplete === null
+                        ? 'Run the agent to see live course data'
+                        : `${coursesComplete} complete`
                 }
             />
 
-            {/* 3. Model Token Usage */}
+            {/* 3. Modules processed THIS SESSION — counts every module
+                 event seen since the dashboard loaded, success or
+                 failure. Deliberately labeled "Processed" not
+                 "Completed": pilot_ui.py's log_module_progress fires
+                 before success/failure is known, so we can't honestly
+                 claim these all succeeded without a dedicated
+                 success-only broadcast event. */}
             <StatCard
-                title="Tokens Consumed"
-                value="1.2M"
-                icon={Cpu}
-                subtext="Llama-3 & Groq-1"
-            />
-
-            {/* 4. Local Knowledge Storage */}
-            <StatCard
-                title="Knowledge Base"
-                value="842 MB"
-                icon={Database}
-                subtext="Synced with Amity Server"
+                title="Modules Processed"
+                value={String(modulesCompletedThisRun)}
+                icon={ListChecks}
+                subtext="This session — includes retries/failures"
             />
         </div>
     );

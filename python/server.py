@@ -1,10 +1,38 @@
+"""
+python/server.py
+
+Local backend for Pilot. One process, one user, one Pilot instance at
+a time — same mental model as a desktop app, not a multi-tenant web
+service.
+
+Run with:
+    uvicorn server:app --reload
+
+Then open http://127.0.0.1:8000/docs to test every endpoint by hand
+before any GUI exists.
+
+ARCHITECTURE NOTE — why a background thread:
+Your Browser/Session/Workflow classes use Playwright's *sync* API.
+FastAPI runs on an asyncio event loop. Calling sync Playwright code
+directly inside an async route would block that event loop for the
+entire multi-minute automation run — no other requests (including the
+WebSocket) could be served while it ran.
+
+So instead: POST /workflow/start spawns a normal OS thread. That
+thread runs your existing Pilot.start_workflow() completely
+untouched — same sync Playwright code as the CLI uses today. The
+thread pushes log lines onto a thread-safe queue.Queue. A small async
+task on the event loop drains that queue and forwards each line to
+any connected WebSocket clients. This is the standard bridge pattern
+for "sync blocking work" + "asyncio server."
+"""
+
 import asyncio
 import queue
 import threading
-import time
 from typing import Optional
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -46,6 +74,19 @@ class OnboardingPayload(BaseModel):
     username: str
     password: str
     phone_number: str
+    display_name: str
+
+
+class ConfigUpdatePayload(BaseModel):
+    """Used by the settings screen for partial updates. Every field is
+    optional — omitted fields mean 'leave this as-is'. This is
+    deliberately a separate model from OnboardingPayload: onboarding
+    requires everything up front, settings updates require nothing."""
+    groq_api_key: Optional[str] = None
+    username: Optional[str] = None
+    password: Optional[str] = None
+    phone_number: Optional[str] = None
+    display_name: Optional[str] = None
 
 
 class StatusResponse(BaseModel):
@@ -59,23 +100,19 @@ class StatusResponse(BaseModel):
 # ──────────────────────────────────────────────────────────────────
 
 def _run_in_thread(target_fn):
-    """Starts target_fn (a Pilot method) on a background thread.
-    Refuses to start a second run if one is already active — this is
-    the single-session rule from the product decision above."""
     global _worker_thread
 
     if pilot.status == "running":
         return False
 
-    # FIX: Point to the imported pilot_ui module namespace
+    # was: broadcast.attach_broadcast_queue(...)
     pilot_ui.attach_broadcast_queue(_log_queue)
 
     def runner():
         try:
             target_fn()
         finally:
-            # FIX: Point to the imported pilot_ui module namespace
-            pilot_ui.detach_broadcast_queue()
+            pilot_ui.detach_broadcast_queue()      # was: broadcast.detach_broadcast_queue()
 
     _worker_thread = threading.Thread(target=runner, daemon=True)
     _worker_thread.start()
@@ -97,22 +134,9 @@ def get_status():
 
 @app.post("/workflow/start")
 def start_workflow():
-    if pilot.status == "running":
+    started = _run_in_thread(pilot.start_workflow_server_mode)
+    if not started:
         return {"started": False, "reason": "A run is already in progress."}
-
-    # FIX: Point to the imported pilot_ui module namespace
-    pilot_ui.attach_broadcast_queue(_log_queue)
-
-    def runner():
-        try:
-            pilot.start_workflow_server_mode()
-        finally:
-            # FIX: Point to the imported pilot_ui module namespace
-            pilot_ui.detach_broadcast_queue()
-
-    global _worker_thread
-    _worker_thread = threading.Thread(target=runner, daemon=True)
-    _worker_thread.start()
     return {"started": True}
 
 
@@ -162,6 +186,8 @@ def get_config():
     return {
         "configured": True,
         "username": data.get("username", ""),
+        "display_name": data.get("display_name", ""),
+        "phone_number": data.get("phone_number", ""),
     }
 
 
@@ -174,9 +200,31 @@ def set_config(payload: OnboardingPayload):
         "username": payload.username,
         "password": payload.password,
         "phone_number": payload.phone_number,
+        "display_name": payload.display_name,
     })
     pilot.load_user_config()
     return {"saved": True}
+
+
+@app.patch("/config")
+def update_config(payload: ConfigUpdatePayload):
+    """Partial update — used by the settings screen. Any field left
+    as None is NOT overwritten; the existing stored value is kept.
+    This is what lets a masked/untouched password field mean
+    'leave this as-is' rather than wiping it to empty."""
+    if not is_configured():
+        raise HTTPException(
+            status_code=409,
+            detail="No existing configuration to update — run onboarding first.",
+        )
+
+    current = load_config()
+    updates = payload.dict(exclude_none=True)
+    merged = {**current, **updates}
+
+    save_config(merged)
+    pilot.load_user_config()
+    return {"saved": True, "updated_fields": list(updates.keys())}
 
 
 # ──────────────────────────────────────────────────────────────────

@@ -1,4 +1,3 @@
-// src/screens/LogsScreen.tsx
 import React from 'react';
 import { LogFilterBar } from '../components/logs/LogFilterBar';
 import { LogHistoryRow } from '../components/logs/LogHistoryRow';
@@ -16,7 +15,7 @@ export function LogsScreen() {
                 </p>
             </div>
 
-            {/* Structured Table Layout with Search/Filter controls */}
+            {/* Structured Table Layout */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <LogFilterBar />
 
@@ -35,7 +34,6 @@ export function LogsScreen() {
                         backgroundColor: 'rgba(255,255,255,0.02)',
                         fontSize: '11px',
                         fontWeight: 600,
-                        textTransform: 'uppercase',
                         letterSpacing: '0.05em',
                         color: 'var(--text-muted)'
                     }}>
@@ -46,21 +44,21 @@ export function LogsScreen() {
                         <div>Result</div>
                     </div>
 
-                    {/* Archived Items */}
+                    {/* Archived Items - Updated props to lowercase status */}
                     <LogHistoryRow
                         date="2026-06-29"
                         courseName="Advanced Machine Learning Architecture"
                         badges={['ML', 'DS']}
                         extraBadgesCount={3}
                         duration="02h 45m"
-                        status="SUCCESS"
+                        status="Success"
                     />
                     <LogHistoryRow
                         date="2026-06-28"
                         courseName="Cybersecurity Fundamentals: Network Protocols"
                         badges={['CS', 'NP']}
                         duration="01h 12m"
-                        status="WARNING"
+                        status="Warning"
                     />
                     <LogHistoryRow
                         date="2026-06-27"
@@ -68,7 +66,7 @@ export function LogsScreen() {
                         badges={['FS', 'GG']}
                         extraBadgesCount={8}
                         duration="05h 30m"
-                        status="SUCCESS"
+                        status="Success"
                     />
                 </div>
             </div>

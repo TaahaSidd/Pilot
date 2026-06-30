@@ -91,7 +91,6 @@ export function SettingsScreen() {
                     />
                 </div>
             </div>
-
         </div>
     );
 }

@@ -19,3 +19,6 @@ user_config.json
 
 # Generated notes
 notes/
+
+# Runtime
+python/data/

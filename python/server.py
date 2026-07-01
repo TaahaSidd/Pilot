@@ -39,6 +39,8 @@ from pydantic import BaseModel
 from engine.Pilot import Pilot
 from core.startup import is_configured, run_onboarding, save_config, load_config
 from ui import pilot_ui
+from runtime.history import history
+from runtime.state import state
 import config
 
 
@@ -132,6 +134,29 @@ def get_status():
     )
 
 
+@app.get("/runtime")
+def get_runtime():
+    return state.to_dict()
+
+
+@app.get("/history")
+def get_history():
+    return history.list_sessions()
+
+
+@app.get("/history/{session_id}")
+def get_history_session(session_id: str):
+    session = history.get_session(session_id)
+
+    if session is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Session not found.",
+        )
+
+    return session
+
+
 @app.post("/workflow/start")
 def start_workflow():
     started = _run_in_thread(pilot.start_workflow_server_mode)
@@ -139,6 +164,15 @@ def start_workflow():
         return {"started": False, "reason": "A run is already in progress."}
     return {"started": True}
 
+
+@app.post("/runtime/stop")
+def stop_runtime(force: bool = False):
+    pilot.stop(force=force)
+    return {
+        "stopped": True,
+        "force": force,
+        "status": state.status,
+    }
 
 @app.post("/workflow/confirm-login")
 def confirm_login():

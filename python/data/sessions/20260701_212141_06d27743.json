@@ -1,0 +1,443 @@
+{
+  "id": "20260701_212141_06d27743",
+  "type": "workflow",
+  "status": "done",
+  "started_at": "2026-07-01T15:51:41.893744+00:00",
+  "finished_at": "2026-07-01T15:55:54.753692+00:00",
+  "duration_seconds": 252,
+  "error": null,
+  "logs": [
+    {
+      "timestamp": "2026-07-01T15:51:42.358298+00:00",
+      "level": "info",
+      "message": "Using profile: C:\\Users\\VICTUS\\Desktop\\Pilot\\python\\profile"
+    },
+    {
+      "timestamp": "2026-07-01T15:51:42.974692+00:00",
+      "level": "info",
+      "message": "Checking session..."
+    },
+    {
+      "timestamp": "2026-07-01T15:51:45.845374+00:00",
+      "level": "info",
+      "message": "Not logged in — starting login flow"
+    },
+    {
+      "timestamp": "2026-07-01T15:51:46.007868+00:00",
+      "level": "success",
+      "message": "Credentials filled"
+    },
+    {
+      "timestamp": "2026-07-01T15:51:46.009414+00:00",
+      "level": "action_required",
+      "message": "Manual login required — solve the CAPTCHA in the browser window, then confirm in the dashboard."
+    },
+    {
+      "timestamp": "2026-07-01T15:53:15.190099+00:00",
+      "level": "info",
+      "message": "Manual login confirmed"
+    },
+    {
+      "timestamp": "2026-07-01T15:53:18.243277+00:00",
+      "level": "success",
+      "message": "Login successful — session will persist for next run"
+    },
+    {
+      "timestamp": "2026-07-01T15:53:18.247576+00:00",
+      "level": "info",
+      "message": "Workflow started"
+    },
+    {
+      "timestamp": "2026-07-01T15:53:18.369588+00:00",
+      "level": "info",
+      "message": "Scanning courses..."
+    },
+    {
+      "timestamp": "2026-07-01T15:53:18.388381+00:00",
+      "level": "info",
+      "message": "Found 7 courses"
+    },
+    {
+      "timestamp": "2026-07-01T15:53:18.659184+00:00",
+      "level": "summary",
+      "message": [
+        {
+          "title": "Course 2758",
+          "completion": 100
+        },
+        {
+          "title": "Course 4418",
+          "completion": 100
+        },
+        {
+          "title": "Course 4419",
+          "completion": 100
+        },
+        {
+          "title": "Course 4420",
+          "completion": 100
+        },
+        {
+          "title": "Course 3460",
+          "completion": 100
+        },
+        {
+          "title": "Course 3459",
+          "completion": 100
+        },
+        {
+          "title": "Course 4548",
+          "completion": 65
+        }
+      ]
+    },
+    {
+      "timestamp": "2026-07-01T15:53:18.664810+00:00",
+      "level": "info",
+      "message": "6 course(s) already complete — skipping"
+    },
+    {
+      "timestamp": "2026-07-01T15:53:18.670545+00:00",
+      "level": "info",
+      "message": "1 course(s) to process"
+    },
+    {
+      "timestamp": "2026-07-01T15:53:18.683070+00:00",
+      "level": "course",
+      "message": {
+        "title": "Course 4548",
+        "completion": 65,
+        "current": 1,
+        "total": 1
+      }
+    },
+    {
+      "timestamp": "2026-07-01T15:53:54.712365+00:00",
+      "level": "info",
+      "message": "186/280 modules already completed"
+    },
+    {
+      "timestamp": "2026-07-01T15:53:54.715786+00:00",
+      "level": "info",
+      "message": "Pass 1: 17 modules to process"
+    },
+    {
+      "timestamp": "2026-07-01T15:53:54.720284+00:00",
+      "level": "module",
+      "message": {
+        "current": 1,
+        "total": 17,
+        "type": "PAGE",
+        "title": "Syllabus"
+      }
+    },
+    {
+      "timestamp": "2026-07-01T15:53:54.723536+00:00",
+      "level": "page",
+      "message": "Syllabus"
+    },
+    {
+      "timestamp": "2026-07-01T15:53:59.297456+00:00",
+      "level": "module",
+      "message": {
+        "current": 2,
+        "total": 17,
+        "type": "PAGE",
+        "title": "E-Tutorial | Basics of Artificial Intelligence | Part 1"
+      }
+    },
+    {
+      "timestamp": "2026-07-01T15:53:59.301684+00:00",
+      "level": "page",
+      "message": "E-Tutorial | Basics of Artificial Intelligence | Part 1"
+    },
+    {
+      "timestamp": "2026-07-01T15:54:04.712590+00:00",
+      "level": "module",
+      "message": {
+        "current": 3,
+        "total": 17,
+        "type": "PAGE",
+        "title": "E-Tutorial | Basics of Artificial Intelligence | Part 2"
+      }
+    },
+    {
+      "timestamp": "2026-07-01T15:54:04.715380+00:00",
+      "level": "page",
+      "message": "E-Tutorial | Basics of Artificial Intelligence | Part 2"
+    },
+    {
+      "timestamp": "2026-07-01T15:54:09.492222+00:00",
+      "level": "module",
+      "message": {
+        "current": 4,
+        "total": 17,
+        "type": "PAGE",
+        "title": "E-Tutorial | Basics of Artificial Intelligence | Part 3"
+      }
+    },
+    {
+      "timestamp": "2026-07-01T15:54:09.495761+00:00",
+      "level": "page",
+      "message": "E-Tutorial | Basics of Artificial Intelligence | Part 3"
+    },
+    {
+      "timestamp": "2026-07-01T15:54:14.514953+00:00",
+      "level": "module",
+      "message": {
+        "current": 5,
+        "total": 17,
+        "type": "PAGE",
+        "title": "E-Tutorial | Basics of Artificial Intelligence | Part 4"
+      }
+    },
+    {
+      "timestamp": "2026-07-01T15:54:14.519621+00:00",
+      "level": "page",
+      "message": "E-Tutorial | Basics of Artificial Intelligence | Part 4"
+    },
+    {
+      "timestamp": "2026-07-01T15:54:19.774575+00:00",
+      "level": "module",
+      "message": {
+        "current": 6,
+        "total": 17,
+        "type": "PAGE",
+        "title": "E-Tutorial | Deep Learning - Part I"
+      }
+    },
+    {
+      "timestamp": "2026-07-01T15:54:19.779590+00:00",
+      "level": "page",
+      "message": "E-Tutorial | Deep Learning - Part I"
+    },
+    {
+      "timestamp": "2026-07-01T15:54:25.319296+00:00",
+      "level": "module",
+      "message": {
+        "current": 7,
+        "total": 17,
+        "type": "PAGE",
+        "title": "E-Tutorial | Deep Learning - Part 2"
+      }
+    },
+    {
+      "timestamp": "2026-07-01T15:54:25.326241+00:00",
+      "level": "page",
+      "message": "E-Tutorial | Deep Learning - Part 2"
+    },
+    {
+      "timestamp": "2026-07-01T15:54:30.814684+00:00",
+      "level": "module",
+      "message": {
+        "current": 8,
+        "total": 17,
+        "type": "PAGE",
+        "title": "E-Tutorial | Deep Learning - Part 3"
+      }
+    },
+    {
+      "timestamp": "2026-07-01T15:54:30.819349+00:00",
+      "level": "page",
+      "message": "E-Tutorial | Deep Learning - Part 3"
+    },
+    {
+      "timestamp": "2026-07-01T15:54:35.565472+00:00",
+      "level": "module",
+      "message": {
+        "current": 9,
+        "total": 17,
+        "type": "PAGE",
+        "title": "E-Tutorial | Deep Learning - Part 4"
+      }
+    },
+    {
+      "timestamp": "2026-07-01T15:54:35.571368+00:00",
+      "level": "page",
+      "message": "E-Tutorial | Deep Learning - Part 4"
+    },
+    {
+      "timestamp": "2026-07-01T15:54:40.634697+00:00",
+      "level": "module",
+      "message": {
+        "current": 10,
+        "total": 17,
+        "type": "PAGE",
+        "title": "E-Tutorial | Generative AI | Part I"
+      }
+    },
+    {
+      "timestamp": "2026-07-01T15:54:40.641523+00:00",
+      "level": "page",
+      "message": "E-Tutorial | Generative AI | Part I"
+    },
+    {
+      "timestamp": "2026-07-01T15:54:45.794748+00:00",
+      "level": "module",
+      "message": {
+        "current": 11,
+        "total": 17,
+        "type": "PAGE",
+        "title": "E-Tutorial | Generative AI | Part 2"
+      }
+    },
+    {
+      "timestamp": "2026-07-01T15:54:45.799588+00:00",
+      "level": "page",
+      "message": "E-Tutorial | Generative AI | Part 2"
+    },
+    {
+      "timestamp": "2026-07-01T15:54:51.550519+00:00",
+      "level": "module",
+      "message": {
+        "current": 12,
+        "total": 17,
+        "type": "PAGE",
+        "title": "E-Tutorial | Generative AI | Part 3"
+      }
+    },
+    {
+      "timestamp": "2026-07-01T15:54:51.559840+00:00",
+      "level": "page",
+      "message": "E-Tutorial | Generative AI | Part 3"
+    },
+    {
+      "timestamp": "2026-07-01T15:54:57.746539+00:00",
+      "level": "module",
+      "message": {
+        "current": 13,
+        "total": 17,
+        "type": "PAGE",
+        "title": "E-Tutorial | Basics of AI - Part 1"
+      }
+    },
+    {
+      "timestamp": "2026-07-01T15:54:57.753231+00:00",
+      "level": "page",
+      "message": "E-Tutorial | Basics of AI - Part 1"
+    },
+    {
+      "timestamp": "2026-07-01T15:55:03.262660+00:00",
+      "level": "module",
+      "message": {
+        "current": 14,
+        "total": 17,
+        "type": "PAGE",
+        "title": "E-Tutorial | Basics of AI - Part 2"
+      }
+    },
+    {
+      "timestamp": "2026-07-01T15:55:03.266675+00:00",
+      "level": "page",
+      "message": "E-Tutorial | Basics of AI - Part 2"
+    },
+    {
+      "timestamp": "2026-07-01T15:55:08.971837+00:00",
+      "level": "module",
+      "message": {
+        "current": 15,
+        "total": 17,
+        "type": "PAGE",
+        "title": "E-Tutorial | Basics of AI - Part 3"
+      }
+    },
+    {
+      "timestamp": "2026-07-01T15:55:08.976530+00:00",
+      "level": "page",
+      "message": "E-Tutorial | Basics of AI - Part 3"
+    },
+    {
+      "timestamp": "2026-07-01T15:55:15.042662+00:00",
+      "level": "module",
+      "message": {
+        "current": 16,
+        "total": 17,
+        "type": "PAGE",
+        "title": "E-Tutorial | Introduction to Multimodal Artificial Intelligence"
+      }
+    },
+    {
+      "timestamp": "2026-07-01T15:55:15.049921+00:00",
+      "level": "page",
+      "message": "E-Tutorial | Introduction to Multimodal Artificial Intelligence"
+    },
+    {
+      "timestamp": "2026-07-01T15:55:20.705215+00:00",
+      "level": "module",
+      "message": {
+        "current": 17,
+        "total": 17,
+        "type": "PAGE",
+        "title": "E-Tutorial | Advancements & Challenges in Multimodal AI"
+      }
+    },
+    {
+      "timestamp": "2026-07-01T15:55:20.711844+00:00",
+      "level": "page",
+      "message": "E-Tutorial | Advancements & Challenges in Multimodal AI"
+    },
+    {
+      "timestamp": "2026-07-01T15:55:26.504089+00:00",
+      "level": "info",
+      "message": "Pass 1 complete — rescanning for newly unlocked modules..."
+    },
+    {
+      "timestamp": "2026-07-01T15:55:54.731285+00:00",
+      "level": "info",
+      "message": "186/280 modules already completed"
+    },
+    {
+      "timestamp": "2026-07-01T15:55:54.737161+00:00",
+      "level": "info",
+      "message": "No new modules unlocked — moving to next course"
+    },
+    {
+      "timestamp": "2026-07-01T15:55:54.742666+00:00",
+      "level": "success",
+      "message": "All courses processed!"
+    },
+    {
+      "timestamp": "2026-07-01T15:55:54.749041+00:00",
+      "level": "success",
+      "message": "All courses processed!"
+    }
+  ],
+  "summary": {
+    "courses": [
+      {
+        "title": "Course 2758",
+        "completion": 100
+      },
+      {
+        "title": "Course 4418",
+        "completion": 100
+      },
+      {
+        "title": "Course 4419",
+        "completion": 100
+      },
+      {
+        "title": "Course 4420",
+        "completion": 100
+      },
+      {
+        "title": "Course 3460",
+        "completion": 100
+      },
+      {
+        "title": "Course 3459",
+        "completion": 100
+      },
+      {
+        "title": "Course 4548",
+        "completion": 65
+      }
+    ],
+    "courses_found": 7,
+    "courses_completed_before_run": 6,
+    "courses_total": 1,
+    "current_course": "Course 4548",
+    "modules_total": 17,
+    "current_module": "E-Tutorial | Advancements & Challenges in Multimodal AI"
+  }
+}

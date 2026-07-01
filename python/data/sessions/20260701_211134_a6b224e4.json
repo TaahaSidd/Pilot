@@ -1,0 +1,37 @@
+{
+  "id": "20260701_211134_a6b224e4",
+  "type": "workflow",
+  "status": "running",
+  "started_at": "2026-07-01T15:41:34.322604+00:00",
+  "finished_at": null,
+  "duration_seconds": null,
+  "error": null,
+  "logs": [
+    {
+      "timestamp": "2026-07-01T15:41:38.140344+00:00",
+      "level": "info",
+      "message": "Using profile: C:\\Users\\VICTUS\\Desktop\\Pilot\\python\\profile"
+    },
+    {
+      "timestamp": "2026-07-01T15:41:39.069599+00:00",
+      "level": "info",
+      "message": "Checking session..."
+    },
+    {
+      "timestamp": "2026-07-01T15:41:41.978544+00:00",
+      "level": "info",
+      "message": "Not logged in — starting login flow"
+    },
+    {
+      "timestamp": "2026-07-01T15:41:42.191716+00:00",
+      "level": "success",
+      "message": "Credentials filled"
+    },
+    {
+      "timestamp": "2026-07-01T15:41:42.192777+00:00",
+      "level": "action_required",
+      "message": "Manual login required — solve the CAPTCHA in the browser window, then confirm in the dashboard."
+    }
+  ],
+  "summary": {}
+}

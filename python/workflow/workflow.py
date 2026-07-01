@@ -1,11 +1,19 @@
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
 import re
+
 from ai.quiz_solver import QuizSolver
 from ai.feedback_solver import FeedbackSolver
+from runtime.state import state
 from ui.pilot_ui import (
-    log_info, log_success, log_warning, log_error,
-    log_page, log_quiz, log_skip, log_course, log_module_progress,
-    show_course_summary
+    log_info,
+    log_success,
+    log_warning,
+    log_error,
+    log_page,
+    log_skip,
+    log_course,
+    log_module_progress,
+    show_course_summary,
 )
 
 
@@ -14,24 +22,36 @@ class Workflow:
         self.page = page
         self.last_page_content = ""
 
+    def _should_stop(self) -> bool:
+        if state.stop_requested:
+            log_warning("Workflow stopped by user")
+            return True
+        return False
+
     def stabilize_page(self):
+        if self._should_stop():
+            return
+
         try:
             self.page.locator("#popupCloseBtn").click(timeout=3000)
         except:
             pass
 
     def get_course_urls(self) -> list[dict]:
+        if self._should_stop():
+            return []
+
         log_info("Scanning courses...")
         courses = []
-
-        # Course IDs to skip
-        # SKIP_COURSE_IDS = ["4548"]
 
         buttons = self.page.locator("a.view-course-btn")
         count = buttons.count()
         log_info(f"Found {count} courses")
 
         for i in range(count):
+            if self._should_stop():
+                return courses
+
             try:
                 btn = buttons.nth(i)
                 href = btn.get_attribute("href") or ""
@@ -40,31 +60,34 @@ class Workflow:
 
                 course_id = href.rstrip("/").split("=")[-1]
 
-                # Skip unwanted courses
-                # if course_id in SKIP_COURSE_IDS:
-                #     log_info(f"Skipping Free Certificate Courses (id={course_id})")
-                #     continue
-
                 title = f"Course {course_id}"
+
                 try:
                     card = self.page.locator(
-                        f"[id*='course-info-container-{course_id}']")
+                        f"[id*='course-info-container-{course_id}']"
+                    )
                     if card.count() > 0:
                         heading = card.locator(
-                            "h3, h4, strong, .card-title, [class*='title']").first
+                            "h3, h4, strong, .card-title, [class*='title']"
+                        ).first
                         if heading.count() > 0:
                             title = heading.inner_text().strip()
                 except:
                     pass
 
                 completion_pct = 0
+
                 try:
                     card = self.page.locator(
-                        f"[id*='course-info-container-{course_id}']")
+                        f"[id*='course-info-container-{course_id}']"
+                    )
                     if card.count() > 0:
                         text = card.inner_text()
                         match = re.search(
-                            r'(\d+)%\s*Course Completed', text, re.IGNORECASE)
+                            r"(\d+)%\s*Course Completed",
+                            text,
+                            re.IGNORECASE,
+                        )
                         if match:
                             completion_pct = int(match.group(1))
                 except:
@@ -73,23 +96,35 @@ class Workflow:
                 courses.append({
                     "title": title,
                     "url": href,
-                    "completion": completion_pct
+                    "completion": completion_pct,
                 })
 
             except Exception as e:
-                log_error(f"Reading course {i+1}: {e}")
+                if self._should_stop():
+                    return courses
+                log_error(f"Reading course {i + 1}: {e}")
 
         return courses
 
     def collect_module_urls(self) -> list[dict]:
+        if self._should_stop():
+            return []
+
         self.page.wait_for_timeout(2000)
         modules = []
 
+        if self._should_stop():
+            return modules
+
         items = self.page.locator(
-            "li.courseindex-item:has(a.courseindex-link[href*='/mod/'])")
+            "li.courseindex-item:has(a.courseindex-link[href*='/mod/'])"
+        )
         count = items.count()
 
         for i in range(count):
+            if self._should_stop():
+                return modules
+
             try:
                 item = items.nth(i)
 
@@ -111,7 +146,6 @@ class Workflow:
                 else:
                     mtype = "OTHER"
 
-                # Skip dimmed non-quiz, non-feedback modules
                 classes = item.get_attribute("class") or ""
                 if "dimmed" in classes and mtype not in ("QUIZ", "FEEDBACK"):
                     continue
@@ -124,21 +158,33 @@ class Workflow:
                     "url": href,
                     "title": title,
                     "type": mtype,
-                    "completed": completed
+                    "completed": completed,
                 })
 
             except Exception as e:
-                log_error(f"Reading module {i+1}: {e}")
+                if self._should_stop():
+                    return modules
+                log_error(f"Reading module {i + 1}: {e}")
 
         done = sum(1 for m in modules if m["completed"])
         log_info(f"{done}/{len(modules)} modules already completed")
         return modules
 
     def visit_page_module(self, module: dict):
+        if self._should_stop():
+            return
+
         log_page(module["title"])
+
+        if self._should_stop():
+            return
+
         self.page.goto(module["url"])
         self.page.wait_for_load_state("domcontentloaded")
         self.page.wait_for_timeout(3000)
+
+        if self._should_stop():
+            return
 
         try:
             content = self.page.locator("div[role='main']").first.inner_text()
@@ -147,6 +193,9 @@ class Workflow:
             self.last_page_content = ""
 
     def handle_module(self, module: dict):
+        if self._should_stop():
+            return
+
         if module["type"] == "PAGE":
             self.visit_page_module(module)
         elif module["type"] == "QUIZ":
@@ -159,9 +208,16 @@ class Workflow:
             log_skip(f"{module['type']} → {module['title']}")
 
     def process_course(self, course: dict):
+        if self._should_stop():
+            return
+
         self.page.goto(course["url"])
         self.page.wait_for_load_state("domcontentloaded")
         self.page.wait_for_timeout(3000)
+
+        if self._should_stop():
+            return
+
         self.stabilize_page()
 
         max_passes = 10
@@ -169,13 +225,22 @@ class Workflow:
         last_pending_count = -1
 
         while passes < max_passes:
+            if self._should_stop():
+                return
+
             passes += 1
 
             self.page.goto(course["url"])
             self.page.wait_for_load_state("domcontentloaded")
             self.page.wait_for_timeout(2000)
 
+            if self._should_stop():
+                return
+
             modules = self.collect_module_urls()
+
+            if self._should_stop():
+                return
 
             pending = [
                 m for m in modules
@@ -194,37 +259,78 @@ class Workflow:
             log_info(f"Pass {passes}: {len(pending)} modules to process")
 
             for i, module in enumerate(pending):
-                log_module_progress(i + 1, len(pending),
-                                    module["type"], module["title"])
+                if self._should_stop():
+                    return
+
+                log_module_progress(
+                    i + 1,
+                    len(pending),
+                    module["type"],
+                    module["title"],
+                )
+
+                if self._should_stop():
+                    return
+
                 try:
                     self.handle_module(module)
                 except PlaywrightTimeoutError:
+                    if self._should_stop():
+                        return
                     log_warning(f"Timeout → {module['title']}")
                 except Exception as e:
+                    if self._should_stop():
+                        return
                     log_error(f"{module['title']}: {e}")
 
             log_info(
-                f"Pass {passes} complete — rescanning for newly unlocked modules...")
+                f"Pass {passes} complete — rescanning for newly unlocked modules..."
+            )
 
     def start(self):
         log_info("Workflow started")
+
+        if self._should_stop():
+            return
+
         self.stabilize_page()
 
+        if self._should_stop():
+            return
+
         courses = self.get_course_urls()
+
+        if self._should_stop():
+            return
+
         pending = [c for c in courses if c["completion"] < 100]
         skipped = [c for c in courses if c["completion"] == 100]
 
         show_course_summary(courses)
 
+        if self._should_stop():
+            return
+
         log_info(f"{len(skipped)} course(s) already complete — skipping")
         log_info(f"{len(pending)} course(s) to process")
 
         for idx, course in enumerate(pending):
-            log_course(course["title"], course["completion"],
-                       idx + 1, len(pending))
+            if self._should_stop():
+                return
+
+            log_course(
+                course["title"],
+                course["completion"],
+                idx + 1,
+                len(pending),
+            )
+
+            if self._should_stop():
+                return
+
             try:
                 self.process_course(course)
             except Exception as e:
+                if self._should_stop():
+                    return
                 log_error(f"Course failed → {course['title']}: {e}")
-
-        log_success("All courses processed!")

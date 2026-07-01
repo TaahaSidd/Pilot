@@ -4,32 +4,31 @@ from core.startup import is_configured, run_onboarding, load_config
 from workflow.workflow import Workflow
 from ai.notes_engine import NotesEngine
 from ui.pilot_ui import (
-    display_banner, show_menu, show_settings_menu,
-    show_completion_banner, log_info, log_success, log_warning, log_error, prepare_server_login_wait, clear_server_login_wait
+    display_banner,
+    show_menu,
+    show_settings_menu,
+    show_completion_banner,
+    log_info,
+    log_warning,
+    log_error,
+    prepare_server_login_wait,
+    clear_server_login_wait,
 )
+
+from runtime.history import history
+from runtime.state import state
 
 import config
 
 
 class Pilot:
-    """
-    Orchestrates every Pilot action: session creation, workflow runs,
-    notes generation, and settings. Used by the CLI (app.py) and the
-    background-thread runner inside server.py — same class, same
-    methods, no duplicated logic either place.
-    """
-
     def __init__(self):
         self.browser = None
         self.page = None
         self.session = None
 
-        # status tracking — read by server.py's /status endpoint.
-        # CLI usage ignores these entirely.
-        self.status = "idle"   # idle | running | done | error
+        self.status = "idle"
         self.error = None
-
-    # ── Lifecycle (CLI) ──────────────────────────────────────────
 
     def start(self):
         display_banner()
@@ -38,6 +37,7 @@ class Pilot:
             self._menu_loop()
         except KeyboardInterrupt:
             log_warning("Pilot interrupted by user")
+            self.stop()
         finally:
             self.close_browser()
 
@@ -53,10 +53,10 @@ class Pilot:
         config.PASSWORD = data["password"]
         config.PHONE_NUMBER = data["phone_number"]
 
-    # ── Session management ───────────────────────────────────────
-
     def create_session(self):
         self.browser = Browser()
+        state.set_browser(True)
+
         self.page = self.browser.page
         self.session = Session(self.page)
         self.session.ensure_logged_in()
@@ -72,11 +72,7 @@ class Pilot:
                 self.browser = None
                 self.page = None
                 self.session = None
-
-    # ── Browser visibility (server mode) ────────────────────────
-    # Manual show/hide toggle for the dashboard's "Show Browser"
-    # button. Uses Playwright's own bring_to_front() — cross-platform,
-    # no OS-specific window-handle code.
+                state.set_browser(False)
 
     def bring_browser_to_front(self):
         if self.page:
@@ -84,36 +80,44 @@ class Pilot:
             return True
         return False
 
-    # ── Actions ──────────────────────────────────────────────────
-    # These now set self.status, so a server running this on a thread
-    # can answer "what's it doing right now" without touching internals.
+    def stop(self, force: bool = False):
+        """
+        Request a safe stop.
 
-    def start_workflow(self):
-        self.status = "running"
-        self.error = None
+        Normal stop:
+        - set stop_requested
+        - let workflow exit at the next checkpoint
+        - browser closes in finally
+
+        Force stop:
+        - close browser immediately
+        - mark state/history stopped
+        """
+        log_warning("Stop requested")
+        state.request_stop()
+
         try:
-            self.create_session()
-            Workflow(self.page).start()
-            show_completion_banner()
+            clear_server_login_wait()
+        except Exception:
+            pass
+
+        if force:
+            log_warning("Force stopping Pilot")
+            try:
+                self.close_browser()
+            except Exception:
+                pass
+
             self.status = "done"
-        except Exception as e:
-            self.status = "error"
-            self.error = str(e)
-            log_error(f"Workflow failed: {e}")
-        finally:
-            self.close_browser()
+            self.error = None
+            state.stop()
+            history.finish_session("stopped")
 
     def start_workflow_server_mode(self):
-        """Used by server.py instead of start_workflow(). Identical
-        flow, but preps the login-wait event first so confirm_login()
-        blocks on POST /workflow/confirm-login instead of stdin."""
-        from ui.pilot_ui import prepare_server_login_wait, clear_server_login_wait, log_info
-
         login_event = prepare_server_login_wait()
 
         try:
             self.start_workflow()
-
         except Exception as e:
             self.error = str(e)
             raise e
@@ -125,14 +129,40 @@ class Pilot:
     def generate_notes(self):
         self.status = "running"
         self.error = None
+
+        state.start("notes")
+        history.start_session("notes")
+
         try:
             self.create_session()
+
+            if state.stop_requested:
+                self.stop()
+                return
+
             NotesEngine(self.page).run()
+
+            if state.stop_requested:
+                self.stop()
+                return
+
             self.status = "done"
+            state.finish()
+            history.finish_session("done")
+
         except Exception as e:
+            if state.stop_requested:
+                self.stop()
+                return
+
             self.status = "error"
             self.error = str(e)
+
+            state.fail(str(e))
+            history.finish_session("error", str(e))
+
             log_error(f"Notes generation failed: {e}")
+
         finally:
             self.close_browser()
 
@@ -147,8 +177,6 @@ class Pilot:
 
     def exit(self):
         log_info("Goodbye!")
-
-# ── CLI menu loop ────────────────────────────────────────────
 
     def _menu_loop(self):
         actions = {

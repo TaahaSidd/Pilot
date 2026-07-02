@@ -113,6 +113,52 @@ class Pilot:
             state.stop()
             history.finish_session("stopped")
 
+    def start_workflow(self):
+        self.status = "running"
+        self.error = None
+
+        state.start("workflow")
+        history.start_session("workflow")
+
+        try:
+            self.create_session()
+
+            if state.stop_requested:
+                self.stop()
+                return
+
+            Workflow(self.page).start()
+
+            if state.stop_requested:
+                self.status = "done"
+                state.stop()
+                history.finish_session("stopped")
+                return
+
+            show_completion_banner()
+
+            self.status = "done"
+            state.finish()
+            history.finish_session("done")
+
+        except Exception as e:
+            if state.stop_requested:
+                self.status = "done"
+                state.stop()
+                history.finish_session("stopped")
+                return
+
+            self.status = "error"
+            self.error = str(e)
+
+            state.fail(str(e))
+            history.finish_session("error", str(e))
+
+            log_error(f"Workflow failed: {e}")
+
+        finally:
+            self.close_browser()
+
     def start_workflow_server_mode(self):
         login_event = prepare_server_login_wait()
 

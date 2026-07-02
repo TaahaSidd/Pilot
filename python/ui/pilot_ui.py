@@ -11,7 +11,17 @@ from rich.align import Align
 from rich import box
 
 from runtime.history import history
-from runtime.state import state
+from runtime.state import (
+    state,
+    ACTION_READING_PAGE,
+    ACTION_PROCESSING_QUIZ,
+    ACTION_OPENING_COURSE,
+    ACTION_PROCESSING_MODULE,
+    ACTION_WAITING_LOGIN,
+    ACTION_LOGIN_CONFIRMED,
+    ACTION_DONE,
+    ACTION_ERROR,
+)
 
 warnings.filterwarnings("ignore", category=FutureWarning,
                         module="google.generativeai")
@@ -24,10 +34,6 @@ DIM = "dim white"
 _broadcast_queue: "queue.Queue | None" = None
 _login_event: "threading.Event | None" = None
 
-
-# ──────────────────────────────────────────────────────────────────
-# Broadcast
-# ──────────────────────────────────────────────────────────────────
 
 def attach_broadcast_queue(q: "queue.Queue"):
     global _broadcast_queue
@@ -65,10 +71,6 @@ def _emit(level: str, message):
     _broadcast(level, message)
 
 
-# ──────────────────────────────────────────────────────────────────
-# Server login wait
-# ──────────────────────────────────────────────────────────────────
-
 def prepare_server_login_wait() -> "threading.Event":
     global _login_event
     _login_event = threading.Event()
@@ -80,10 +82,6 @@ def clear_server_login_wait():
     _login_event = None
     state.set_login_wait(False)
 
-
-# ──────────────────────────────────────────────────────────────────
-# CLI display
-# ──────────────────────────────────────────────────────────────────
 
 def display_banner():
     os.system("cls" if os.name == "nt" else "clear")
@@ -131,44 +129,36 @@ def show_settings_menu(current_provider: str) -> str:
     return Prompt.ask(f"[bold {PURPLE}]>[/bold {PURPLE}]", choices=["1", "2"])
 
 
-# ──────────────────────────────────────────────────────────────────
-# Logs
-# ──────────────────────────────────────────────────────────────────
-
 def log_info(message: str):
-    state.set_action(message)
     console.print(f"[{PURPLE}][PILOT][/{PURPLE}] {message}")
     _emit("info", message)
 
 
 def log_success(message: str):
-    state.set_action(message)
     console.print(f"[bold green]✓[/bold green] {message}")
     _emit("success", message)
 
 
 def log_warning(message: str):
-    state.set_action(message)
     console.print(f"[bold yellow]⚠[/bold yellow]  {message}")
     _emit("warning", message)
 
 
 def log_error(message: str):
-    state.set_action(message)
+    state.set_action(ACTION_ERROR, message)
     state.error = message
     console.print(f"[bold red]✗[/bold red]  {message}")
     _emit("error", message)
 
 
 def log_skip(message: str):
-    state.set_action(message)
     console.print(f"[dim]→ SKIP  {message}[/dim]")
     _emit("skip", message)
 
 
 def log_page(title: str):
     state.set_page(title)
-    state.set_action(f"Reading page: {title}")
+    state.set_action(ACTION_READING_PAGE, f"Reading page: {title}")
 
     console.print(
         f"[bold {PURPLE}]●[/bold {PURPLE}]  [white]PAGE[/white]  {title}"
@@ -177,7 +167,7 @@ def log_page(title: str):
 
 
 def log_quiz(title: str, ai_answer: str = ""):
-    state.set_action(f"Processing quiz: {title}")
+    state.set_action(ACTION_PROCESSING_QUIZ, f"Processing quiz: {title}")
 
     if ai_answer:
         message = f"{title} → {ai_answer}"
@@ -193,12 +183,13 @@ def log_quiz(title: str, ai_answer: str = ""):
 
 
 def log_course(title: str, completion: int, current: int, total: int):
-    state.set_course(title, current, total)
-    state.set_action(f"Processing course: {title}")
+    state.set_course(title, current, total, completion)
+    state.set_action(ACTION_OPENING_COURSE, f"Processing course: {title}")
 
     history.update_summary({
         "courses_total": total,
         "current_course": title,
+        "course_progress_percent": completion,
     })
 
     bar_filled = int((completion / 100) * 20)
@@ -219,12 +210,14 @@ def log_course(title: str, completion: int, current: int, total: int):
 
 
 def log_module_progress(current: int, total: int, mtype: str, title: str):
-    state.set_module(title, current, total)
-    state.set_action(f"Processing {mtype}: {title}")
+    state.set_module(title, current, total, mtype)
+    state.set_action(ACTION_PROCESSING_MODULE, f"Processing {mtype}: {title}")
 
     history.update_summary({
         "modules_total": total,
         "current_module": title,
+        "current_module_type": mtype,
+        "module_current_index": current,
     })
 
     console.print(
@@ -258,7 +251,11 @@ def show_course_summary(courses: list[dict]):
         bar_empty = 15 - bar_filled
         bar = f"{'█' * bar_filled}{'░' * bar_empty} {pct}%"
 
-        status = "[bold green]✓ Done[/bold green]" if pct == 100 else f"[bold {PURPLE}]In Progress[/bold {PURPLE}]"
+        status = (
+            "[bold green]✓ Done[/bold green]"
+            if pct == 100
+            else f"[bold {PURPLE}]In Progress[/bold {PURPLE}]"
+        )
         table.add_row(course["title"], bar, status)
 
     console.print()
@@ -266,20 +263,30 @@ def show_course_summary(courses: list[dict]):
     console.print()
 
     summary = [
-        {"title": c["title"], "completion": c["completion"]}
+        {
+            "id": c.get("id"),
+            "title": c["title"],
+            "completion": c["completion"],
+            "image": c.get("image", ""),
+            "category": c.get("category", ""),
+        }
         for c in courses
     ]
 
     history.update_summary({
         "courses": summary,
         "courses_found": len(summary),
-        "courses_completed_before_run": sum(1 for c in courses if c["completion"] == 100),
+        "courses_completed_before_run": sum(
+            1 for c in courses if c["completion"] == 100
+        ),
     })
 
     _emit("summary", summary)
 
 
 def show_completion_banner():
+    state.set_action(ACTION_DONE, "All courses processed")
+
     console.print(Panel(
         Align.center(Text("✓  All courses processed!",
                      style=f"bold {PURPLE}")),
@@ -292,7 +299,10 @@ def show_completion_banner():
 def confirm_login():
     if _login_event is not None:
         state.set_login_wait(True)
-        state.set_action("Waiting for manual login confirmation")
+        state.set_action(
+            ACTION_WAITING_LOGIN,
+            "Waiting for manual login confirmation",
+        )
 
         message = (
             "Manual login required — solve the CAPTCHA in the browser window, "
@@ -303,7 +313,7 @@ def confirm_login():
         _login_event.wait()
 
         state.set_login_wait(False)
-        state.set_action("Manual login confirmed")
+        state.set_action(ACTION_LOGIN_CONFIRMED, "Manual login confirmed")
         _emit("info", "Manual login confirmed")
         return
 

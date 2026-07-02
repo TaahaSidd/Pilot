@@ -44,8 +44,8 @@ class Workflow:
         log_info("Scanning courses...")
         courses = []
 
-        buttons = self.page.locator("a.view-course-btn")
-        count = buttons.count()
+        cards = self.page.locator("div.card.dashboard-card[data-course-id]")
+        count = cards.count()
         log_info(f"Found {count} courses")
 
         for i in range(count):
@@ -53,35 +53,37 @@ class Workflow:
                 return courses
 
             try:
-                btn = buttons.nth(i)
-                href = btn.get_attribute("href") or ""
+                card = cards.nth(i)
+
+                course_id = card.get_attribute("data-course-id") or ""
+
+                link = card.locator("a.view-course-btn").first
+                href = link.get_attribute("href") or ""
                 if not href:
                     continue
-
-                course_id = href.rstrip("/").split("=")[-1]
 
                 title = f"Course {course_id}"
 
                 try:
-                    card = self.page.locator(
-                        f"[id*='course-info-container-{course_id}']"
-                    )
-                    if card.count() > 0:
-                        heading = card.locator(
-                            "h3, h4, strong, .card-title, [class*='title']"
-                        ).first
-                        if heading.count() > 0:
-                            title = heading.inner_text().strip()
+                    title_el = card.locator(
+                        "a.coursename span.multiline").first
+                    if title_el.count() > 0:
+                        title = title_el.inner_text().strip()
+                    else:
+                        title_attr = card.locator(
+                            "a.coursename").first.get_attribute("title")
+                        if title_attr:
+                            title = title_attr.strip()
                 except:
                     pass
 
                 completion_pct = 0
-
                 try:
-                    card = self.page.locator(
-                        f"[id*='course-info-container-{course_id}']"
-                    )
-                    if card.count() > 0:
+                    progress = card.locator(".progress-bar").first
+                    aria_value = progress.get_attribute("aria-valuenow")
+                    if aria_value:
+                        completion_pct = int(float(aria_value))
+                    else:
                         text = card.inner_text()
                         match = re.search(
                             r"(\d+)%\s*Course Completed",
@@ -93,10 +95,22 @@ class Workflow:
                 except:
                     pass
 
+                image_url = ""
+                try:
+                    img_wrapper = card.locator(".dashboard-card-img").first
+                    style = img_wrapper.get_attribute("style") or ""
+                    match = re.search(r'url\(["\']?(.*?)["\']?\)', style)
+                    if match:
+                        image_url = match.group(1)
+                except:
+                    pass
+
                 courses.append({
+                    "id": course_id,
                     "title": title,
-                    "url": href,
+                    "url": href.strip(),
                     "completion": completion_pct,
+                    "image": image_url,
                 })
 
             except Exception as e:
@@ -248,6 +262,7 @@ class Workflow:
             ]
 
             if not pending:
+                state.complete_course()
                 log_success("Course complete — nothing pending")
                 return
 
@@ -274,6 +289,9 @@ class Workflow:
 
                 try:
                     self.handle_module(module)
+
+                    # Module finished successfully
+                    state.complete_module()
                 except PlaywrightTimeoutError:
                     if self._should_stop():
                         return
@@ -305,6 +323,9 @@ class Workflow:
 
         pending = [c for c in courses if c["completion"] < 100]
         skipped = [c for c in courses if c["completion"] == 100]
+
+        state.courses_completed = len(skipped)
+        state.courses_total = len(courses)
 
         show_course_summary(courses)
 

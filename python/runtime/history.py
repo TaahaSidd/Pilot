@@ -87,6 +87,21 @@ class HistoryManager:
 
         self._save_current()
 
+    def increment_summary(self, key: str, amount: int = 1):
+        if not self.current_session:
+            return
+
+        summary = self.current_session.get("summary", {})
+        current = summary.get(key, 0)
+
+        if not isinstance(current, int):
+            current = 0
+
+        summary[key] = current + amount
+        self.current_session["summary"] = summary
+
+        self._save_current()
+
     def finish_session(self, status: str = "done", error: Optional[str] = None):
         if not self.current_session:
             return

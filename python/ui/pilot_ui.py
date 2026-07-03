@@ -160,6 +160,8 @@ def log_page(title: str):
     state.set_page(title)
     state.set_action(ACTION_READING_PAGE, f"Reading page: {title}")
 
+    history.increment_summary("pages_processed")
+
     console.print(
         f"[bold {PURPLE}]●[/bold {PURPLE}]  [white]PAGE[/white]  {title}"
     )
@@ -168,6 +170,8 @@ def log_page(title: str):
 
 def log_quiz(title: str, ai_answer: str = ""):
     state.set_action(ACTION_PROCESSING_QUIZ, f"Processing quiz: {title}")
+
+    history.increment_summary("quizzes_processed")
 
     if ai_answer:
         message = f"{title} → {ai_answer}"
@@ -191,6 +195,8 @@ def log_course(title: str, completion: int, current: int, total: int):
         "current_course": title,
         "course_progress_percent": completion,
     })
+
+    history.increment_summary("courses_processed")
 
     bar_filled = int((completion / 100) * 20)
     bar_empty = 20 - bar_filled
@@ -219,6 +225,8 @@ def log_module_progress(current: int, total: int, mtype: str, title: str):
         "current_module_type": mtype,
         "module_current_index": current,
     })
+
+    history.increment_summary("modules_started")
 
     console.print(
         f"  [dim]{current}/{total}[/dim]  "

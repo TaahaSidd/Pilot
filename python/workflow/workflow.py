@@ -4,6 +4,7 @@ import re
 from ai.quiz_solver import QuizSolver
 from ai.feedback_solver import FeedbackSolver
 from runtime.state import state
+from runtime.history import history
 from ui.pilot_ui import (
     log_info,
     log_success,
@@ -292,6 +293,7 @@ class Workflow:
 
                     # Module finished successfully
                     state.complete_module()
+                    history.increment_summary("modules_processed")
                 except PlaywrightTimeoutError:
                     if self._should_stop():
                         return

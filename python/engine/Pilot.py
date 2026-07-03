@@ -212,6 +212,19 @@ class Pilot:
         finally:
             self.close_browser()
 
+    def generate_notes_server_mode(self):
+        login_event = prepare_server_login_wait()
+
+        try:
+            self.generate_notes()
+        except Exception as e:
+            self.error = str(e)
+            raise e
+        finally:
+            clear_server_login_wait()
+
+        return login_event
+
     def settings(self):
         while True:
             choice = show_settings_menu(config.AI_PROVIDER)

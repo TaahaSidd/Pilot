@@ -1,63 +1,102 @@
 import os
 import re
+from typing import Optional
+
 from groq import Groq
-from config import GROQ_API_KEY
+
+import config
+from config import URL
+from runtime.history import history
+from runtime.state import (
+    state,
+    ACTION_SCANNING_COURSES,
+    ACTION_OPENING_COURSE,
+    ACTION_GENERATING_NOTES,
+    ACTION_SAVING_NOTES,
+)
 from ui.pilot_ui import log_info, log_success, log_warning, log_error
+from workflow.workflow import Workflow
 
-groq_client = Groq(api_key=GROQ_API_KEY)
 
-NOTES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "notes")
+NOTES_DIR = os.path.join(os.path.dirname(
+    os.path.abspath(__file__)), "..", "notes")
+
+
+def _should_stop() -> bool:
+    if state.stop_requested:
+        log_warning("Notes generation stopped by user")
+        return True
+    return False
+
+
+def get_groq_client():
+    return Groq(api_key=config.GROQ_API_KEY)
 
 
 def clean_folder_name(name: str) -> str:
-    """Clean section/module name for use as folder name."""
     name = name.strip()
     name = name.lstrip("#").strip()
     name = name.replace(":", " -")
-    name = re.sub(r'[<>"/\\|?*]', '', name)
-    name = re.sub(r'\s+', ' ', name).strip()
+    name = re.sub(r'[<>"/\\|?*]', "", name)
+    name = re.sub(r"\s+", " ", name).strip()
     return name
 
 
 def clean_file_name(name: str) -> str:
-    """Clean page title for use as filename."""
     name = name.strip()
-    name = re.sub(r'[<>":"/\\|?*]', '', name)
-    name = re.sub(r'\s+', ' ', name).strip()
+    name = re.sub(r'[<>":"/\\|?*]', "", name)
+    name = re.sub(r"\s+", " ", name).strip()
     return f"{name}.md"
 
 
-def generate_notes(content: str, title: str) -> str:
-    """Send page content to Groq and get back structured notes."""
-    prompt = f"""You are a student note-taker. Convert the following study material into clear, concise notes.
+def generate_notes(content: str, title: str) -> Optional[str]:
+    prompt = f"""You are an expert exam-focused study note maker.
+
+Convert the study material into detailed, easy-to-revise notes for a student.
 
 Rules:
-- Use simple, easy to understand language
-- Use bullet points only
-- No complex words
-- Keep it short and to the point
-- Format exactly like this:
+- Use simple language
+- Keep all important concepts
+- Focus on exam-relevant points
+- Add definitions where needed
+- Add examples where helpful
+- Add important keywords
+- Do NOT add information outside the given content
+- Do NOT make it too short
+- Use clear headings and bullet points
 
-## Key Points
-- point 1
-- point 2
-- point 3
+Format exactly like this:
 
-## Summary
-One short paragraph in simple language.
+## Topic Overview
+- Explain what this topic is about in simple words.
+
+## Important Concepts
+- Cover the main points in detail.
+- Include definitions, steps, types, features, advantages, disadvantages, or uses if present.
+
+## Exam-Focused Points
+- List points that are likely useful for exams.
+- Keep them direct and memorable.
+
+## Key Terms
+- Term: simple meaning
+- Term: simple meaning
+
+## Quick Revision Summary
+- Short bullet-point recap for last-minute revision.
 
 Topic: {title}
 
-Content:
-{content[:3000]}
+Study Material:
+{content[:5000]}
 
 Notes:"""
 
     try:
-        response = groq_client.chat.completions.create(
+        response = get_groq_client().chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": prompt}],
-            max_tokens=500
+            max_tokens=800,
         )
         return response.choices[0].message.content.strip()
     except Exception as e:
@@ -66,7 +105,6 @@ Notes:"""
 
 
 def save_note(course_title: str, module_title: str, page_title: str, notes: str):
-    """Save generated notes to the correct folder structure."""
     course_folder = clean_folder_name(course_title)
     module_folder = clean_folder_name(module_title)
     file_name = clean_file_name(page_title)
@@ -81,20 +119,23 @@ def save_note(course_title: str, module_title: str, page_title: str, notes: str)
         f.write(notes)
         f.write("\n")
 
+    state.set_action(ACTION_SAVING_NOTES, f"Saving note: {page_title}")
+    history.increment_summary("notes_saved")
+
     log_success(f"Note saved → {module_folder}/{file_name}")
 
 
 class NotesEngine:
     def __init__(self, page):
         self.page = page
-        self.current_module = "General"
 
     def run(self):
         log_info("Starting notes generation run...")
         os.makedirs(NOTES_DIR, exist_ok=True)
 
-        # Verify we're on dashboard before scanning
-        from python.config import URL
+        if _should_stop():
+            return
+
         current_url = self.page.url
         if "/my/" not in current_url.lower() and "dashboard" not in current_url.lower():
             log_info("Navigating to dashboard...")
@@ -102,93 +143,172 @@ class NotesEngine:
             self.page.wait_for_load_state("domcontentloaded")
             self.page.wait_for_timeout(3000)
 
+        if _should_stop():
+            return
+
+        state.set_action(ACTION_SCANNING_COURSES, "Scanning courses for notes")
         log_info(f"Current URL: {self.page.url}")
 
-        from python.workflow.workflow import Workflow
         wf = Workflow(self.page)
         wf.stabilize_page()
         courses = wf.get_course_urls()
 
+        history.update_summary({
+            "courses_found": len(courses),
+            "notes_output_dir": os.path.normpath(NOTES_DIR),
+        })
+
         log_info(f"Found {len(courses)} courses")
 
         for course in courses:
+            if _should_stop():
+                return
+
             try:
                 self._process_course(course)
             except Exception as e:
+                if _should_stop():
+                    return
                 log_error(f"Course failed → {course['title']}: {e}")
 
         log_success("Notes generation complete — saved to /notes/")
 
-    
     def _process_course(self, course: dict):
-        log_info(f"Processing → {course['title']}")
+        if _should_stop():
+            return
+
+        title = course["title"]
+
+        state.set_course(
+            title=title,
+            current=1,
+            total=1,
+            completion=course.get("completion", 0),
+        )
+        state.set_action(ACTION_OPENING_COURSE,
+                         f"Opening course for notes: {title}")
+
+        history.increment_summary("courses_processed")
+        history.update_summary({
+            "current_course": title,
+        })
+
+        log_info(f"Processing → {title}")
+
         self.page.goto(course["url"])
         self.page.wait_for_load_state("domcontentloaded")
         self.page.wait_for_timeout(2000)
 
-        # Get all sections and their modules
+        if _should_stop():
+            return
+
         sections = self.page.locator("div.courseindex-section")
         section_count = sections.count()
 
+        history.update_summary({
+            "sections_found": section_count,
+        })
+
         for s in range(section_count):
+            if _should_stop():
+                return
+
             try:
                 section = sections.nth(s)
 
-                # Get section title
-                section_title = ""
                 try:
-                    section_title = section.locator("a.courseindex-link[data-for='section_title']").inner_text().strip()
+                    section_title = section.locator(
+                        "a.courseindex-link[data-for='section_title']"
+                    ).inner_text().strip()
                 except:
-                    section_title = f"Section {s+1}"
+                    section_title = f"Section {s + 1}"
 
-                # Only process sections that look like modules (#Module...)
                 if not section_title:
                     continue
 
-                # Get all PAGE links in this section
-                page_links = section.locator("a.courseindex-link[href*='/mod/page/']")
+                page_links = section.locator(
+                    "a.courseindex-link[href*='/mod/page/']")
                 link_count = page_links.count()
 
                 if link_count == 0:
                     continue
 
+                history.increment_summary("sections_processed")
+                history.increment_summary("pages_found", link_count)
+
                 log_info(f"Section: {section_title} — {link_count} pages")
 
-                # Collect all page urls and titles first
                 pages = []
                 for p in range(link_count):
                     try:
                         link = page_links.nth(p)
                         href = link.get_attribute("href") or ""
-                        title = link.inner_text().strip()
+                        page_title = link.inner_text().strip()
+
                         if href:
-                            pages.append({"url": href, "title": title})
+                            pages.append({
+                                "url": href,
+                                "title": page_title,
+                            })
                     except:
                         pass
 
-                # Visit each page and generate notes
                 for page_info in pages:
+                    if _should_stop():
+                        return
+
                     try:
-                        self._process_page(course["title"], section_title, page_info)
+                        self._process_page(title, section_title, page_info)
                     except Exception as e:
+                        if _should_stop():
+                            return
+                        history.increment_summary("notes_errors")
                         log_error(f"Page failed → {page_info['title']}: {e}")
 
-                    # Go back to course page after each page visit
+                    if _should_stop():
+                        return
+
                     self.page.goto(course["url"])
                     self.page.wait_for_load_state("domcontentloaded")
                     self.page.wait_for_timeout(1500)
 
             except Exception as e:
-                log_error(f"Section {s+1}: {e}")
+                if _should_stop():
+                    return
+                history.increment_summary("notes_errors")
+                log_error(f"Section {s + 1}: {e}")
 
     def _process_page(self, course_title: str, section_title: str, page_info: dict):
-        log_info(f"Generating notes → {page_info['title']}")
+        if _should_stop():
+            return
+
+        page_title = page_info["title"]
+
+        state.set_page(page_title)
+        state.set_module(
+            title=page_title,
+            current=history.current_session.get(
+                "summary", {}).get("notes_attempted", 0) + 1
+            if history.current_session else 1,
+            total=history.current_session.get(
+                "summary", {}).get("pages_found", 0)
+            if history.current_session else 0,
+            mtype="NOTES",
+        )
+        state.set_action(ACTION_GENERATING_NOTES,
+                         f"Generating notes: {page_title}")
+
+        history.increment_summary("notes_attempted")
+
+        log_info(f"Generating notes → {page_title}")
 
         self.page.goto(page_info["url"])
         self.page.wait_for_load_state("domcontentloaded")
         self.page.wait_for_timeout(2000)
 
-        # Try multiple selectors to extract content
+        if _should_stop():
+            return
+
         content = ""
         selectors = [
             "div.no-overflow",
@@ -210,7 +330,6 @@ class NotesEngine:
             except:
                 continue
 
-        # Last resort — get all visible text from body
         if not content or len(content) < 200:
             try:
                 content = self.page.locator("body").inner_text().strip()
@@ -218,16 +337,20 @@ class NotesEngine:
                 pass
 
         if not content or len(content) < 200:
-            log_warning(f"Content too short — skipping {page_info['title']}")
+            history.increment_summary("notes_skipped")
+            log_warning(f"Content too short — skipping {page_title}")
             return
 
         log_info(f"Content captured ({len(content)} chars)")
 
-        # Generate notes via Groq
-        notes = generate_notes(content, page_info["title"])
+        notes = generate_notes(content, page_title)
 
         if not notes:
-            log_warning(f"No notes generated for {page_info['title']}")
+            history.increment_summary("notes_skipped")
+            log_warning(f"No notes generated for {page_title}")
             return
 
-        save_note(course_title, section_title, page_info["title"], notes)
+        save_note(course_title, section_title, page_title, notes)
+
+        history.increment_summary("notes_generated")
+        state.complete_module()

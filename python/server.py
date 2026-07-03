@@ -174,6 +174,7 @@ def stop_runtime(force: bool = False):
         "status": state.status,
     }
 
+
 @app.post("/workflow/confirm-login")
 def confirm_login():
     """Called by the dashboard once the user has solved the CAPTCHA
@@ -203,7 +204,7 @@ def toggle_browser():
 
 @app.post("/notes/start")
 def start_notes():
-    started = _run_in_thread(pilot.generate_notes)
+    started = _run_in_thread(pilot.generate_notes_server_mode)
     if not started:
         return {"started": False, "reason": "A run is already in progress."}
     return {"started": True}

@@ -183,13 +183,17 @@ class Pilot:
             self.create_session()
 
             if state.stop_requested:
-                self.stop()
+                self.status = "done"
+                state.stop()
+                history.finish_session("stopped")
                 return
 
             NotesEngine(self.page).run()
 
             if state.stop_requested:
-                self.stop()
+                self.status = "done"
+                state.stop()
+                history.finish_session("stopped")
                 return
 
             self.status = "done"
@@ -198,7 +202,9 @@ class Pilot:
 
         except Exception as e:
             if state.stop_requested:
-                self.stop()
+                self.status = "done"
+                state.stop()
+                history.finish_session("stopped")
                 return
 
             self.status = "error"

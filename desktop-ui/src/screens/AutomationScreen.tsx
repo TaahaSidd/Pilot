@@ -1,6 +1,7 @@
 // src/screens/AutomationScreen.tsx
 import React from 'react';
-import { ProcessorLoad } from '../components/automation/ProcessorLoad';
+// Corrected import to match the new component name
+import { PilotMiniGame } from '../components/automation/PilotMiniGame';
 import { LiveActivityLog } from '../components/automation/LiveActivityLog';
 import type { LogEvent, PilotStatus } from '../hooks/usePilot';
 
@@ -35,11 +36,7 @@ export function AutomationScreen({
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-            {/* Header — real status only, no fabricated step counter or
-                percentage. There is no concept of "step N of 6" or a
-                completion % anywhere in the backend's run model — Pilot
-                processes a variable number of modules across a variable
-                number of courses, discovered live, not a fixed pipeline. */}
+            {/* Header */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                     <h1
@@ -75,10 +72,6 @@ export function AutomationScreen({
                             position: 'relative',
                         }}
                     >
-                        {/* Indeterminate progress indicator — honest
-                            substitute for a fake percentage. We genuinely
-                            don't know how far through a run we are, since
-                            course/module counts are discovered live. */}
                         <div
                             style={{
                                 position: 'absolute',
@@ -100,9 +93,7 @@ export function AutomationScreen({
             </div>
 
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px' }}>
-                {/* Left: real current course/module text, parsed from
-                    the live log stream. See usePilot.ts for the parsing
-                    logic and its caveats. */}
+                {/* Left: Current Activity Info */}
                 <div
                     style={{
                         backgroundColor: 'var(--surface)',
@@ -178,14 +169,10 @@ export function AutomationScreen({
                             </div>
                         </div>
                     )}
-
-                    {/* Run-time / ETA removed entirely — there is no
-                        timer anywhere in the backend tracking elapsed
-                        time, and an estimated-remaining figure would be
-                        pure fabrication with no model behind it. */}
                 </div>
 
-                <ProcessorLoad />
+                {/* Right: Engagement Zone */}
+                <PilotMiniGame />
             </div>
 
             <LiveActivityLog logs={liveLogs} />

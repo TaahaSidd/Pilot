@@ -28,11 +28,19 @@ export function CourseGrid({ courses }: CourseGridProps) {
                 >
                     Courses
                 </h3>
+
+                {courses && (
+                    <span
+                        style={{
+                            fontSize: '12px',
+                            color: 'var(--text-muted)',
+                        }}
+                    >
+                        {courses.length} found
+                    </span>
+                )}
             </div>
 
-            {/* No run has reported a summary yet this session — this is
-                an honest empty state, not a loading spinner, since
-                there's nothing to wait for until the user starts a run. */}
             {courses === null && (
                 <div
                     style={{
@@ -69,7 +77,7 @@ export function CourseGrid({ courses }: CourseGridProps) {
                 <div
                     style={{
                         display: 'grid',
-                        gridTemplateColumns: '1fr 1fr',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
                         gap: '16px',
                     }}
                 >
@@ -78,67 +86,148 @@ export function CourseGrid({ courses }: CourseGridProps) {
 
                         return (
                             <div
-                                key={course.title}
+                                key={course.id ?? course.title}
                                 style={{
                                     backgroundColor: 'var(--surface)',
                                     border: '1px solid var(--border)',
                                     borderRadius: '12px',
-                                    padding: '20px',
+                                    overflow: 'hidden',
                                     display: 'flex',
                                     flexDirection: 'column',
-                                    gap: '12px',
+                                    minHeight: '260px',
                                 }}
                             >
-                                <div
-                                    style={{
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'flex-start',
-                                        gap: '8px',
-                                    }}
-                                >
-                                    <h4
-                                        style={{
-                                            fontSize: '15px',
-                                            fontWeight: 600,
-                                            color: 'var(--text-primary)',
-                                            margin: 0,
-                                            letterSpacing: '-0.01em',
-                                        }}
-                                    >
-                                        {course.title}
-                                    </h4>
-                                    {isComplete && (
-                                        <CheckCircle2
-                                            size={18}
-                                            style={{ color: 'var(--success)', flexShrink: 0 }}
-                                        />
-                                    )}
-                                </div>
-
-                                {isComplete ? (
+                                {course.image ? (
                                     <div
                                         style={{
-                                            fontSize: '12px',
-                                            fontWeight: 600,
-                                            color: 'var(--success)',
+                                            width: '100%',
+                                            height: '120px',
+                                            overflow: 'hidden',
+                                            backgroundColor: 'var(--border)',
                                         }}
                                     >
-                                        Completed
+                                        <img
+                                            src={course.image}
+                                            alt={course.title}
+                                            style={{
+                                                width: '100%',
+                                                height: '100%',
+                                                objectFit: 'cover',
+                                            }}
+                                        />
                                     </div>
                                 ) : (
                                     <div
                                         style={{
+                                            width: '100%',
+                                            height: '120px',
+                                            background:
+                                                'linear-gradient(135deg, rgba(170,0,255,0.24), rgba(170,0,255,0.05))',
                                             display: 'flex',
                                             alignItems: 'center',
-                                            gap: '12px',
+                                            justifyContent: 'center',
+                                            color: 'var(--accent)',
                                             fontSize: '12px',
-                                            color: 'var(--text-muted)',
+                                            fontWeight: 700,
+                                            letterSpacing: '0.08em',
+                                            textTransform: 'uppercase',
                                         }}
                                     >
+                                        Pilot Course
+                                    </div>
+                                )}
+
+                                <div
+                                    style={{
+                                        padding: '16px',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: '12px',
+                                        flex: 1,
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'flex-start',
+                                            gap: '10px',
+                                        }}
+                                    >
+                                        <h4
+                                            style={{
+                                                fontSize: '14px',
+                                                fontWeight: 600,
+                                                color: 'var(--text-primary)',
+                                                margin: 0,
+                                                lineHeight: '20px',
+                                                letterSpacing: '-0.01em',
+                                            }}
+                                        >
+                                            {course.title}
+                                        </h4>
+
+                                        {isComplete && (
+                                            <CheckCircle2
+                                                size={18}
+                                                style={{
+                                                    color: 'var(--success)',
+                                                    flexShrink: 0,
+                                                    marginTop: '1px',
+                                                }}
+                                            />
+                                        )}
+                                    </div>
+
+                                    {course.category && (
                                         <div
                                             style={{
-                                                flex: 1,
+                                                fontSize: '11px',
+                                                color: 'var(--text-muted)',
+                                                textTransform: 'uppercase',
+                                                letterSpacing: '0.06em',
+                                                fontWeight: 600,
+                                            }}
+                                        >
+                                            {course.category}
+                                        </div>
+                                    )}
+
+                                    <div style={{ marginTop: 'auto' }}>
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                marginBottom: '8px',
+                                            }}
+                                        >
+                                            <span
+                                                style={{
+                                                    fontSize: '12px',
+                                                    fontWeight: 600,
+                                                    color: isComplete
+                                                        ? 'var(--success)'
+                                                        : 'var(--text-secondary)',
+                                                }}
+                                            >
+                                                {isComplete ? 'Completed' : 'In Progress'}
+                                            </span>
+
+                                            <span
+                                                style={{
+                                                    fontSize: '12px',
+                                                    fontWeight: 600,
+                                                    color: 'var(--text-muted)',
+                                                }}
+                                            >
+                                                {course.completion}%
+                                            </span>
+                                        </div>
+
+                                        <div
+                                            style={{
+                                                width: '100%',
                                                 height: '6px',
                                                 backgroundColor: 'var(--border)',
                                                 borderRadius: '3px',
@@ -149,15 +238,14 @@ export function CourseGrid({ courses }: CourseGridProps) {
                                                 style={{
                                                     width: `${course.completion}%`,
                                                     height: '100%',
-                                                    backgroundColor: 'var(--accent)',
+                                                    backgroundColor: isComplete
+                                                        ? 'var(--success)'
+                                                        : 'var(--accent)',
                                                 }}
                                             />
                                         </div>
-                                        <span style={{ fontWeight: 500 }}>
-                                            {course.completion}%
-                                        </span>
                                     </div>
-                                )}
+                                </div>
                             </div>
                         );
                     })}

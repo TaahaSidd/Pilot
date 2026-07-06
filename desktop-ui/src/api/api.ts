@@ -108,12 +108,49 @@ export const apiPatch = <T>(path: string, body?: unknown): Promise<T> =>
 // directly from components.
 // ──────────────────────────────────────────────────────────────────
 
-export type PilotStatus = "idle" | "running" | "done" | "error";
+export type PilotStatus = "idle" | "running" | "done" | "error" | "stopped";
+export type RunType = "workflow" | "notes" | null;
 
 export interface StatusResponse {
     status: PilotStatus;
     error: string | null;
     configured: boolean;
+}
+
+export interface RuntimeState {
+    status: PilotStatus;
+    run_type: RunType;
+
+    started_at: string | null;
+    finished_at: string | null;
+    elapsed_seconds: number | null;
+
+    current_course: string | null;
+    course_progress_percent: number;
+    course_run_progress_percent: number;
+
+    courses_total: number;
+    courses_completed: number;
+
+    current_module: string | null;
+    current_module_type: string | null;
+    current_page: string | null;
+
+    modules_total: number;
+    modules_completed: number;
+    modules_processed: number;
+    module_current_index: number;
+    module_progress_percent: number;
+
+    stop_requested: boolean;
+
+    awaiting_login: boolean;
+    browser_open: boolean;
+
+    current_action: string;
+    current_action_label: string | null;
+
+    error: string | null;
 }
 
 export interface ConfigResponse {
@@ -144,6 +181,14 @@ export interface StartResponse {
     reason?: string;
 }
 
+export interface StopResponse {
+    stopped?: boolean;
+    stop_requested?: boolean;
+    force?: boolean;
+    status?: PilotStatus;
+    message?: string;
+}
+
 export interface ConfirmLoginResponse {
     confirmed: boolean;
     reason?: string;
@@ -154,8 +199,40 @@ export interface ToggleBrowserResponse {
     reason?: string;
 }
 
+export interface HistorySessionSummary {
+    id: string;
+    type: "workflow" | "notes";
+    status: PilotStatus | "running";
+    started_at: string;
+    finished_at: string | null;
+    duration_seconds: number | null;
+    error: string | null;
+    summary: Record<string, unknown>;
+    log_count: number;
+}
+
+export interface HistoryLog {
+    timestamp: string;
+    level: string;
+    message: unknown;
+}
+
+export interface HistorySessionDetail extends HistorySessionSummary {
+    logs: HistoryLog[];
+}
+
 export const pilotApi = {
     getStatus: () => apiGet<StatusResponse>("/status"),
+
+    getRuntime: () => apiGet<RuntimeState>("/runtime"),
+
+    stopRuntime: (force = false) =>
+        apiPost<StopResponse>(`/runtime/stop?force=${force}`),
+
+    getHistory: () => apiGet<HistorySessionSummary[]>("/history"),
+
+    getHistorySession: (sessionId: string) =>
+        apiGet<HistorySessionDetail>(`/history/${sessionId}`),
 
     getConfig: () => apiGet<ConfigResponse>("/config"),
 

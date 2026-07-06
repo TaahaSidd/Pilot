@@ -1,13 +1,14 @@
 // src/components/dashboard/StatsGrid.tsx
 import React from 'react';
 import { StatCard } from './StatCard';
-import { ListChecks, Layers, Activity } from 'lucide-react';
-import type { PilotStatus, CourseSummary } from '../../hooks/usePilot';
+import { ListChecks, Layers, Activity, Timer } from 'lucide-react';
+import type { PilotStatus, CourseSummary, RuntimeState } from '../../hooks/usePilot';
 
 interface StatsGridProps {
     status: PilotStatus;
     statusError: string | null;
     configured: boolean;
+    runtime: RuntimeState | null;
     courses: CourseSummary[] | null;
     modulesCompletedThisRun: number;
 }
@@ -16,22 +17,54 @@ const STATUS_LABEL: Record<PilotStatus, string> = {
     idle: 'Idle',
     running: 'Running',
     done: 'Completed',
+    stopped: 'Stopped',
     error: 'Failed',
 };
+
+function formatElapsed(seconds: number | null | undefined) {
+    if (!seconds) return '—';
+
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+
+    if (mins < 1) return `${secs}s`;
+    return `${mins}m ${secs}s`;
+}
 
 export function StatsGrid({
     status,
     statusError,
     configured,
+    runtime,
     courses,
     modulesCompletedThisRun,
 }: StatsGridProps) {
+    const isRunning = status === 'running';
+
     const coursesInProgress = courses
         ? courses.filter((c) => c.completion < 100).length
         : null;
+
     const coursesComplete = courses
         ? courses.filter((c) => c.completion === 100).length
         : null;
+
+    const modulesValue = runtime?.modules_total
+        ? `${runtime.modules_processed}/${runtime.modules_total}`
+        : String(modulesCompletedThisRun);
+
+    const modulesSubtext = runtime?.modules_total
+        ? `${runtime.module_progress_percent}% processed`
+        : 'This session — includes retries/failures';
+
+    const statusSubtext =
+        status === 'error' && statusError ? (
+            <span style={{ color: 'var(--error)' }}>{statusError}</span>
+        ) : isRunning && runtime?.current_action_label ? (
+            runtime.current_action_label
+        ) : (
+            'Pulled live from the running agent'
+        );
 
     return (
         <div
@@ -42,24 +75,13 @@ export function StatsGrid({
                 marginBottom: '32px',
             }}
         >
-            {/* 1. Last run status — directly from /status, no fabrication */}
             <StatCard
-                title="Last Run Status"
+                title={isRunning ? 'Current Status' : 'Last Run Status'}
                 value={!configured ? 'Not set up' : STATUS_LABEL[status]}
                 icon={Activity}
-                subtext={
-                    status === 'error' && statusError ? (
-                        <span style={{ color: 'var(--error)' }}>{statusError}</span>
-                    ) : (
-                        'Pulled live from the running agent'
-                    )
-                }
+                subtext={statusSubtext}
             />
 
-            {/* 2. Course progress — from the real "summary" broadcast.
-                 null courses means no run has reported a summary yet
-                 this session — show an honest "—" rather than 0, since
-                 0 would falsely imply "checked, none in progress." */}
             <StatCard
                 title="Courses In Progress"
                 value={coursesInProgress === null ? '—' : String(coursesInProgress)}
@@ -71,18 +93,18 @@ export function StatsGrid({
                 }
             />
 
-            {/* 3. Modules processed THIS SESSION — counts every module
-                 event seen since the dashboard loaded, success or
-                 failure. Deliberately labeled "Processed" not
-                 "Completed": pilot_ui.py's log_module_progress fires
-                 before success/failure is known, so we can't honestly
-                 claim these all succeeded without a dedicated
-                 success-only broadcast event. */}
             <StatCard
-                title="Modules Processed"
-                value={String(modulesCompletedThisRun)}
+                title={runtime?.run_type === 'notes' ? 'Notes Progress' : 'Modules Processed'}
+                value={modulesValue}
                 icon={ListChecks}
-                subtext="This session — includes retries/failures"
+                subtext={modulesSubtext}
+            />
+
+            <StatCard
+                title="Elapsed Time"
+                value={formatElapsed(runtime?.elapsed_seconds)}
+                icon={Timer}
+                subtext={isRunning ? 'Current run duration' : 'Last tracked run'}
             />
         </div>
     );

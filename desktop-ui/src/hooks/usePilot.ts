@@ -4,11 +4,11 @@ import {
     ApiError,
     NetworkError,
     type PilotStatus,
+    type RuntimeState,
     type StartResponse,
     type ConfirmLoginResponse,
     type ToggleBrowserResponse,
 } from "../api/api";
-
 const WS_URL = "ws://127.0.0.1:8000/logs";
 
 const STATUS_POLL_INTERVAL_MS = 2000;
@@ -49,9 +49,13 @@ export type WsConnectionState = "connecting" | "open" | "closed";
 // broadcast event (show_course_summary in pilot_ui.py), which carries
 // [{title, completion}, ...] for every run. This is the only place
 // course data comes from; there is no separate "courses API."
+
 export interface CourseSummary {
+    id?: string;
     title: string;
     completion: number;
+    image?: string;
+    category?: string;
 }
 
 interface UsePilotResult {
@@ -76,6 +80,7 @@ interface UsePilotResult {
     // rather than assuming data is always present.
     courses: CourseSummary[] | null;
     modulesCompletedThisRun: number;
+    runtime: RuntimeState | null;
 
     // best-effort "what's happening right now" text, parsed from the
     // most recent "course"/"module" log message. This is a string
@@ -121,6 +126,7 @@ export function usePilot(): UsePilotResult {
     const [awaitingLogin, setAwaitingLogin] = useState(false);
     const [courses, setCourses] = useState<CourseSummary[] | null>(null);
     const [modulesCompletedThisRun, setModulesCompletedThisRun] = useState(0);
+    const [runtime, setRuntime] = useState<RuntimeState | null>(null);
     const [currentCourseText, setCurrentCourseText] = useState<string | null>(null);
     const [currentModuleText, setCurrentModuleText] = useState<string | null>(null);
 
@@ -197,7 +203,12 @@ export function usePilot(): UsePilotResult {
         ws.onmessage = (event) => {
             if (socketIdRef.current !== socketId) return; // superseded — ignore
 
-            let parsed: { level: LogLevel; message: LogEvent["message"] };
+            let parsed: {
+                level: LogLevel;
+                message: LogEvent["message"];
+                state?: RuntimeState;
+            };
+
             try {
                 parsed = JSON.parse(event.data);
             } catch {
@@ -206,6 +217,10 @@ export function usePilot(): UsePilotResult {
 
             const entry: LogEvent = { ..._stripId(parsed), _id: nextId() };
             setLogs((prev) => [...prev, entry]);
+
+            if (parsed.state) {
+                setRuntime(parsed.state);
+            }
 
             if (parsed.level === "action_required") {
                 setAwaitingLogin(true);
@@ -334,6 +349,7 @@ export function usePilot(): UsePilotResult {
         awaitingLogin,
         courses,
         modulesCompletedThisRun,
+        runtime,
         currentCourseText,
         currentModuleText,
         startWorkflow,
@@ -357,4 +373,4 @@ function _stripId(parsed: {
 // can check `err instanceof ApiError` / `NetworkError` without a
 // separate import from api.ts
 export { ApiError, NetworkError };
-export type { PilotStatus };
+export type { PilotStatus, RuntimeState };

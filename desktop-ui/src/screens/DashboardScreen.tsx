@@ -6,18 +6,20 @@ import { CourseGrid } from '../components/dashboard/CourseGrid';
 import { ActivityFeed } from '../components/dashboard/ActivityFeed';
 import { Button } from '../components/shared/Button';
 import { Play, FileText, GlobeOff, Square } from 'lucide-react';
-import type { PilotStatus, CourseSummary, LogEvent } from '../hooks/usePilot';
+import type { PilotStatus, CourseSummary, LogEvent, RuntimeState } from '../hooks/usePilot';
 
 interface DashboardScreenProps {
     status: PilotStatus;
     statusError: string | null;
     configured: boolean;
+    runtime: RuntimeState | null;
     courses: CourseSummary[] | null;
     modulesCompletedThisRun: number;
     logs: LogEvent[];
     awaitingLogin: boolean;
     startWorkflow: () => void;
     startNotes: () => void;
+    stopRuntime: () => void;
     confirmLogin: () => void;
     toggleBrowser: () => void;
 }
@@ -26,16 +28,28 @@ export function DashboardScreen({
     status,
     statusError,
     configured,
+    runtime,
     courses,
     modulesCompletedThisRun,
     logs,
     awaitingLogin,
     startWorkflow,
     startNotes,
+    stopRuntime,
     confirmLogin,
     toggleBrowser,
 }: DashboardScreenProps) {
     const isRunning = status === 'running';
+
+    const subtitle = !configured
+        ? 'Finish setup to start automating your portal.'
+        : isRunning
+            ? runtime?.current_action_label ?? 'An automation run is in progress.'
+            : status === 'error'
+                ? `Last run failed${statusError ? `: ${statusError}` : '.'}`
+                : status === 'stopped'
+                    ? 'Last run was stopped.'
+                    : 'Ready to run.';
 
     return (
         <div
@@ -46,7 +60,6 @@ export function DashboardScreen({
                 paddingBottom: '32px',
             }}
         >
-            {/* Header */}
             <div
                 style={{
                     display: 'flex',
@@ -70,13 +83,7 @@ export function DashboardScreen({
                         Pilot
                     </h1>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '13px', margin: 0 }}>
-                        {!configured
-                            ? 'Finish setup to start automating your portal.'
-                            : isRunning
-                                ? 'An automation run is in progress.'
-                                : status === 'error'
-                                    ? `Last run failed${statusError ? `: ${statusError}` : '.'}`
-                                    : 'Ready to run.'}
+                        {subtitle}
                     </p>
                 </div>
 
@@ -84,10 +91,10 @@ export function DashboardScreen({
                     <Button
                         variant={isRunning ? 'danger' : 'primary'}
                         icon={isRunning ? Square : Play}
-                        onClick={startWorkflow}
-                        disabled={!configured || isRunning}
+                        onClick={isRunning ? stopRuntime : startWorkflow}
+                        disabled={!configured}
                     >
-                        {isRunning ? 'Run In Progress' : 'Start Automation'}
+                        {isRunning ? 'Stop' : 'Start Automation'}
                     </Button>
 
                     <Button
@@ -121,6 +128,7 @@ export function DashboardScreen({
                 status={status}
                 statusError={statusError}
                 configured={configured}
+                runtime={runtime}
                 courses={courses}
                 modulesCompletedThisRun={modulesCompletedThisRun}
             />

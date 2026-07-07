@@ -2,7 +2,7 @@
 
 # Pilot
 
-Pilot is an open-source browser automation tool for Amity Online students. It navigates course modules, answers quizzes using Groq's Llama 3.3 70B, and submits feedback forms — automatically.
+Pilot is an open-source browser automation tool for Amity Online students. It navigates course modules, answers quizzes using Groq's Llama 3.3 70B, and submits feedback forms automatically.
 
 > Full documentation at [pilotcli.netlify.app](https://pilotcli.netlify.app)
 

@@ -156,7 +156,6 @@ def get_history_session(session_id: str):
 
     return session
 
-
 @app.post("/workflow/start")
 def start_workflow():
     started = _run_in_thread(pilot.start_workflow_server_mode)

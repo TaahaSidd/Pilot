@@ -1,42 +1,37 @@
 // src/screens/AutomationScreen.tsx
 import React from 'react';
-// Corrected import to match the new component name
 import { PilotMiniGame } from '../components/automation/PilotMiniGame';
 import { LiveActivityLog } from '../components/automation/LiveActivityLog';
-import type { LogEvent, PilotStatus } from '../hooks/usePilot';
+import { usePilotContext } from '../context/usePilotContext';
 
-interface AutomationScreenProps {
-    liveLogs: LogEvent[];
-    status: PilotStatus;
-    currentCourseText: string | null;
-    currentModuleText: string | null;
-}
-
-const STATUS_LABEL: Record<PilotStatus, string> = {
+const STATUS_LABEL: Record<string, string> = {
     idle: 'Idle',
     running: 'Running',
     done: 'Completed',
+    stopped: 'Stopped',
     error: 'Failed',
 };
 
-const STATUS_COLOR: Record<PilotStatus, string> = {
+const STATUS_COLOR: Record<string, string> = {
     idle: 'var(--text-muted)',
     running: '#a855f7',
     done: 'var(--success)',
+    stopped: 'var(--warning)',
     error: 'var(--error)',
 };
 
-export function AutomationScreen({
-    liveLogs,
-    status,
-    currentCourseText,
-    currentModuleText,
-}: AutomationScreenProps) {
+export function AutomationScreen() {
+    const { logs, status, runtime } = usePilotContext();
+
     const isRunning = status === 'running';
+
+    const currentCourseText = runtime?.current_course ?? null;
+    const currentModuleText = runtime?.current_module ?? null;
+    const currentActionText = runtime?.current_action_label ?? null;
+    const progress = runtime?.module_progress_percent ?? 0;
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-            {/* Header */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                     <h1
@@ -50,14 +45,15 @@ export function AutomationScreen({
                     >
                         Automation
                     </h1>
+
                     <div
                         style={{
                             fontSize: '14px',
                             fontWeight: 600,
-                            color: STATUS_COLOR[status],
+                            color: STATUS_COLOR[status] ?? 'var(--text-muted)',
                         }}
                     >
-                        {STATUS_LABEL[status]}
+                        {STATUS_LABEL[status] ?? status}
                     </div>
                 </div>
 
@@ -74,26 +70,18 @@ export function AutomationScreen({
                     >
                         <div
                             style={{
-                                position: 'absolute',
-                                width: '30%',
+                                width: `${Math.max(progress, 8)}%`,
                                 height: '100%',
                                 backgroundColor: '#a855f7',
                                 borderRadius: '2px',
-                                animation: 'pilot-indeterminate 1.4s ease-in-out infinite',
+                                transition: 'width 250ms ease',
                             }}
                         />
-                        <style>{`
-                            @keyframes pilot-indeterminate {
-                                0% { left: -30%; }
-                                100% { left: 100%; }
-                            }
-                        `}</style>
                     </div>
                 )}
             </div>
 
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px' }}>
-                {/* Left: Current Activity Info */}
                 <div
                     style={{
                         backgroundColor: 'var(--surface)',
@@ -121,10 +109,12 @@ export function AutomationScreen({
                                 <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
                                 <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
                             </svg>
+
                             <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
                                 Current Activity
                             </h3>
                         </div>
+
                         {isRunning && (
                             <span
                                 style={{
@@ -149,7 +139,7 @@ export function AutomationScreen({
                         </div>
                     )}
 
-                    {(currentCourseText || currentModuleText) && (
+                    {(currentCourseText || currentModuleText || currentActionText) && (
                         <div style={{ display: 'flex', gap: '48px', flexWrap: 'wrap' }}>
                             <div>
                                 <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>
@@ -159,6 +149,7 @@ export function AutomationScreen({
                                     {currentCourseText ?? '—'}
                                 </div>
                             </div>
+
                             <div>
                                 <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>
                                     Current Module
@@ -167,15 +158,34 @@ export function AutomationScreen({
                                     {currentModuleText ?? '—'}
                                 </div>
                             </div>
+
+                            <div>
+                                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>
+                                    Current Action
+                                </div>
+                                <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                                    {currentActionText ?? '—'}
+                                </div>
+                            </div>
+
+                            {runtime?.modules_total ? (
+                                <div>
+                                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>
+                                        Progress
+                                    </div>
+                                    <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                                        {runtime.modules_processed}/{runtime.modules_total} · {runtime.module_progress_percent}%
+                                    </div>
+                                </div>
+                            ) : null}
                         </div>
                     )}
                 </div>
 
-                {/* Right: Engagement Zone */}
                 <PilotMiniGame />
             </div>
 
-            <LiveActivityLog logs={liveLogs} />
+            <LiveActivityLog logs={logs} />
         </div>
     );
 }

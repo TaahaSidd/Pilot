@@ -2,12 +2,14 @@
 import React from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import type { CourseSummary } from '../../hooks/usePilot';
+import cardBg from '../../assets/images/card-bg.jpg';
 
 interface CourseGridProps {
     courses: CourseSummary[] | null;
 }
 
 export function CourseGrid({ courses }: CourseGridProps) {
+
     return (
         <div>
             <div
@@ -97,45 +99,26 @@ export function CourseGrid({ courses }: CourseGridProps) {
                                     minHeight: '260px',
                                 }}
                             >
-                                {course.image ? (
-                                    <div
+                                <div
+                                    style={{
+                                        width: '100%',
+                                        height: '140px',
+                                        overflow: 'hidden',
+                                        borderBottom: '1px solid var(--border)',
+                                        backgroundColor: 'var(--surface)',
+                                    }}
+                                >
+                                    <img
+                                        src={cardBg}
+                                        alt={course.title}
                                         style={{
                                             width: '100%',
-                                            height: '120px',
-                                            overflow: 'hidden',
-                                            backgroundColor: 'var(--border)',
+                                            height: '100%',
+                                            objectFit: 'cover',
+                                            display: 'block',
                                         }}
-                                    >
-                                        <img
-                                            src={course.image}
-                                            alt={course.title}
-                                            style={{
-                                                width: '100%',
-                                                height: '100%',
-                                                objectFit: 'cover',
-                                            }}
-                                        />
-                                    </div>
-                                ) : (
-                                    <div
-                                        style={{
-                                            width: '100%',
-                                            height: '120px',
-                                            background:
-                                                'linear-gradient(135deg, rgba(170,0,255,0.24), rgba(170,0,255,0.05))',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            color: 'var(--accent)',
-                                            fontSize: '12px',
-                                            fontWeight: 700,
-                                            letterSpacing: '0.08em',
-                                            textTransform: 'uppercase',
-                                        }}
-                                    >
-                                        Pilot Course
-                                    </div>
-                                )}
+                                    />
+                                </div>
 
                                 <div
                                     style={{
@@ -166,32 +149,7 @@ export function CourseGrid({ courses }: CourseGridProps) {
                                         >
                                             {course.title}
                                         </h4>
-
-                                        {isComplete && (
-                                            <CheckCircle2
-                                                size={18}
-                                                style={{
-                                                    color: 'var(--success)',
-                                                    flexShrink: 0,
-                                                    marginTop: '1px',
-                                                }}
-                                            />
-                                        )}
                                     </div>
-
-                                    {course.category && (
-                                        <div
-                                            style={{
-                                                fontSize: '11px',
-                                                color: 'var(--text-muted)',
-                                                textTransform: 'uppercase',
-                                                letterSpacing: '0.06em',
-                                                fontWeight: 600,
-                                            }}
-                                        >
-                                            {course.category}
-                                        </div>
-                                    )}
 
                                     <div style={{ marginTop: 'auto' }}>
                                         <div

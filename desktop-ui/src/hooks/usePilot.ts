@@ -5,6 +5,7 @@ import {
     NetworkError,
     type PilotStatus,
     type RuntimeState,
+    type StopResponse,
     type StartResponse,
     type ConfirmLoginResponse,
     type ToggleBrowserResponse,
@@ -94,6 +95,7 @@ interface UsePilotResult {
 
     // actions — each forwards to api.ts, hook just reacts to the result
     startWorkflow: () => Promise<StartResponse>;
+    stopRuntime: (force?: boolean) => Promise<StopResponse>;
     startNotes: () => Promise<StartResponse>;
     confirmLogin: () => Promise<ConfirmLoginResponse>;
     toggleBrowser: () => Promise<ToggleBrowserResponse>;
@@ -326,6 +328,12 @@ export function usePilot(): UsePilotResult {
         return result;
     }, [pollStatus]);
 
+    const stopRuntime = useCallback(async (force = false) => {
+        const result = await pilotApi.stopRuntime(force);
+        await pollStatus();
+        return result;
+    }, [pollStatus]);
+
     const confirmLogin = useCallback(async () => {
         const result = await pilotApi.confirmLogin();
         if (result.confirmed) {
@@ -354,6 +362,7 @@ export function usePilot(): UsePilotResult {
         currentModuleText,
         startWorkflow,
         startNotes,
+        stopRuntime,
         confirmLogin,
         toggleBrowser,
     };

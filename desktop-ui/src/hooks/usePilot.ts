@@ -9,6 +9,7 @@ import {
     type StartResponse,
     type ConfirmLoginResponse,
     type ToggleBrowserResponse,
+    type CourseSummary,
 } from "../api/api";
 const WS_URL = "ws://127.0.0.1:8000/logs";
 
@@ -50,14 +51,6 @@ export type WsConnectionState = "connecting" | "open" | "closed";
 // broadcast event (show_course_summary in pilot_ui.py), which carries
 // [{title, completion}, ...] for every run. This is the only place
 // course data comes from; there is no separate "courses API."
-
-export interface CourseSummary {
-    id?: string;
-    title: string;
-    completion: number;
-    image?: string;
-    category?: string;
-}
 
 interface UsePilotResult {
     // status polling
@@ -147,27 +140,36 @@ export function usePilot(): UsePilotResult {
             setStatusError(data.error);
             setConfigured(data.configured);
 
-            // if the run is no longer active, we can't still be waiting on
-            // a login confirmation — clear it defensively so the UI never
-            // gets stuck showing a CAPTCHA button after a run ends
             if (data.status !== "running") {
                 setAwaitingLogin(false);
             }
         } catch {
-            // a single missed poll isn't fatal (NetworkError or ApiError
-            // both land here) — the next interval tries again. We don't
-            // surface transient blips as statusError, since that field
-            // is reserved for the server's own pilot.error.
+            // ignore transient polling failures
         } finally {
             setStatusLoading(false);
         }
     }, []);
 
+    // Load the last known course list once when the UI starts.
+    // Live websocket "summary" events will overwrite this whenever
+    // a new workflow finishes.
+    const loadCourses = useCallback(async () => {
+        try {
+            const data = await pilotApi.getCourses();
+            setCourses(data.courses);
+        } catch {
+            // Ignore if no history exists yet.
+        }
+    }, []);
+
     useEffect(() => {
         pollStatus();
+        loadCourses();
+
         const interval = setInterval(pollStatus, STATUS_POLL_INTERVAL_MS);
+
         return () => clearInterval(interval);
-    }, [pollStatus]);
+    }, [pollStatus, loadCourses]);
 
     // ── WebSocket log stream, with backoff reconnect ────────────
     //
@@ -382,4 +384,4 @@ function _stripId(parsed: {
 // can check `err instanceof ApiError` / `NetworkError` without a
 // separate import from api.ts
 export { ApiError, NetworkError };
-export type { PilotStatus, RuntimeState };
+export type { PilotStatus, RuntimeState, CourseSummary };

@@ -217,6 +217,21 @@ export interface HistoryLog {
     message: unknown;
 }
 
+export interface CourseSummary {
+    id?: string;
+    title: string;
+    completion: number;
+    image?: string;
+    category?: string;
+}
+
+export interface CoursesResponse {
+    courses: CourseSummary[];
+    source_session_id: string | null;
+    updated_at: string | null;
+    source_type: string | null;
+}
+
 export interface HistorySessionDetail extends HistorySessionSummary {
     logs: HistoryLog[];
 }
@@ -228,6 +243,8 @@ export const pilotApi = {
 
     stopRuntime: (force = false) =>
         apiPost<StopResponse>(`/runtime/stop?force=${force}`),
+
+    getCourses: () => apiGet<CoursesResponse>("/courses"),
 
     getHistory: () => apiGet<HistorySessionSummary[]>("/history"),
 

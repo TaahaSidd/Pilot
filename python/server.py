@@ -156,6 +156,12 @@ def get_history_session(session_id: str):
 
     return session
 
+
+@app.get("/courses")
+def get_courses():
+    return history.get_latest_courses()
+
+
 @app.post("/workflow/start")
 def start_workflow():
     started = _run_in_thread(pilot.start_workflow_server_mode)
@@ -242,14 +248,14 @@ def set_config(payload: OnboardingPayload):
 
 @app.patch("/config")
 def update_config(payload: ConfigUpdatePayload):
-    """Partial update — used by the settings screen. Any field left
+    """Partial update used by the settings screen. Any field left
     as None is NOT overwritten; the existing stored value is kept.
     This is what lets a masked/untouched password field mean
     'leave this as-is' rather than wiping it to empty."""
     if not is_configured():
         raise HTTPException(
             status_code=409,
-            detail="No existing configuration to update — run onboarding first.",
+            detail="No existing configuration to update. Run onboarding first.",
         )
 
     current = load_config()

@@ -87,6 +87,28 @@ class HistoryManager:
 
         self._save_current()
 
+    def get_latest_courses(self) -> dict:
+        sessions = self.list_sessions()
+
+        for session in sessions:
+            summary = session.get("summary", {})
+            courses = summary.get("courses")
+
+            if isinstance(courses, list) and len(courses) > 0:
+                return {
+                    "courses": courses,
+                    "source_session_id": session.get("id"),
+                    "updated_at": session.get("started_at"),
+                    "source_type": session.get("type"),
+                }
+
+        return {
+            "courses": [],
+            "source_session_id": None,
+            "updated_at": None,
+            "source_type": None,
+        }
+
     def increment_summary(self, key: str, amount: int = 1):
         if not self.current_session:
             return

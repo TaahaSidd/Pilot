@@ -1,5 +1,4 @@
-// src/screens/DashboardScreen.tsx
-import React from 'react';
+import { useState } from 'react';
 import { StatsGrid } from '../components/dashboard/StatsGrid';
 import { InterventionBanner } from '../components/dashboard/InterventionBanner';
 import { CourseGrid } from '../components/dashboard/CourseGrid';
@@ -7,12 +6,13 @@ import { ActivityFeed } from '../components/dashboard/ActivityFeed';
 import { Button } from '../components/shared/Button';
 import { Play, FileText, GlobeOff, Square } from 'lucide-react';
 import { usePilotContext } from '../context/usePilotContext';
+import type { CourseSummary } from '../api/api';
 
-export function DashboardScreen() {
+export function DashboardScreen({ onOpenCourseNotes }: { onOpenCourseNotes?: (course: CourseSummary) => void }) {
     const {
         status,
-        statusError,
         configured,
+        config,
         runtime,
         courses,
         modulesCompletedThisRun,
@@ -26,16 +26,30 @@ export function DashboardScreen() {
     } = usePilotContext();
 
     const isRunning = status === 'running';
+    const userName = config?.display_name || config?.username || 'there';
+    const [pendingAction, setPendingAction] = useState<'workflow' | 'stop' | 'notes' | null>(null);
 
-    const subtitle = !configured
-        ? 'Finish setup to start automating your portal.'
-        : isRunning
-            ? runtime?.current_action_label ?? 'An automation run is in progress.'
-            : status === 'error'
-                ? `Last run failed${statusError ? `: ${statusError}` : '.'}`
-                : status === 'stopped'
-                    ? 'Last run was stopped.'
-                    : 'Ready to run.';
+    async function runDashboardAction(action: 'workflow' | 'stop' | 'notes') {
+        try {
+            setPendingAction(action);
+
+            if (action === 'workflow') {
+                await startWorkflow();
+                return;
+            }
+
+            if (action === 'notes') {
+                await startNotes();
+                return;
+            }
+
+            await stopRuntime(true);
+        } catch (error) {
+            console.error('Dashboard action failed', error);
+        } finally {
+            setPendingAction(null);
+        }
+    }
 
     return (
         <div
@@ -60,26 +74,23 @@ export function DashboardScreen() {
                         style={{
                             fontSize: '26px',
                             fontWeight: 700,
-                            letterSpacing: '-0.02em',
-                            marginBottom: '4px',
+                            letterSpacing: 0,
                             color: 'var(--text-primary)',
-                            margin: '0 0 4px 0',
+                            margin: 0,
                         }}
                     >
-                        Pilot
+                        Welcome, {userName}
                     </h1>
-
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '13px', margin: 0 }}>
-                        {subtitle}
-                    </p>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <Button
                         variant={isRunning ? 'danger' : 'primary'}
                         icon={isRunning ? Square : Play}
-                        onClick={isRunning ? () => stopRuntime(false) : startWorkflow}
-                        disabled={!configured}
+                        onClick={() => runDashboardAction(isRunning ? 'stop' : 'workflow')}
+                        disabled={!configured || pendingAction !== null}
+                        loading={pendingAction === 'workflow' || pendingAction === 'stop'}
+                        loadingText={pendingAction === 'stop' ? 'Stopping' : 'Starting'}
                     >
                         {isRunning ? 'Stop' : 'Start Automation'}
                     </Button>
@@ -87,8 +98,9 @@ export function DashboardScreen() {
                     <Button
                         variant="secondary"
                         icon={FileText}
-                        onClick={startNotes}
-                        disabled={!configured || isRunning}
+                        onClick={() => runDashboardAction('notes')}
+                        disabled={!configured || isRunning || pendingAction !== null}
+                        loading={pendingAction === 'notes'}
                         style={{ padding: '9px 10px' }}
                         title="Notes Agent"
                     >
@@ -111,25 +123,41 @@ export function DashboardScreen() {
                 <InterventionBanner awaitingLogin={awaitingLogin} confirmLogin={confirmLogin} />
             )}
 
-            <StatsGrid
-                status={status}
-                statusError={statusError}
-                configured={configured}
-                runtime={runtime}
-                courses={courses}
-                modulesCompletedThisRun={modulesCompletedThisRun}
-            />
-
             <div
                 style={{
                     display: 'grid',
-                    gridTemplateColumns: '2fr 1fr',
-                    gap: '24px',
+                    gridTemplateColumns: 'minmax(0, 1fr) minmax(300px, 400px)',
+                    gap: '20px',
                     alignItems: 'start',
                 }}
             >
-                <CourseGrid courses={courses} />
-                <ActivityFeed logs={logs} />
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '24px',
+                        minWidth: 0,
+                    }}
+                >
+                    <StatsGrid
+                        status={status}
+                        runtime={runtime}
+                        courses={courses}
+                        modulesCompletedThisRun={modulesCompletedThisRun}
+                    />
+
+                    <CourseGrid courses={courses} onSelectCourse={onOpenCourseNotes} />
+                </div>
+
+                <div
+                    style={{
+                        minWidth: 0,
+                        position: 'sticky',
+                        top: 0,
+                    }}
+                >
+                    <ActivityFeed logs={logs} />
+                </div>
             </div>
         </div>
     );

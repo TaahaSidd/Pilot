@@ -1,5 +1,4 @@
-// src/components/dashboard/ActivityFeed.tsx
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
     FileSpreadsheet,
     CheckCircle2,
@@ -15,9 +14,11 @@ import type { LogEvent, LogLevel } from '../../hooks/usePilot';
 
 interface ActivityFeedProps {
     logs: LogEvent[];
+    compact?: boolean;
 }
 
 const PAGE_SIZE = 8;
+const COMPACT_PAGE_SIZE = 4;
 
 function getIcon(level: LogLevel) {
     switch (level) {
@@ -50,7 +51,7 @@ function messageToText(message: LogEvent['message']): string {
         const data = message as Record<string, unknown>;
 
         if ('title' in data && 'completion' in data) {
-            return `${String(data.title)} — ${String(data.completion)}%`;
+            return `${String(data.title)} - ${String(data.completion)}%`;
         }
 
         if ('current' in data && 'total' in data && 'title' in data) {
@@ -62,19 +63,27 @@ function messageToText(message: LogEvent['message']): string {
     return 'Activity update';
 }
 
-export function ActivityFeed({ logs }: ActivityFeedProps) {
-    const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+export function ActivityFeed({ logs, compact = false }: ActivityFeedProps) {
+    const initialVisibleCount = compact ? COMPACT_PAGE_SIZE : PAGE_SIZE;
+    const [visibleCount, setVisibleCount] = useState(initialVisibleCount);
 
     const items = [...logs].reverse().filter((l) => l.level !== 'summary');
     const visible = items.slice(0, visibleCount);
 
     const handleLoadMore = () => {
-        setVisibleCount((prev) => prev + PAGE_SIZE);
+        setVisibleCount((prev) => prev + initialVisibleCount);
     };
 
     return (
-        <div>
-            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px', marginTop: 0 }}>
+        <div style={{ minWidth: 0 }}>
+            <h3 style={{
+                fontSize: compact ? '13px' : '16px',
+                fontWeight: 600,
+                color: compact ? 'var(--text-secondary)' : 'var(--text-primary)',
+                marginBottom: compact ? '12px' : '16px',
+                marginTop: 0,
+                letterSpacing: 0,
+            }}>
                 Recent Activity
             </h3>
 
@@ -83,11 +92,12 @@ export function ActivityFeed({ logs }: ActivityFeedProps) {
                     backgroundColor: 'var(--surface)',
                     border: '1px solid var(--border)',
                     borderRadius: '12px',
-                    padding: '20px',
+                    padding: compact ? '16px' : '20px',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '18px',
-                    maxHeight: '520px',
+                    gap: compact ? '14px' : '18px',
+                    maxHeight: compact ? '236px' : '520px',
+                    minHeight: compact ? '176px' : undefined,
                     overflowY: 'auto',
                 }}
             >
@@ -117,8 +127,7 @@ export function ActivityFeed({ logs }: ActivityFeedProps) {
                                     color: 'var(--text-muted)',
                                     fontSize: '11px',
                                     marginTop: '3px',
-                                    textTransform: 'uppercase',
-                                    letterSpacing: '0.04em',
+                                    letterSpacing: 0,
                                 }}
                             >
                                 {entry.level.replace('_', ' ')}

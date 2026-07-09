@@ -1,5 +1,3 @@
-// src/components/dashboard/InterventionBanner.tsx
-import React from 'react';
 import { AlertTriangle } from 'lucide-react';
 
 interface InterventionBannerProps {
@@ -13,7 +11,7 @@ export function InterventionBanner({ awaitingLogin, confirmLogin }: Intervention
     return (
         <div style={{
             border: '1px solid var(--warning)',
-            backgroundColor: 'rgba(255, 183, 121, 0.05)',
+            backgroundColor: 'var(--warning-soft)',
             padding: '20px',
             borderRadius: '8px',
             marginBottom: '32px',
@@ -25,10 +23,10 @@ export function InterventionBanner({ awaitingLogin, confirmLogin }: Intervention
                 <AlertTriangle size={18} style={{ color: 'var(--warning)', marginTop: '2px' }} />
                 <div>
                     <h4 style={{ color: 'var(--warning)', fontWeight: 600, fontSize: '15px', marginBottom: '4px' }}>
-                        Action Required: Check Headless Browser Window
+                        Complete Login Verification
                     </h4>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>
-                        A login prompt or CAPTCHA sequence was intercepted. Solve it, then report validation complete.
+                        Pilot has filled your credentials. Finish the CAPTCHA in the browser, then click Continue.
                     </p>
                 </div>
             </div>
@@ -36,7 +34,7 @@ export function InterventionBanner({ awaitingLogin, confirmLogin }: Intervention
                 onClick={confirmLogin}
                 style={{
                     backgroundColor: 'var(--warning)',
-                    color: '#0D0D0D',
+                    color: 'var(--text-primary)',
                     border: 'none',
                     padding: '10px 20px',
                     borderRadius: '6px',
@@ -45,7 +43,7 @@ export function InterventionBanner({ awaitingLogin, confirmLogin }: Intervention
                     cursor: 'pointer'
                 }}
             >
-                Verification Cleared
+                Continue
             </button>
         </div>
     );

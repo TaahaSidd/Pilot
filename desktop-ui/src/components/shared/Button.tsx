@@ -9,6 +9,8 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     icon?: LucideIcon;
     iconPosition?: 'left' | 'right';
     fullWidth?: boolean;
+    loading?: boolean;
+    loadingText?: string;
 }
 
 export function Button({
@@ -18,17 +20,21 @@ export function Button({
     icon: Icon,
     iconPosition = 'left',
     fullWidth = false,
+    loading = false,
+    loadingText,
     style,
     disabled,
     ...props
 }: ButtonProps) {
     const [isHovered, setIsHovered] = useState(false);
+    const [isFocused, setIsFocused] = useState(false);
+    const isDisabled = disabled || loading;
 
     // Color matrix design tokens mapping dashboard context styles
     const getVariantStyles = () => {
-        if (disabled) {
+        if (disabled && !loading) {
             return {
-                bg: 'rgba(255, 255, 255, 0.04)',
+                bg: 'var(--surface-subtle)',
                 color: 'var(--text-muted)',
                 border: '1px solid var(--border)'
             };
@@ -36,38 +42,38 @@ export function Button({
         switch (variant) {
             case 'secondary':
                 return {
-                    bg: 'rgba(255, 255, 255, 0.03)',
+                    bg: 'var(--surface-subtle)',
                     color: 'var(--text-secondary)',
                     border: '1px solid var(--border)',
-                    hoverBg: 'rgba(255, 255, 255, 0.07)'
+                    hoverBg: 'var(--surface-overlay)'
                 };
             case 'danger':
                 return {
-                    bg: 'rgba(255, 68, 68, 0.1)',
-                    color: '#ff4444',
-                    border: '1px solid rgba(255, 68, 68, 0.2)',
-                    hoverBg: 'rgba(255, 68, 68, 0.18)'
+                    bg: 'var(--error)',
+                    color: 'var(--text-on-accent)',
+                    border: '1px solid transparent',
+                    hoverBg: 'var(--error-hover)'
                 };
             case 'ghost':
                 return {
                     bg: 'transparent',
                     color: 'var(--text-muted)',
                     border: '1px solid transparent',
-                    hoverBg: 'rgba(255, 255, 255, 0.03)'
+                    hoverBg: 'var(--surface-subtle)'
                 };
             case 'outline':
                 return {
                     bg: 'transparent',
                     color: 'var(--text-primary)',
                     border: '1px solid var(--border)',
-                    hoverBg: 'rgba(255, 255, 255, 0.02)'
+                    hoverBg: 'var(--surface-subtle)'
                 };
             default: // Primary
                 return {
                     bg: 'var(--accent)',
-                    color: '#ffffff',
+                    color: 'var(--text-on-accent)',
                     border: '1px solid transparent',
-                    hoverBg: '#9333ea' // Deep matching highlight purple
+                    hoverBg: 'var(--accent-hover)'
                 };
         }
     };
@@ -85,9 +91,19 @@ export function Button({
 
     return (
         <button
-            onMouseEnter={() => !disabled && setIsHovered(true)}
-            onMouseLeave={() => !disabled && setIsHovered(false)}
-            disabled={disabled}
+            {...props}
+            onMouseEnter={() => !isDisabled && setIsHovered(true)}
+            onMouseLeave={() => !isDisabled && setIsHovered(false)}
+            onFocus={(event) => {
+                setIsFocused(true);
+                props.onFocus?.(event);
+            }}
+            onBlur={(event) => {
+                setIsFocused(false);
+                props.onBlur?.(event);
+            }}
+            disabled={isDisabled}
+            aria-busy={loading}
             style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -100,19 +116,37 @@ export function Button({
                 backgroundColor: isHovered && vStyle.hoverBg ? vStyle.hoverBg : vStyle.bg,
                 color: vStyle.color,
                 border: vStyle.border,
-                cursor: disabled ? 'not-allowed' : 'pointer',
+                cursor: isDisabled ? 'not-allowed' : 'pointer',
                 width: fullWidth ? '100%' : 'auto',
                 transition: 'all 150ms ease',
                 fontFamily: 'inherit',
-                outline: 'none',
-                opacity: disabled ? 0.6 : 1,
+                outline: isFocused ? '2px solid var(--accent)' : 'none',
+                outlineOffset: '2px',
+                opacity: isDisabled ? 0.6 : 1,
                 ...style
             }}
-            {...props}
         >
-            {Icon && iconPosition === 'left' && <Icon size={sStyle.iconSize} style={{ flexShrink: 0 }} />}
-            <span>{children}</span>
-            {Icon && iconPosition === 'right' && <Icon size={sStyle.iconSize} style={{ flexShrink: 0 }} />}
+            {loading && (
+                <>
+                    <style>
+                        {'@keyframes pilot-button-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }'}
+                    </style>
+                    <span
+                        style={{
+                            width: sStyle.iconSize,
+                            height: sStyle.iconSize,
+                            border: '2px solid currentColor',
+                            borderTopColor: 'transparent',
+                            borderRadius: '999px',
+                            flexShrink: 0,
+                            animation: 'pilot-button-spin 700ms linear infinite',
+                        }}
+                    />
+                </>
+            )}
+            {!loading && Icon && iconPosition === 'left' && <Icon size={sStyle.iconSize} style={{ flexShrink: 0 }} />}
+            <span>{loading && loadingText ? loadingText : children}</span>
+            {!loading && Icon && iconPosition === 'right' && <Icon size={sStyle.iconSize} style={{ flexShrink: 0 }} />}
         </button>
     );
 }

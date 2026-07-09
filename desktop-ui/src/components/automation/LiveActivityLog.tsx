@@ -27,7 +27,7 @@ export function LiveActivityLog({ logs }: LiveActivityLogProps) {
                     alignItems: 'center',
                     padding: '14px 20px',
                     borderBottom: '1px solid var(--border)',
-                    backgroundColor: 'rgba(255, 255, 255, 0.01)',
+                    backgroundColor: 'var(--surface)',
                 }}
             >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -68,7 +68,7 @@ export function LiveActivityLog({ logs }: LiveActivityLogProps) {
             <div
                 style={{
                     padding: '24px',
-                    backgroundColor: 'rgba(0,0,0,0.2)',
+                    backgroundColor: 'var(--surface-subtle)',
                     height: '320px',
                     overflowY: 'auto',
                     display: 'flex',
@@ -117,9 +117,9 @@ export function LiveActivityLog({ logs }: LiveActivityLogProps) {
                                     style={{
                                         color:
                                             log.level === 'error'
-                                                ? '#ff4444'
+                                                ? 'var(--error)'
                                                 : log.level === 'warning' || log.level === 'action_required'
-                                                    ? '#ffbb33'
+                                                    ? 'var(--warning)'
                                                     : 'var(--text-primary)',
                                     }}
                                 >

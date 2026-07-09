@@ -1,71 +1,116 @@
 import React from 'react';
+import { ArrowLeft, Check } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { Button } from '../components/shared/Button';
+
+type ThemeOption = {
+    id: 'light' | 'dark' | 'system';
+    label: string;
+    description: string;
+    previewBackground: string;
+    previewSurface: string;
+    previewAccent: string;
+};
+
+const themes: ThemeOption[] = [
+    {
+        id: 'dark',
+        label: 'Dark',
+        description: 'Low glare interface for long automation runs.',
+        previewBackground: '#101014',
+        previewSurface: '#1B1B21',
+        previewAccent: '#7C3AED',
+    },
+    {
+        id: 'light',
+        label: 'Light',
+        description: 'Brighter interface for daytime work.',
+        previewBackground: '#F7F8FB',
+        previewSurface: '#FCFCFD',
+        previewAccent: '#7C3AED',
+    },
+    {
+        id: 'system',
+        label: 'System',
+        description: 'Follow your operating system appearance.',
+        previewBackground: 'linear-gradient(135deg, #F7F8FB 0 50%, #101014 50% 100%)',
+        previewSurface: '#FCFCFD',
+        previewAccent: '#7C3AED',
+    },
+];
 
 export function ThemeSettingsScreen({ onBack }: { onBack: () => void }) {
     const { theme, setTheme } = useTheme();
 
-    const themes = [
-        { id: 'light', label: 'Light', bg: '#F8F9FA', text: '#1F1F1F' },
-        { id: 'dark', label: 'Dark', bg: '#0A0A0A', text: '#FFFFFF' },
-        { id: 'system', label: 'System', bg: 'linear-gradient(135deg, #F8F9FA 50%, #0A0A0A 50%)', text: 'var(--text-primary)' },
-        { id: 'high-contrast', label: 'Contrast', bg: '#000000', text: '#FFD700' },
-    ];
-
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <button
-                    onClick={onBack}
-                    style={{ background: 'var(--social-bg)', border: 'none', borderRadius: '8px', padding: '8px 16px', cursor: 'pointer', color: 'var(--text-primary)', fontWeight: 500 }}
-                >
-                    ← Back
-                </button>
-                <h1 style={{ fontSize: '20px', margin: 0, color: 'var(--text-primary)' }}>Appearance</h1>
+                <Button variant="ghost" icon={ArrowLeft} onClick={onBack} style={{ width: 'fit-content' }}>
+                    Back
+                </Button>
+
+                <h1 style={{ fontSize: '20px', margin: 0, color: 'var(--text-primary)' }}>
+                    Appearance
+                </h1>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
-                {themes.map((t) => {
-                    const isComingSoon = t.id === 'system' || t.id === 'high-contrast';
-                    const isActive = theme === t.id;
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                {themes.map((item) => {
+                    const isActive = theme === item.id;
 
                     return (
-                        <div
-                            key={t.id}
-                            onClick={() => !isComingSoon && setTheme(t.id as 'light' | 'dark')}
+                        <button
+                            key={item.id}
+                            onClick={() => setTheme(item.id)}
                             style={{
-                                background: 'var(--bg-secondary)',
+                                background: 'var(--surface)',
                                 borderRadius: '12px',
-                                padding: '20px',
-                                // Active border is now much thicker/clearer
-                                border: isActive ? '3px solid var(--primary)' : '2px solid var(--border)',
-                                cursor: isComingSoon ? 'not-allowed' : 'pointer',
-                                transition: 'all 0.2s ease',
-                                opacity: isComingSoon ? 0.5 : 1,
-                                position: 'relative'
+                                padding: '18px',
+                                border: isActive ? '2px solid var(--accent)' : '1px solid var(--border)',
+                                cursor: 'pointer',
+                                transition: 'border-color 150ms ease, background-color 150ms ease',
+                                textAlign: 'left',
+                                color: 'inherit',
                             }}
                         >
-                            <div style={{
-                                background: t.bg,
-                                height: '80px',
-                                borderRadius: '8px',
-                                marginBottom: '16px',
-                                border: '1px solid var(--border)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: t.text,
-                                fontWeight: 'bold'
-                            }}>
-                                {t.id === 'system' ? 'A/B' : 'Aa'}
+                            <div
+                                style={{
+                                    height: '92px',
+                                    borderRadius: '10px',
+                                    marginBottom: '16px',
+                                    border: '1px solid var(--border)',
+                                    overflow: 'hidden',
+                                    position: 'relative',
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        background: item.previewBackground,
+                                        width: '100%',
+                                        height: '100%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '10px',
+                                    }}
+                                >
+                                    <span style={{ width: '44px', height: '28px', borderRadius: '7px', background: item.previewSurface, border: '1px solid rgba(0, 0, 0, 0.08)' }} />
+                                    <span style={{ width: '28px', height: '28px', borderRadius: '999px', background: item.previewAccent }} />
+                                </div>
                             </div>
 
-                            <h3 style={{ margin: '0 0 8px 0', fontSize: '16px', color: 'var(--text-primary)' }}>
-                                {t.label} {isActive && '(Active)'}
-                            </h3>
-                            <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary)' }}>
-                                {isComingSoon ? 'Coming Soon' : 'Click to apply'}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+                                <h3 style={{ margin: 0, fontSize: '15px', color: 'var(--text-primary)' }}>
+                                    {item.label}
+                                </h3>
+
+                                {isActive && <Check size={16} color="var(--accent)" />}
+                            </div>
+
+                            <p style={{ margin: '8px 0 0', fontSize: '12px', lineHeight: '18px', color: 'var(--text-secondary)' }}>
+                                {item.description}
                             </p>
-                        </div>
+                        </button>
                     );
                 })}
             </div>

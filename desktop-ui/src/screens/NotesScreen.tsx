@@ -1,53 +1,277 @@
-import React, { useState } from 'react';
-import { NoteCard } from '../components/notes/NoteCard';
+import { useEffect, useState } from 'react';
+import { ArrowLeft } from 'lucide-react';
+
+import {
+    pilotApi,
+    type NoteCourse,
+    type NoteModule,
+    type NoteFile,
+    type NoteFileResponse,
+} from '../api/api';
+
 import { NotesEmptyState } from '../components/notes/NotesEmptyState';
+import { NotesCourseGrid } from '../components/notes/NotesCourseGrid';
+import { NotesModuleGrid } from '../components/notes/NotesModuleGrid';
+import { NotesFileGrid } from '../components/notes/NotesFileGrid';
+import { NotesBreadcrumb, type NotesBreadcrumbItem } from '../components/shared/NotesBreadcrumb';
 import { NoteDetailScreen } from './NoteDetailScreen';
+import { Button } from '../components/shared/Button';
 
-const MOCK_NOTES = [
-    { id: '1', title: 'Advanced Artificial Intelligence', description: 'Comprehensive markdown records focusing on neural network cost functions, backpropagation mechanics, and weight tuners.', imageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=60', date: 'Updated June 29, 2026' },
-    { id: '2', title: 'Cloud Architecture & Microservices', description: 'Complete pipeline compilation covering AWS Lambda topologies, decoupled message streams, and performance thresholds.', imageUrl: 'https://images.unsplash.com/photo-1639322537228-f710d846310a?w=600&auto=format&fit=crop&q=60', date: 'Updated June 27, 2026' },
-    { id: '3', title: 'Advanced Java Web Ecosystems', description: 'Deep dive into Spring Boot persistence filters, relational connection pools, and real-time socket listeners.', imageUrl: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&auto=format&fit=crop&q=60', date: 'Updated June 24, 2026' }
-];
+type View = 'courses' | 'modules' | 'notes';
 
-export function NotesScreen() {
-    const [notes, setNotes] = useState(MOCK_NOTES);
-    const [selectedNote, setSelectedNote] = useState<any | null>(null);
+function normalizeTitle(value: string) {
+    return value
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
 
-    // If a note is selected, switch to the immersive Detail View
+export function NotesScreen({ initialCourseTitle }: { initialCourseTitle?: string | null }) {
+    const [courses, setCourses] = useState<NoteCourse[]>([]);
+
+    const [selectedCourse, setSelectedCourse] = useState<NoteCourse | null>(null);
+    const [selectedModule, setSelectedModule] = useState<NoteModule | null>(null);
+    const [selectedNote, setSelectedNote] = useState<NoteFileResponse | null>(null);
+
+    const [loading, setLoading] = useState(true);
+    const [openingNote, setOpeningNote] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const currentView: View =
+        selectedModule
+            ? 'notes'
+            : selectedCourse
+                ? 'modules'
+                : 'courses';
+
+    useEffect(() => {
+        let cancelled = false;
+
+        async function loadNotes() {
+            try {
+                setLoading(true);
+
+                const data = await pilotApi.getNotesTree();
+
+                if (!cancelled) {
+                    setCourses(data.courses);
+                    setError(null);
+                }
+            } catch {
+                if (!cancelled) {
+                    setError('Could not load generated notes.');
+                }
+            } finally {
+                if (!cancelled) {
+                    setLoading(false);
+                }
+            }
+        }
+
+        loadNotes();
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!initialCourseTitle || selectedCourse || courses.length === 0) {
+            return;
+        }
+
+        const targetTitle = normalizeTitle(initialCourseTitle);
+        const matchingCourse = courses.find(
+            (course) => normalizeTitle(course.title) === targetTitle
+        );
+
+        if (matchingCourse) {
+            setSelectedCourse(matchingCourse);
+        }
+    }, [courses, initialCourseTitle, selectedCourse]);
+
+    async function openNote(note: NoteFile) {
+        try {
+            setOpeningNote(true);
+
+            const file = await pilotApi.getNoteFile(note.path);
+
+            setSelectedNote(file);
+        } catch {
+            setError('Could not open this note.');
+        } finally {
+            setOpeningNote(false);
+        }
+    }
+
+    function goToNotesRoot() {
+        setSelectedNote(null);
+        setSelectedModule(null);
+        setSelectedCourse(null);
+    }
+
+    function goToCourse() {
+        setSelectedNote(null);
+        setSelectedModule(null);
+    }
+
+    function goToModule() {
+        setSelectedNote(null);
+    }
+
+    function goBack() {
+        if (selectedNote) {
+            setSelectedNote(null);
+            return;
+        }
+
+        if (selectedModule) {
+            setSelectedModule(null);
+            return;
+        }
+
+        if (selectedCourse) {
+            setSelectedCourse(null);
+        }
+    }
+
+    const breadcrumbItems: NotesBreadcrumbItem[] = [
+        {
+            label: 'Generated notes',
+            onClick: currentView === 'courses' && !selectedNote ? undefined : goToNotesRoot,
+        },
+    ];
+
+    if (selectedCourse) {
+        breadcrumbItems.push({
+            label: selectedCourse.title,
+            onClick: selectedModule || selectedNote ? goToCourse : undefined,
+        });
+    }
+
+    if (selectedModule) {
+        breadcrumbItems.push({
+            label: selectedModule.title,
+            onClick: selectedNote ? goToModule : undefined,
+        });
+    }
+
     if (selectedNote) {
-        return <NoteDetailScreen note={selectedNote} onBack={() => setSelectedNote(null)} />;
+        breadcrumbItems.push({
+            label: selectedNote.title,
+        });
+    }
+
+    if (selectedNote) {
+        return (
+            <NoteDetailScreen
+                note={selectedNote}
+                onBack={goBack}
+                breadcrumbItems={breadcrumbItems}
+            />
+        );
+    }
+
+    if (loading) {
+        return (
+            <div
+                style={{
+                    color: 'var(--text-secondary)',
+                    fontSize: '14px',
+                }}
+            >
+                Loading generated notes...
+            </div>
+        );
+    }
+
+    if (courses.length === 0) {
+        return <NotesEmptyState />;
     }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div>
-                    <h1 style={{ fontSize: '24px', fontWeight: 600, color: 'var(--text-primary)' }}>Generated Notebooks</h1>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Review, read, and edit compiled knowledge sets.</p>
-                </div>
-                <button
-                    onClick={() => setNotes(prev => prev.length === 0 ? MOCK_NOTES : [])}
-                    style={{ background: 'transparent', border: '1px solid var(--border)', borderRadius: '6px', padding: '6px 12px', color: 'var(--text-secondary)', cursor: 'pointer' }}
+        <div
+            style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '24px',
+            }}
+        >
+            {currentView !== 'courses' && (
+                <Button variant="ghost" icon={ArrowLeft} onClick={goBack} style={{ width: 'fit-content' }}>
+                    Back
+                </Button>
+            )}
+
+            <div
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '10px',
+                }}
+            >
+                <NotesBreadcrumb items={breadcrumbItems} />
+
+                <h1
+                    style={{
+                        fontSize: '24px',
+                        fontWeight: 600,
+                        color: 'var(--text-primary)',
+                        margin: 0,
+                    }}
                 >
-                    Simulate: {notes.length === 0 ? "Populated" : "Empty"}
-                </button>
+                    Generated Notebooks
+                </h1>
+
+                <p
+                    style={{
+                        color: 'var(--text-secondary)',
+                        fontSize: '14px',
+                        margin: 0,
+                    }}
+                >
+                    {currentView === 'courses' && 'Browse generated notes by course.'}
+
+                    {currentView === 'modules' &&
+                        `${selectedCourse?.title}`}
+
+                    {currentView === 'notes' &&
+                        `${selectedModule?.title}`}
+                </p>
             </div>
 
-            {notes.length === 0 ? (
-                <NotesEmptyState />
-            ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }}>
-                    {notes.map((note) => (
-                        <NoteCard
-                            key={note.id}
-                            title={note.title}
-                            description={note.description}
-                            imageUrl={note.imageUrl}
-                            date={note.date}
-                            onClick={() => setSelectedNote(note)}
-                        />
-                    ))}
+            {error && (
+                <div
+                    style={{
+                        color: 'var(--error)',
+                        fontSize: '13px',
+                    }}
+                >
+                    {error}
                 </div>
+            )}
+
+            {currentView === 'courses' && (
+                <NotesCourseGrid
+                    courses={courses}
+                    onSelect={setSelectedCourse}
+                />
+            )}
+
+            {currentView === 'modules' && selectedCourse && (
+                <NotesModuleGrid
+                    modules={selectedCourse.modules}
+                    onSelect={setSelectedModule}
+                />
+            )}
+
+            {currentView === 'notes' && selectedModule && (
+                <NotesFileGrid
+                    notes={selectedModule.notes}
+                    openingNote={openingNote}
+                    onSelect={openNote}
+                />
             )}
         </div>
     );

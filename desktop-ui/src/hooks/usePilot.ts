@@ -10,6 +10,7 @@ import {
     type ConfirmLoginResponse,
     type ToggleBrowserResponse,
     type CourseSummary,
+    type ConfigResponse,
 } from "../api/api";
 const WS_URL = "ws://127.0.0.1:8000/logs";
 
@@ -75,6 +76,7 @@ interface UsePilotResult {
     courses: CourseSummary[] | null;
     modulesCompletedThisRun: number;
     runtime: RuntimeState | null;
+    config: ConfigResponse | null;
 
     // best-effort "what's happening right now" text, parsed from the
     // most recent "course"/"module" log message. This is a string
@@ -122,6 +124,7 @@ export function usePilot(): UsePilotResult {
     const [courses, setCourses] = useState<CourseSummary[] | null>(null);
     const [modulesCompletedThisRun, setModulesCompletedThisRun] = useState(0);
     const [runtime, setRuntime] = useState<RuntimeState | null>(null);
+    const [config, setConfig] = useState<ConfigResponse | null>(null);
     const [currentCourseText, setCurrentCourseText] = useState<string | null>(null);
     const [currentModuleText, setCurrentModuleText] = useState<string | null>(null);
 
@@ -162,14 +165,24 @@ export function usePilot(): UsePilotResult {
         }
     }, []);
 
+    const loadConfig = useCallback(async () => {
+        try {
+            const data = await pilotApi.getConfig();
+            setConfig(data);
+        } catch {
+            setConfig(null);
+        }
+    }, []);
+
     useEffect(() => {
         pollStatus();
         loadCourses();
+        loadConfig();
 
         const interval = setInterval(pollStatus, STATUS_POLL_INTERVAL_MS);
 
         return () => clearInterval(interval);
-    }, [pollStatus, loadCourses]);
+    }, [pollStatus, loadCourses, loadConfig]);
 
     // ── WebSocket log stream, with backoff reconnect ────────────
     //
@@ -360,6 +373,7 @@ export function usePilot(): UsePilotResult {
         courses,
         modulesCompletedThisRun,
         runtime,
+        config,
         currentCourseText,
         currentModuleText,
         startWorkflow,

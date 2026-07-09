@@ -3,23 +3,107 @@
 
 :root {
   /* Color Tokens */
-  --background: #0D0D0D;
-  --surface: #1A1A1A;
-  --surface-overlay: #242424;
-  --accent: #AA00FF;
-  --accent-hover: #BF36FF;
-  --border: #2D2D2D;
-  --border-hover: #3D3D3D;
+  --background: #101014;
+  --surface: #1B1B21;
+  --surface-overlay: #25252D;
+  --surface-subtle: #202027;
+  --accent: #7C3AED;
+  --accent-hover: #6D28D9;
+  --accent-active: #5B21B6;
+  --accent-soft: rgba(124, 58, 237, 0.16);
+  --border: #30303A;
+  --border-hover: #454554;
 
   /* Text States */
-  --text-primary: #E5E2E1;
-  --text-secondary: #9B8BA1;
-  --text-muted: #666666;
+  --text-primary: #F1EEF6;
+  --text-secondary: #B7AFBF;
+  --text-muted: #81798A;
+  --text-on-accent: #F8F7FC;
 
   /* Semantic Flags */
-  --success: #4CAF50;
-  --error: #FFB4AB;
-  --warning: #FFB779;
+  --success: #16A34A;
+  --success-hover: #15803D;
+  --success-soft: rgba(22, 163, 74, 0.14);
+  --error: #DC2626;
+  --error-hover: #B91C1C;
+  --error-soft: rgba(220, 38, 38, 0.14);
+  --warning: #D97706;
+  --warning-hover: #B45309;
+  --warning-soft: rgba(217, 119, 6, 0.14);
+
+  --bg-app: var(--background);
+  --bg-secondary: var(--surface);
+  --social-bg: var(--surface-overlay);
+  --primary: var(--accent);
+  --text-h: var(--text-primary);
+}
+
+[data-theme='light'] {
+  --background: #F7F8FB;
+  --surface: #FCFCFD;
+  --surface-overlay: #EEF1F6;
+  --surface-subtle: #F3F5F9;
+  --accent: #7C3AED;
+  --accent-hover: #6D28D9;
+  --accent-active: #5B21B6;
+  --accent-soft: rgba(124, 58, 237, 0.11);
+  --border: #DDE2EA;
+  --border-hover: #C8D0DC;
+
+  --text-primary: #171717;
+  --text-secondary: #5B6472;
+  --text-muted: #8A93A3;
+  --text-on-accent: #FAF9FE;
+
+  --success: #16A34A;
+  --success-hover: #15803D;
+  --success-soft: rgba(22, 163, 74, 0.11);
+  --error: #DC2626;
+  --error-hover: #B91C1C;
+  --error-soft: rgba(220, 38, 38, 0.11);
+  --warning: #D97706;
+  --warning-hover: #B45309;
+  --warning-soft: rgba(217, 119, 6, 0.11);
+
+  --bg-app: var(--background);
+  --bg-secondary: var(--surface);
+  --social-bg: var(--surface-overlay);
+  --primary: var(--accent);
+  --text-h: var(--text-primary);
+}
+
+[data-theme='dark'] {
+  --background: #101014;
+  --surface: #1B1B21;
+  --surface-overlay: #25252D;
+  --surface-subtle: #202027;
+  --accent: #7C3AED;
+  --accent-hover: #6D28D9;
+  --accent-active: #5B21B6;
+  --accent-soft: rgba(124, 58, 237, 0.16);
+  --border: #30303A;
+  --border-hover: #454554;
+
+  --text-primary: #F1EEF6;
+  --text-secondary: #B7AFBF;
+  --text-muted: #81798A;
+  --text-on-accent: #F8F7FC;
+
+  --success: #16A34A;
+  --success-hover: #15803D;
+  --success-soft: rgba(22, 163, 74, 0.14);
+  --error: #DC2626;
+  --error-hover: #B91C1C;
+  --error-soft: rgba(220, 38, 38, 0.14);
+  --warning: #D97706;
+  --warning-hover: #B45309;
+  --warning-soft: rgba(217, 119, 6, 0.14);
+
+  --bg-app: var(--background);
+  --bg-secondary: var(--surface);
+  --social-bg: var(--surface-overlay);
+  --primary: var(--accent);
+  --text-h: var(--text-primary);
 }
 
 * {

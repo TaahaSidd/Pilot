@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { PilotProvider, usePilotContext } from './context/usePilotContext';
 import { Sidebar } from './components/layout/Sidebar';
 import { StatusBar } from './components/layout/StatusBar';
@@ -8,9 +8,12 @@ import { AutomationScreen } from './screens/AutomationScreen';
 import { NotesScreen } from './screens/NotesScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { OnboardingScreen } from './screens/OnboardingScreen';
+import { HelpScreen } from './screens/HelpScreen';
+import type { CourseSummary } from './api/api';
 
 function AppContent() {
   const [currentTab, setTab] = useState('dashboard');
+  const [notesCourseTitle, setNotesCourseTitle] = useState<string | null>(null);
 
   const {
     status,
@@ -33,7 +36,7 @@ function AppContent() {
           fontSize: '14px',
         }}
       >
-        Loading Pilot…
+        Loading Pilot...
       </div>
     );
   }
@@ -48,18 +51,35 @@ function AppContent() {
 
   return (
     <div style={{ display: 'flex', width: '100vw', height: '100vh' }}>
-      <Sidebar currentTab={currentTab} setTab={setTab} />
+      <Sidebar
+        currentTab={currentTab}
+        setTab={(tab) => {
+          if (tab !== 'notes') {
+            setNotesCourseTitle(null);
+          }
+
+          setTab(tab);
+        }}
+      />
 
       <div style={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100vh' }}>
-        <StatusBar wsState={wsState} status={status} />
-
         <main style={{ flex: 1, padding: '32px', overflowY: 'auto', backgroundColor: 'var(--background)' }}>
-          {currentTab === 'dashboard' && <DashboardScreen />}
+          {currentTab === 'dashboard' && (
+            <DashboardScreen
+              onOpenCourseNotes={(course: CourseSummary) => {
+                setNotesCourseTitle(course.title);
+                setTab('notes');
+              }}
+            />
+          )}
           {currentTab === 'automation' && <AutomationScreen />}
           {currentTab === 'logs' && <LogsScreen />}
-          {currentTab === 'notes' && <NotesScreen />}
+          {currentTab === 'notes' && <NotesScreen initialCourseTitle={notesCourseTitle} />}
+          {currentTab === 'help' && <HelpScreen />}
           {currentTab === 'settings' && <SettingsScreen />}
         </main>
+
+        <StatusBar wsState={wsState} status={status} />
       </div>
     </div>
   );

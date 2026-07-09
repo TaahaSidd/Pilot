@@ -1,14 +1,12 @@
-// src/components/dashboard/CourseGrid.tsx
-import React from 'react';
-import { CheckCircle2 } from 'lucide-react';
 import type { CourseSummary } from '../../hooks/usePilot';
 import cardBg from '../../assets/images/card-bg.jpg';
 
 interface CourseGridProps {
     courses: CourseSummary[] | null;
+    onSelectCourse?: (course: CourseSummary) => void;
 }
 
-export function CourseGrid({ courses }: CourseGridProps) {
+export function CourseGrid({ courses, onSelectCourse }: CourseGridProps) {
 
     return (
         <div>
@@ -87,37 +85,48 @@ export function CourseGrid({ courses }: CourseGridProps) {
                         const isComplete = course.completion === 100;
 
                         return (
-                            <div
+                            <button
                                 key={course.id ?? course.title}
+                                onClick={() => onSelectCourse?.(course)}
                                 style={{
                                     backgroundColor: 'var(--surface)',
                                     border: '1px solid var(--border)',
                                     borderRadius: '12px',
-                                    overflow: 'hidden',
                                     display: 'flex',
                                     flexDirection: 'column',
                                     minHeight: '260px',
+                                    padding: 0,
+                                    textAlign: 'left',
+                                    cursor: onSelectCourse ? 'pointer' : 'default',
                                 }}
                             >
                                 <div
                                     style={{
                                         width: '100%',
-                                        height: '140px',
-                                        overflow: 'hidden',
-                                        borderBottom: '1px solid var(--border)',
-                                        backgroundColor: 'var(--surface)',
+                                        padding: '12px 12px 0',
+                                        boxSizing: 'border-box',
                                     }}
                                 >
-                                    <img
-                                        src={cardBg}
-                                        alt={course.title}
+                                    <div
                                         style={{
                                             width: '100%',
-                                            height: '100%',
-                                            objectFit: 'cover',
-                                            display: 'block',
+                                            height: '132px',
+                                            overflow: 'hidden',
+                                            borderRadius: '10px',
+                                            backgroundColor: 'var(--surface-subtle)',
                                         }}
-                                    />
+                                    >
+                                        <img
+                                            src={cardBg}
+                                            alt={course.title}
+                                            style={{
+                                                width: '100%',
+                                                height: '100%',
+                                                objectFit: 'cover',
+                                                display: 'block',
+                                            }}
+                                        />
+                                    </div>
                                 </div>
 
                                 <div
@@ -144,7 +153,7 @@ export function CourseGrid({ courses }: CourseGridProps) {
                                                 color: 'var(--text-primary)',
                                                 margin: 0,
                                                 lineHeight: '20px',
-                                                letterSpacing: '-0.01em',
+                                                letterSpacing: 0,
                                             }}
                                         >
                                             {course.title}
@@ -204,7 +213,7 @@ export function CourseGrid({ courses }: CourseGridProps) {
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </button>
                         );
                     })}
                 </div>

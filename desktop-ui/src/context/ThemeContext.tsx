@@ -2,19 +2,44 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 
 type Theme = 'light' | 'dark' | 'system';
 
+function isTheme(value: string | null): value is Theme {
+    return value === 'light' || value === 'dark' || value === 'system';
+}
+
 export const ThemeContext = createContext({
-    theme: 'light' as Theme,
+    theme: 'dark' as Theme,
     setTheme: (theme: Theme) => { },
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-    const [theme, setThemeState] = useState<Theme>(() =>
-        (localStorage.getItem('theme') as Theme) || 'light'
-    );
+    const [theme, setThemeState] = useState<Theme>(() => {
+        const savedTheme = localStorage.getItem('theme');
+        return isTheme(savedTheme) ? savedTheme : 'dark';
+    });
 
     useEffect(() => {
-        document.documentElement.setAttribute('data-theme', theme);
+        const systemQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+        function applyTheme() {
+            const resolvedTheme = theme === 'system'
+                ? systemQuery.matches ? 'dark' : 'light'
+                : theme;
+
+            document.documentElement.setAttribute('data-theme', resolvedTheme);
+        }
+
+        applyTheme();
         localStorage.setItem('theme', theme);
+
+        if (theme !== 'system') {
+            return;
+        }
+
+        systemQuery.addEventListener('change', applyTheme);
+
+        return () => {
+            systemQuery.removeEventListener('change', applyTheme);
+        };
     }, [theme]);
 
     return (

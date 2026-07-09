@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { LogFilterBar } from '../components/logs/LogFilterBar';
+import { LogFilterBar, type DateRangeFilter, type StatusFilter } from '../components/logs/LogFilterBar';
 import { LogHistoryRow } from '../components/logs/LogHistoryRow';
 import { pilotApi, type HistorySessionSummary } from '../api/api';
 
 function formatDate(iso: string | null) {
-    if (!iso) return '—';
+    if (!iso) return 'Unknown';
     return new Date(iso).toLocaleDateString();
 }
 
 function formatDuration(seconds: number | null) {
-    if (seconds === null) return '—';
+    if (seconds === null) return 'Unknown';
 
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -32,6 +32,14 @@ function mapStatus(status: string): RowStatus {
     return 'Warning';
 }
 
+function getStatusFilter(status: string): StatusFilter {
+    if (status === 'done') return 'success';
+    if (status === 'stopped') return 'warning';
+    if (status === 'error') return 'failed';
+    if (status === 'running') return 'running';
+    return 'warning';
+}
+
 function getSessionTitle(session: HistorySessionSummary) {
     const summary = session.summary as Record<string, unknown>;
 
@@ -39,19 +47,10 @@ function getSessionTitle(session: HistorySessionSummary) {
         return summary.current_course;
     }
 
-    if (session.type === 'notes') return 'Notes Generation';
-    if (session.type === 'workflow') return 'Workflow Automation';
+    if (session.type === 'notes') return 'Notes generation';
+    if (session.type === 'workflow') return 'Workflow automation';
 
-    return 'Pilot Session';
-}
-
-function getBadges(session: HistorySessionSummary) {
-    const badges = [session.type.toUpperCase()];
-
-    if (session.status === 'stopped') badges.push('STOP');
-    if (session.status === 'error') badges.push('ERR');
-
-    return badges;
+    return 'Pilot session';
 }
 
 function getSummary(session: HistorySessionSummary) {
@@ -60,19 +59,47 @@ function getSummary(session: HistorySessionSummary) {
     if (session.type === 'notes') {
         const saved = summary.notes_saved ?? 0;
         const attempted = summary.notes_attempted ?? 0;
-        return `${saved}/${attempted} notes`;
+        return `${saved}/${attempted} notes saved`;
     }
 
     const processed = summary.modules_processed ?? summary.modules_started ?? 0;
     const total = summary.modules_total ?? 0;
 
-    return total ? `${processed}/${total} modules` : `${processed} modules`;
+    return total ? `${processed}/${total} modules processed` : `${processed} modules processed`;
+}
+
+function isInDateRange(iso: string | null, filter: DateRangeFilter) {
+    if (filter === 'all') return true;
+    if (!iso) return false;
+
+    const startedAt = new Date(iso).getTime();
+    const now = Date.now();
+    const dayMs = 24 * 60 * 60 * 1000;
+
+    if (filter === 'today') {
+        return new Date(iso).toDateString() === new Date().toDateString();
+    }
+
+    if (filter === 'week') {
+        return now - startedAt <= 7 * dayMs;
+    }
+
+    return now - startedAt <= 30 * dayMs;
 }
 
 export function LogsScreen() {
     const [sessions, setSessions] = useState<HistorySessionSummary[]>([]);
+    const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+    const [dateRangeFilter, setDateRangeFilter] = useState<DateRangeFilter>('all');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    const filteredSessions = sessions.filter((session) => {
+        const matchesStatus = statusFilter === 'all' || getStatusFilter(session.status) === statusFilter;
+        const matchesDate = isInDateRange(session.started_at, dateRangeFilter);
+
+        return matchesStatus && matchesDate;
+    });
 
     useEffect(() => {
         let cancelled = false;
@@ -107,7 +134,7 @@ export function LogsScreen() {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
             <div>
-                <h1 style={{ fontSize: '24px', fontWeight: 600, letterSpacing: '-0.01em', marginBottom: '6px', color: 'var(--text-primary)' }}>
+                <h1 style={{ fontSize: '24px', fontWeight: 600, letterSpacing: 0, marginBottom: '6px', color: 'var(--text-primary)' }}>
                     Activity Archive
                 </h1>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
@@ -116,35 +143,41 @@ export function LogsScreen() {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <LogFilterBar resultCount={sessions.length} />
+                <LogFilterBar
+                    resultCount={filteredSessions.length}
+                    statusFilter={statusFilter}
+                    dateRangeFilter={dateRangeFilter}
+                    onStatusChange={setStatusFilter}
+                    onDateRangeChange={setDateRangeFilter}
+                />
 
                 <div style={{
                     border: '1px solid var(--border)',
                     borderRadius: '8px',
                     overflow: 'hidden',
-                    backgroundColor: 'rgba(255,255,255,0.01)'
+                    backgroundColor: 'var(--surface)'
                 }}>
                     <div style={{
                         display: 'grid',
-                        gridTemplateColumns: '1.2fr 3.5fr 1.2fr 1.2fr 1fr',
+                        gridTemplateColumns: '1.2fr 3.5fr 1.5fr 1.2fr 1fr',
                         padding: '12px 20px',
                         borderBottom: '1px solid var(--border)',
-                        backgroundColor: 'rgba(255,255,255,0.02)',
+                        backgroundColor: 'var(--surface-subtle)',
                         fontSize: '11px',
                         fontWeight: 600,
-                        letterSpacing: '0.05em',
+                        letterSpacing: 0,
                         color: 'var(--text-muted)'
                     }}>
                         <div>Date</div>
-                        <div>Course / Project</div>
+                        <div>Course / project</div>
                         <div>Summary</div>
-                        <div>Time Taken</div>
+                        <div>Time taken</div>
                         <div>Result</div>
                     </div>
 
                     {loading && (
                         <div style={{ padding: '24px', color: 'var(--text-secondary)', fontSize: '13px' }}>
-                            Loading history…
+                            Loading history...
                         </div>
                     )}
 
@@ -154,22 +187,21 @@ export function LogsScreen() {
                         </div>
                     )}
 
-                    {!loading && !error && sessions.length === 0 && (
+                    {!loading && !error && filteredSessions.length === 0 && (
                         <div style={{ padding: '24px', color: 'var(--text-secondary)', fontSize: '13px' }}>
-                            No activity history yet.
+                            No activity sessions match these filters.
                         </div>
                     )}
 
-                    {!loading && !error && sessions.map((session) => (
+                    {!loading && !error && filteredSessions.map((session) => (
                         <LogHistoryRow
                             key={session.id}
                             sessionId={session.id}
                             date={formatDate(session.started_at)}
                             courseName={getSessionTitle(session)}
-                            badges={getBadges(session)}
+                            summary={getSummary(session)}
                             duration={formatDuration(session.duration_seconds)}
                             status={mapStatus(session.status)}
-                            extraBadgesCount={0}
                         />
                     ))}
                 </div>

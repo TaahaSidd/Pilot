@@ -232,6 +232,42 @@ export interface CoursesResponse {
     source_type: string | null;
 }
 
+export interface NoteFile {
+    title: string;
+    file_name: string;
+    path: string;
+    updated_at: number;
+}
+
+export interface NoteModule {
+    title: string;
+    path: string;
+    notes: NoteFile[];
+    note_count: number;
+}
+
+export interface NoteCourse {
+    title: string;
+    path: string;
+    modules: NoteModule[];
+    module_count: number;
+    note_count: number;
+}
+
+export interface NotesTreeResponse {
+    root: string;
+    courses: NoteCourse[];
+    course_count: number;
+    note_count: number;
+}
+
+export interface NoteFileResponse {
+    path: string;
+    title: string;
+    content: string;
+    updated_at: number;
+}
+
 export interface HistorySessionDetail extends HistorySessionSummary {
     logs: HistoryLog[];
 }
@@ -245,6 +281,11 @@ export const pilotApi = {
         apiPost<StopResponse>(`/runtime/stop?force=${force}`),
 
     getCourses: () => apiGet<CoursesResponse>("/courses"),
+
+    getNotesTree: () => apiGet<NotesTreeResponse>("/notes/tree"),
+
+    getNoteFile: (path: string) =>
+        apiGet<NoteFileResponse>(`/notes/file?path=${encodeURIComponent(path)}`),
 
     getHistory: () => apiGet<HistorySessionSummary[]>("/history"),
 

@@ -9,10 +9,10 @@ interface ToastProps {
 }
 
 const colors: Record<ToastType, string> = {
-    normal: '#333',
-    success: '#16a34a',
-    warning: '#ca8a04',
-    error: '#dc2626'
+    normal: 'var(--surface-overlay)',
+    success: 'var(--success)',
+    warning: 'var(--warning)',
+    error: 'var(--error)'
 };
 
 export function Toast({ message, type, onClose }: ToastProps) {
@@ -33,7 +33,7 @@ export function Toast({ message, type, onClose }: ToastProps) {
             left: '50%',
             transform: 'translateX(-50%)',
             backgroundColor: colors[type],
-            color: '#FFF',
+            color: type === 'normal' ? 'var(--text-primary)' : 'var(--text-on-accent)',
             padding: '12px 32px',
             borderRadius: '50px',
             fontSize: '14px',
@@ -53,7 +53,7 @@ export function Toast({ message, type, onClose }: ToastProps) {
             <button
                 onClick={onClose}
                 style={{
-                    background: 'none', border: 'none', color: '#FFF',
+                    background: 'none', border: 'none', color: 'currentColor',
                     cursor: 'pointer', opacity: 0.6, fontSize: '16px', padding: '0'
                 }}
             >

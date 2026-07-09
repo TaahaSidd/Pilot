@@ -79,6 +79,8 @@ def prepare_server_login_wait() -> "threading.Event":
 
 def clear_server_login_wait():
     global _login_event
+    if _login_event is not None:
+        _login_event.set()
     _login_event = None
     state.set_login_wait(False)
 

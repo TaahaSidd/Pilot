@@ -67,12 +67,16 @@ class Pilot:
                 self.browser.close()
                 log_info("Browser closed cleanly")
             except Exception:
-                pass
-            finally:
-                self.browser = None
-                self.page = None
-                self.session = None
-                state.set_browser(False)
+                log_warning("Browser close deferred to worker thread")
+                return False
+
+            self.browser = None
+            self.page = None
+            self.session = None
+            state.set_browser(False)
+            return True
+
+        return True
 
     def bring_browser_to_front(self):
         if self.page:
@@ -90,7 +94,8 @@ class Pilot:
         - browser closes in finally
 
         Force stop:
-        - close browser immediately
+        - wake any blocking login wait immediately
+        - let the worker thread close Playwright from its own finally block
         - mark state/history stopped
         """
         log_warning("Stop requested")
@@ -103,14 +108,10 @@ class Pilot:
 
         if force:
             log_warning("Force stopping Pilot")
-            try:
-                self.close_browser()
-            except Exception:
-                pass
-
-            self.status = "done"
+            self.status = "stopped"
             self.error = None
             state.stop()
+            state.stop_requested = True
             history.finish_session("stopped")
 
     def start_workflow(self):
@@ -124,13 +125,15 @@ class Pilot:
             self.create_session()
 
             if state.stop_requested:
-                self.stop()
+                self.status = "stopped"
+                state.stop()
+                history.finish_session("stopped")
                 return
 
             Workflow(self.page).start()
 
             if state.stop_requested:
-                self.status = "done"
+                self.status = "stopped"
                 state.stop()
                 history.finish_session("stopped")
                 return
@@ -142,8 +145,8 @@ class Pilot:
             history.finish_session("done")
 
         except Exception as e:
-            if state.stop_requested:
-                self.status = "done"
+            if state.stop_requested or self.status == "stopped":
+                self.status = "stopped"
                 state.stop()
                 history.finish_session("stopped")
                 return
@@ -183,7 +186,7 @@ class Pilot:
             self.create_session()
 
             if state.stop_requested:
-                self.status = "done"
+                self.status = "stopped"
                 state.stop()
                 history.finish_session("stopped")
                 return
@@ -191,7 +194,7 @@ class Pilot:
             NotesEngine(self.page).run()
 
             if state.stop_requested:
-                self.status = "done"
+                self.status = "stopped"
                 state.stop()
                 history.finish_session("stopped")
                 return
@@ -201,8 +204,8 @@ class Pilot:
             history.finish_session("done")
 
         except Exception as e:
-            if state.stop_requested:
-                self.status = "done"
+            if state.stop_requested or self.status == "stopped":
+                self.status = "stopped"
                 state.stop()
                 history.finish_session("stopped")
                 return

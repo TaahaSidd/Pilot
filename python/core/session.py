@@ -1,5 +1,6 @@
 from config import URL, USERNAME, PASSWORD
 from ui.pilot_ui import log_info, log_success, log_warning, confirm_login
+from runtime.state import state
 
 
 class Session:
@@ -21,6 +22,9 @@ class Session:
 
     def wait_for_manual_login(self):
         confirm_login()
+        if state.stop_requested:
+            return
+
         # After user presses ENTER, wait for dashboard to actually load
         self.page.wait_for_load_state("domcontentloaded")
         self.page.wait_for_timeout(3000)
@@ -45,6 +49,8 @@ class Session:
         log_info("Not logged in — starting login flow")
         self.autofill_credentials()
         self.wait_for_manual_login()
+        if state.stop_requested:
+            return
 
         if self.is_logged_in():
             log_success("Login successful — session will persist for next run")

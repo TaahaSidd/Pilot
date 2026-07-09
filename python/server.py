@@ -38,6 +38,7 @@ from pydantic import BaseModel
 
 from engine.Pilot import Pilot
 from core.startup import is_configured, run_onboarding, save_config, load_config
+from runtime.notes_library import get_notes_tree, read_note_file
 from ui import pilot_ui
 from runtime.history import history
 from runtime.state import state
@@ -104,7 +105,9 @@ class StatusResponse(BaseModel):
 def _run_in_thread(target_fn):
     global _worker_thread
 
-    if pilot.status == "running":
+    if pilot.status == "running" or (
+        _worker_thread is not None and _worker_thread.is_alive()
+    ):
         return False
 
     # was: broadcast.attach_broadcast_queue(...)
@@ -213,6 +216,24 @@ def start_notes():
     if not started:
         return {"started": False, "reason": "A run is already in progress."}
     return {"started": True}
+
+
+@app.get("/notes/tree")
+def get_notes_tree_route():
+    return get_notes_tree()
+
+
+@app.get("/notes/file")
+def get_note_file(path: str):
+    note = read_note_file(path)
+
+    if note is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Note file not found.",
+        )
+
+    return note
 
 
 @app.get("/config")

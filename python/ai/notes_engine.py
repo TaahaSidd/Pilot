@@ -22,6 +22,10 @@ NOTES_DIR = os.path.join(os.path.dirname(
     os.path.abspath(__file__)), "..", "notes")
 
 
+class GroqRateLimitReached(Exception):
+    pass
+
+
 def _should_stop() -> bool:
     if state.stop_requested:
         log_warning("Notes generation stopped by user")
@@ -31,6 +35,16 @@ def _should_stop() -> bool:
 
 def get_groq_client():
     return Groq(api_key=config.GROQ_API_KEY)
+
+
+def _is_rate_limit_error(error: Exception) -> bool:
+    error_text = str(error).lower()
+    return (
+        "rate_limit" in error_text
+        or "rate limit" in error_text
+        or "429" in error_text
+        or "tokens per day" in error_text
+    )
 
 
 def clean_folder_name(name: str) -> str:
@@ -100,7 +114,10 @@ Notes:"""
         )
         return response.choices[0].message.content.strip()
     except Exception as e:
-        log_error(f"Groq notes error: {e}")
+        if _is_rate_limit_error(e):
+            raise GroqRateLimitReached() from e
+
+        log_error("Groq could not generate notes for this page. Skipping it.")
         return None
 
 
@@ -122,7 +139,7 @@ def save_note(course_title: str, module_title: str, page_title: str, notes: str)
     state.set_action(ACTION_SAVING_NOTES, f"Saving note: {page_title}")
     history.increment_summary("notes_saved")
 
-    log_success(f"Note saved → {module_folder}/{file_name}")
+    log_success(f"Note saved: {module_folder}/{file_name}")
 
 
 class NotesEngine:
@@ -166,12 +183,14 @@ class NotesEngine:
 
             try:
                 self._process_course(course)
+            except GroqRateLimitReached:
+                return
             except Exception as e:
                 if _should_stop():
                     return
-                log_error(f"Course failed → {course['title']}: {e}")
+                log_error(f"Course failed: {course['title']}: {e}")
 
-        log_success("Notes generation complete — saved to /notes/")
+        log_success("Notes generation complete - saved to /notes/")
 
     def _process_course(self, course: dict):
         if _should_stop():
@@ -193,7 +212,7 @@ class NotesEngine:
             "current_course": title,
         })
 
-        log_info(f"Processing → {title}")
+        log_info(f"Processing: {title}")
 
         self.page.goto(course["url"])
         self.page.wait_for_load_state("domcontentloaded")
@@ -236,7 +255,7 @@ class NotesEngine:
                 history.increment_summary("sections_processed")
                 history.increment_summary("pages_found", link_count)
 
-                log_info(f"Section: {section_title} — {link_count} pages")
+                log_info(f"Section: {section_title} - {link_count} pages")
 
                 pages = []
                 for p in range(link_count):
@@ -263,7 +282,7 @@ class NotesEngine:
                         if _should_stop():
                             return
                         history.increment_summary("notes_errors")
-                        log_error(f"Page failed → {page_info['title']}: {e}")
+                        log_error(f"Page failed: {page_info['title']}: {e}")
 
                     if _should_stop():
                         return
@@ -300,7 +319,7 @@ class NotesEngine:
 
         history.increment_summary("notes_attempted")
 
-        log_info(f"Generating notes → {page_title}")
+        log_info(f"Generating notes: {page_title}")
 
         self.page.goto(page_info["url"])
         self.page.wait_for_load_state("domcontentloaded")
@@ -338,12 +357,23 @@ class NotesEngine:
 
         if not content or len(content) < 200:
             history.increment_summary("notes_skipped")
-            log_warning(f"Content too short — skipping {page_title}")
+            log_warning(f"Content too short. Skipping {page_title}")
             return
 
         log_info(f"Content captured ({len(content)} chars)")
 
-        notes = generate_notes(content, page_title)
+        try:
+            notes = generate_notes(content, page_title)
+        except GroqRateLimitReached:
+            history.increment_summary("notes_errors")
+            history.update_summary({
+                "stop_reason": "groq_rate_limit",
+            })
+            log_warning(
+                "Groq API limit reached. Notes generation stopped. Try again after the quota resets."
+            )
+            state.request_stop()
+            raise
 
         if not notes:
             history.increment_summary("notes_skipped")

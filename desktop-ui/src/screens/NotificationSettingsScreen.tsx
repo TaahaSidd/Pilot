@@ -1,4 +1,5 @@
 import { ArrowLeft } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { Button } from '../components/shared/Button';
 import { useNotifications, type NotificationPreferences } from '../context/NotificationContext';
 
@@ -73,30 +74,12 @@ function SwitchRow({
     );
 }
 
-export function NotificationSettingsScreen({ onBack }: { onBack: () => void }) {
-    const { preferences, updatePreferences } = useNotifications();
-    const enabled = preferences.enabled;
-    const setPreference = <Key extends keyof NotificationPreferences>(key: Key, value: NotificationPreferences[Key]) => {
-        updatePreferences({ [key]: value });
-    };
-
+function Section({ title, children }: { title: string; children: ReactNode }) {
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                <Button variant="ghost" icon={ArrowLeft} onClick={onBack} style={{ width: 'fit-content' }}>
-                    Back to Settings
-                </Button>
-            </div>
-
-            <div>
-                <h1 style={{ fontSize: '24px', fontWeight: 700, letterSpacing: 0, margin: 0, color: 'var(--text-primary)' }}>
-                    Updates
-                </h1>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: '20px', margin: '6px 0 0' }}>
-                    Choose which Pilot updates should appear in your update history and toast messages.
-                </p>
-            </div>
-
+        <section style={{ display: 'grid', gap: '12px' }}>
+            <h2 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-secondary)', margin: 0 }}>
+                {title}
+            </h2>
             <div
                 style={{
                     backgroundColor: 'var(--surface)',
@@ -105,69 +88,96 @@ export function NotificationSettingsScreen({ onBack }: { onBack: () => void }) {
                     padding: '2px 16px',
                 }}
             >
+                {children}
+            </div>
+        </section>
+    );
+}
+
+export function NotificationSettingsScreen({ onBack }: { onBack: () => void }) {
+    const { preferences, updatePreferences } = useNotifications();
+    const enabled = preferences.enabled;
+    const setPreference = <Key extends keyof NotificationPreferences>(key: Key, value: NotificationPreferences[Key]) => {
+        updatePreferences({ [key]: value });
+    };
+
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '28px', maxWidth: '860px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <Button variant="ghost" icon={ArrowLeft} onClick={onBack} style={{ width: 'fit-content' }}>
+                    Back to Settings
+                </Button>
+            </div>
+
+            <div>
+                <h1 style={{ fontSize: '24px', fontWeight: 700, letterSpacing: 0, margin: 0, color: 'var(--text-primary)' }}>
+                    Notifications
+                </h1>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: '20px', margin: '6px 0 0' }}>
+                    Choose which Pilot updates you want to see.
+                </p>
+            </div>
+
+            <Section title="General">
                 <SwitchRow
-                    label="Enable updates"
-                    description="Allow Pilot to save update history and show important messages."
+                    label="In-app notifications"
+                    description="Show important Pilot updates inside the app."
                     checked={preferences.enabled}
                     onChange={(checked) => setPreference('enabled', checked)}
                 />
                 <SwitchRow
-                    label="Show toast messages"
-                    description="Show temporary in-app messages at the bottom of the screen."
+                    label="Toast messages"
+                    description="Show short messages at the bottom of the screen."
                     checked={preferences.showToasts}
                     disabled={!enabled}
                     onChange={(checked) => setPreference('showToasts', checked)}
                 />
                 <SwitchRow
-                    label="Completion alerts"
-                    description="Notify when automation or notes generation finishes."
+                    label="Desktop notifications"
+                    description="Prepare Pilot updates for native Windows notifications."
+                    checked={preferences.nativeNotifications}
+                    disabled={!enabled}
+                    onChange={(checked) => setPreference('nativeNotifications', checked)}
+                />
+                <SwitchRow
+                    label="Notification sound"
+                    description="Play a sound for important updates when sound is available."
+                    checked={preferences.playSound}
+                    disabled={!enabled}
+                    onChange={(checked) => setPreference('playSound', checked)}
+                />
+            </Section>
+
+            <Section title="Notify me about">
+                <SwitchRow
+                    label="Study run completed"
+                    description="Let me know when a study run finishes."
                     checked={preferences.completionNotifications}
                     disabled={!enabled}
                     onChange={(checked) => setPreference('completionNotifications', checked)}
                 />
                 <SwitchRow
-                    label="Login and CAPTCHA alerts"
-                    description="Notify when Pilot needs you to complete login verification."
+                    label="Notes generation completed"
+                    description="Let me know when generated notes are ready."
+                    checked={preferences.completionNotifications}
+                    disabled={!enabled}
+                    onChange={(checked) => setPreference('completionNotifications', checked)}
+                />
+                <SwitchRow
+                    label="Login verification required"
+                    description="Let me know when Pilot needs me to complete a login check."
                     checked={preferences.loginAlerts}
                     disabled={!enabled}
                     onChange={(checked) => setPreference('loginAlerts', checked)}
                 />
                 <SwitchRow
-                    label="Error alerts"
-                    description="Notify when Pilot fails or the Groq quota is reached."
+                    label="Errors"
+                    description="Let me know when Pilot cannot continue."
                     checked={preferences.errorNotifications}
                     disabled={!enabled}
                     onChange={(checked) => setPreference('errorNotifications', checked)}
                 />
-                <SwitchRow
-                    label="Stopped study run alerts"
-                    description="Notify when a run is stopped by the user."
-                    checked={preferences.stoppedNotifications}
-                    disabled={!enabled}
-                    onChange={(checked) => setPreference('stoppedNotifications', checked)}
-                />
-                <SwitchRow
-                    label="Progress updates"
-                    description="Notify for routine starts and other lightweight progress events."
-                    checked={preferences.progressNotifications}
-                    disabled={!enabled}
-                    onChange={(checked) => setPreference('progressNotifications', checked)}
-                />
-                <SwitchRow
-                    label="Notification sound"
-                    description="Prepare important notifications for sound when audio is added later."
-                    checked={preferences.playSound}
-                    disabled={!enabled}
-                    onChange={(checked) => setPreference('playSound', checked)}
-                />
-                <SwitchRow
-                    label="Windows notifications"
-                    description="Prepare important updates for native Tauri notifications later."
-                    checked={preferences.nativeNotifications}
-                    disabled={!enabled}
-                    onChange={(checked) => setPreference('nativeNotifications', checked)}
-                />
-            </div>
+            </Section>
         </div>
     );
 }

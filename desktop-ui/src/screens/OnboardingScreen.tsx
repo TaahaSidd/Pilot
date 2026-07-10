@@ -61,11 +61,8 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
 
     return (
         <div style={{ display: 'flex', width: '100vw', height: '100vh', backgroundColor: 'var(--bg-app)', overflow: 'hidden' }}>
-            {/* Left Side: Wizard Content */}
             <div style={{ flex: 1, display: 'flex', padding: '64px' }}>
                 <div style={{ width: '100%', maxWidth: '400px', margin: '0 auto', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-
-                    {/* Centered Form Area */}
                     <div style={{ margin: 'auto 0' }}>
                         <div>
                             <h1 style={{ color: 'var(--text-primary)', fontSize: '28px', fontWeight: 700 }}>{stepTitle}</h1>
@@ -85,7 +82,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '12px' }}>
                                 <Button variant="primary" onClick={validateAndNext} disabled={saving} style={{ width: '100%' }}>
-                                    {saving ? 'Saving…' : step === TOTAL_STEPS ? 'Get Started' : 'Continue'}
+                                    {saving ? 'Saving...' : step === TOTAL_STEPS ? 'Get Started' : 'Continue'}
                                 </Button>
                                 <div style={{ textAlign: 'center' }}>
                                     {step === 1 && <span onClick={() => setModalType('groq')} style={{ color: 'var(--primary)', fontSize: '13px', cursor: 'pointer', textDecoration: 'underline' }}>Where do I find my API key?</span>}
@@ -95,7 +92,6 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
                         </div>
                     </div>
 
-                    {/* Footer Pinned to Bottom */}
                     <div style={{ fontSize: '12px', color: 'var(--text-secondary)', textAlign: 'center', paddingTop: '20px' }}>
                         By continuing, you agree to our{' '}
                         <span onClick={() => setModalType('legal')} style={{ color: 'var(--primary)', cursor: 'pointer', textDecoration: 'underline' }}>Terms of Service</span>
@@ -105,9 +101,33 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
                 </div>
             </div>
 
-            {/* Right Side: Hero Image */}
-            <div style={{ flex: 1, backgroundColor: 'var(--bg-secondary)', backgroundImage: `linear-gradient(rgba(10, 10, 10, 0.2), rgba(10, 10, 10, 0.2)), url('https://images.unsplash.com/photo-1779126931857-f12866cf7049?fm=jpg&q=60&w=3000&auto=format&fit=crop')`, backgroundSize: 'cover', backgroundPosition: 'center', display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end', padding: '80px', borderLeft: '1px solid var(--border)' }}>
-                <div style={{ color: '#FFF', textAlign: 'right', maxWidth: '650px', padding: '50px', borderRadius: '24px', backgroundColor: 'rgba(255, 255, 255, 0.05)', backdropFilter: 'blur(15px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+            <div
+                style={{
+                    flex: 1,
+                    backgroundColor: 'var(--bg-secondary)',
+                    backgroundImage: `linear-gradient(color-mix(in srgb, var(--background) 26%, transparent), color-mix(in srgb, var(--background) 26%, transparent)), url('https://images.unsplash.com/photo-1779126931857-f12866cf7049?fm=jpg&q=60&w=3000&auto=format&fit=crop')`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    display: 'flex',
+                    alignItems: 'flex-end',
+                    justifyContent: 'flex-end',
+                    padding: '80px',
+                    borderLeft: '1px solid var(--border)',
+                }}
+            >
+                <div
+                    style={{
+                        color: 'var(--text-on-accent)',
+                        textAlign: 'right',
+                        maxWidth: '650px',
+                        padding: '50px',
+                        borderRadius: '24px',
+                        backgroundColor: 'color-mix(in srgb, var(--surface) 24%, transparent)',
+                        backdropFilter: 'blur(15px)',
+                        border: '1px solid color-mix(in srgb, var(--border) 70%, transparent)',
+                        boxShadow: 'var(--shadow-lg)',
+                    }}
+                >
                     <h2 style={{ fontSize: '42px', fontWeight: 700, lineHeight: '1.2', margin: 0 }}>Your Amity study assistant.</h2>
                     <p style={{ fontSize: '18px', opacity: 0.8, marginTop: '24px', lineHeight: '1.6' }}>Pilot helps you study, generate notes, and keep track of coursework from your Amity portal.</p>
                 </div>

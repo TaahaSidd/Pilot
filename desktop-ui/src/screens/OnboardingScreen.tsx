@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button } from '../components/shared/Button';
 import { Input } from '../components/shared/Input';
 import { Toast } from '../components/shared/Toast';
@@ -108,8 +108,8 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
             {/* Right Side: Hero Image */}
             <div style={{ flex: 1, backgroundColor: 'var(--bg-secondary)', backgroundImage: `linear-gradient(rgba(10, 10, 10, 0.2), rgba(10, 10, 10, 0.2)), url('https://images.unsplash.com/photo-1779126931857-f12866cf7049?fm=jpg&q=60&w=3000&auto=format&fit=crop')`, backgroundSize: 'cover', backgroundPosition: 'center', display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end', padding: '80px', borderLeft: '1px solid var(--border)' }}>
                 <div style={{ color: '#FFF', textAlign: 'right', maxWidth: '650px', padding: '50px', borderRadius: '24px', backgroundColor: 'rgba(255, 255, 255, 0.05)', backdropFilter: 'blur(15px)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
-                    <h2 style={{ fontSize: '42px', fontWeight: 700, lineHeight: '1.2', margin: 0 }}>Let Pilot handle Amity.</h2>
-                    <p style={{ fontSize: '18px', opacity: 0.8, marginTop: '24px', lineHeight: '1.6' }}>Pilot automates your Amigo portal tasks, solving validation checkpoints automatically.</p>
+                    <h2 style={{ fontSize: '42px', fontWeight: 700, lineHeight: '1.2', margin: 0 }}>Your Amity study assistant.</h2>
+                    <p style={{ fontSize: '18px', opacity: 0.8, marginTop: '24px', lineHeight: '1.6' }}>Pilot helps you study, generate notes, and keep track of coursework from your Amity portal.</p>
                 </div>
             </div>
 
@@ -119,10 +119,10 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
                 3. Create a new key, copy it, and paste it here!
             </InfoModal>
             <InfoModal isOpen={modalType === 'amity'} onClose={() => setModalType(null)} title="Privacy">
-                We only use credentials for automation. Passwords are encrypted locally and never stored on our servers.
+                We only use credentials to help with your Amity study runs. Passwords are encrypted locally and never stored on our servers.
             </InfoModal>
             <InfoModal isOpen={modalType === 'legal'} onClose={() => setModalType(null)} title="Terms & Privacy">
-                <p>Pilot is a local-first automation tool. Your data stays on your machine.</p>
+                <p>Pilot is a local-first study assistant. Your data stays on your machine.</p>
                 <p>By using Pilot, you acknowledge that you are responsible for any actions performed on your account.</p>
             </InfoModal>
             {toast && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}

@@ -1,37 +1,43 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { SettingRow } from '../components/settings/SettingRow';
 import { IdentitySettingsScreen } from './IdentitySettingsScreen';
-import { ThemeSettingsScreen } from './ThemeSettingsScreen'; // Ensure this is imported
-import { useTheme } from '../context/ThemeContext';
+import { NotificationSettingsScreen } from './NotificationSettingsScreen';
 
-export function SettingsScreen() {
-    const [isEditingIdentity, setIsEditingIdentity] = useState(false);
-    const [isEditingTheme, setIsEditingTheme] = useState(false); // ◄ Added state
-    const { theme } = useTheme();
+export function SettingsScreen({
+    initialView,
+    onInitialViewHandled,
+}: {
+    initialView?: 'identity' | null;
+    onInitialViewHandled?: () => void;
+}) {
+    const [activeScreen, setActiveScreen] = useState<'settings' | 'identity' | 'notifications'>('settings');
 
-    // Navigation logic: Prioritize sub-screen views
-    if (isEditingIdentity) {
-        return <IdentitySettingsScreen onBack={() => setIsEditingIdentity(false)} />;
+    useEffect(() => {
+        if (initialView === 'identity') {
+            setActiveScreen('identity');
+            onInitialViewHandled?.();
+        }
+    }, [initialView, onInitialViewHandled]);
+
+    if (activeScreen === 'identity') {
+        return <IdentitySettingsScreen onBack={() => setActiveScreen('settings')} />;
     }
 
-    if (isEditingTheme) {
-        return <ThemeSettingsScreen onBack={() => setIsEditingTheme(false)} />; // ◄ Added navigation
+    if (activeScreen === 'notifications') {
+        return <NotificationSettingsScreen onBack={() => setActiveScreen('settings')} />;
     }
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '48px' }}>
-
-            {/* Header */}
             <div>
-                <h1 style={{ fontSize: '24px', fontWeight: 600, letterSpacing: '-0.01em', marginBottom: '6px', color: 'var(--text-primary)' }}>
+                <h1 style={{ fontSize: '24px', fontWeight: 600, letterSpacing: 0, marginBottom: '6px', color: 'var(--text-primary)' }}>
                     Settings
                 </h1>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '14px', margin: 0 }}>
-                    Manage your account, appearance, and automation preferences.
+                    Manage your account, updates, privacy, and study preferences.
                 </p>
             </div>
 
-            {/* Account & Security */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-secondary)', margin: 0 }}>
                     Account & Security
@@ -41,7 +47,7 @@ export function SettingsScreen() {
                         label="Profile & API Keys"
                         description="Update your name, Amity login details, or your Groq API key."
                         actionLabel="Manage"
-                        onClick={() => setIsEditingIdentity(true)}
+                        onClick={() => setActiveScreen('identity')}
                     />
                     <SettingRow
                         label="Amity Server Status"
@@ -52,40 +58,46 @@ export function SettingsScreen() {
                 </div>
             </div>
 
-            {/* Appearance */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-secondary)', margin: 0 }}>
-                    Appearance
+                    Updates
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <SettingRow
-                        label="Theme Profiles"
-                        description="Switch between light, dark, and system modes."
-                        actionLabel={theme.charAt(0).toUpperCase() + theme.slice(1)}
-                        onClick={() => setIsEditingTheme(true)} // ◄ Navigation trigger
+                        label="Update Preferences"
+                        description="Choose which Pilot updates should appear as notifications."
+                        actionLabel="Manage"
+                        onClick={() => setActiveScreen('notifications')}
                     />
+                </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-secondary)', margin: 0 }}>
+                    Privacy
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <SettingRow
                         label="Privacy"
-                        description="Control what data is stored and how we handle your logs."
+                        description="Control what data is stored and how Pilot handles your logs."
                         onClick={() => console.log('Privacy settings')}
                     />
                 </div>
             </div>
 
-            {/* Automation */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-secondary)', margin: 0 }}>
-                    Automation
+                    Study Preferences
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <SettingRow
-                        label="Browser Settings"
-                        description="Adjust window scaling and how the automation runs."
+                        label="Study Session Behavior"
+                        description="Choose how Pilot opens Amity and handles study runs."
                         onClick={() => console.log('Browser settings')}
                     />
                     <SettingRow
                         label="Performance"
-                        description="Choose how many tasks run at once to save your computer's resources."
+                        description="Choose how much work Pilot should handle at once."
                         actionLabel="Balanced"
                         onClick={() => console.log('Performance settings')}
                     />

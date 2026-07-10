@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import type { LogEvent } from '../../hooks/usePilot';
 
 interface TerminalLogProps {
@@ -28,7 +28,7 @@ export function TerminalLog({ logs }: TerminalLogProps) {
             border: '1px solid var(--border)',
             borderRadius: '8px',
             padding: '16px',
-            fontFamily: 'JetBrains Mono, monospace',
+            fontFamily: 'Geist Mono, monospace',
             fontSize: '13px',
             height: '320px',
             overflowY: 'auto',

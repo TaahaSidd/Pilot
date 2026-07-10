@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import {
     ClipboardList,
+    BookOpenText,
     FileText,
     HelpCircle,
     LayoutDashboard,
     PanelLeftClose,
     PanelLeftOpen,
     Settings,
-    Zap,
     type LucideIcon,
 } from 'lucide-react';
 
@@ -20,19 +20,23 @@ type SidebarItem = {
     id: string;
     label: string;
     icon: LucideIcon;
+    href?: string;
 };
 
 const mainItems: SidebarItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'automation', label: 'Automation', icon: Zap },
-    { id: 'logs', label: 'Activity archive', icon: ClipboardList },
     { id: 'notes', label: 'Notes', icon: FileText },
+    { id: 'sessions', label: 'History', icon: ClipboardList },
 ];
 
 const bottomItems: SidebarItem[] = [
+    { id: 'docs', label: 'Docs', icon: BookOpenText, href: 'https://pilotcli.netlify.app/docs' },
     { id: 'help', label: 'Help', icon: HelpCircle },
     { id: 'settings', label: 'Settings', icon: Settings },
 ];
+
+const CLI_DOCS_URL = 'https://pilotcli.netlify.app/docs';
+const PILOT_LOGO_URL = '/PilotSVG.svg';
 
 function Tooltip({ label }: { label: string }) {
     return (
@@ -49,7 +53,7 @@ function Tooltip({ label }: { label: string }) {
                 fontSize: '12px',
                 whiteSpace: 'nowrap',
                 zIndex: 20,
-                boxShadow: '0 10px 24px rgba(0, 0, 0, 0.24)',
+                boxShadow: 'var(--shadow-md)',
                 border: '1px solid var(--border)',
             }}
         >
@@ -87,18 +91,18 @@ function SidebarButton({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: expanded ? 'flex-start' : 'center',
-                gap: '12px',
-                width: expanded ? '100%' : '36px',
-                height: '36px',
-                borderRadius: '6px',
+                gap: '13px',
+                width: expanded ? '100%' : '40px',
+                height: '42px',
+                borderRadius: '10px',
                 border: '1px solid transparent',
-                backgroundColor: active ? 'var(--accent-soft)' : 'transparent',
+                backgroundColor: active ? 'color-mix(in srgb, var(--accent) 12%, var(--surface))' : 'transparent',
                 color: active ? 'var(--accent)' : 'var(--text-secondary)',
                 cursor: 'pointer',
                 transition: 'background-color 160ms ease, color 160ms ease, border-color 160ms ease',
-                padding: expanded ? '0 10px' : 0,
-                fontSize: '13px',
-                fontWeight: active ? 600 : 500,
+                padding: expanded ? '0 12px' : 0,
+                fontSize: '14px',
+                fontWeight: active ? 700 : 500,
                 letterSpacing: 0,
                 textAlign: 'left',
             }}
@@ -123,7 +127,7 @@ function SidebarButton({
 }
 
 export function Sidebar({ currentTab, setTab }: SidebarProps) {
-    const [expanded, setExpanded] = useState(false);
+    const [expanded, setExpanded] = useState(true);
     const [hoveredId, setHoveredId] = useState<string | null>(null);
     const ToggleIcon = expanded ? PanelLeftClose : PanelLeftOpen;
 
@@ -135,19 +139,26 @@ export function Sidebar({ currentTab, setTab }: SidebarProps) {
             expanded={expanded}
             hovered={hoveredId === item.id}
             onHover={setHoveredId}
-            onSelect={() => setTab(item.id)}
+            onSelect={() => {
+                if (item.href) {
+                    window.open(item.href, '_blank', 'noopener,noreferrer');
+                    return;
+                }
+
+                setTab(item.id);
+            }}
         />
     );
 
     return (
         <aside
             style={{
-                width: expanded ? '224px' : '40px',
-                backgroundColor: 'var(--surface)',
+                width: expanded ? '264px' : '56px',
+                backgroundColor: 'color-mix(in srgb, var(--surface) 88%, var(--background))',
                 borderRight: '1px solid var(--border)',
                 display: 'flex',
                 flexDirection: 'column',
-                padding: expanded ? '12px' : '8px 4px',
+                padding: expanded ? '18px 14px' : '12px 8px',
                 height: '100vh',
                 transition: 'width 180ms ease, padding 180ms ease',
                 flex: '0 0 auto',
@@ -158,71 +169,76 @@ export function Sidebar({ currentTab, setTab }: SidebarProps) {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: expanded ? 'space-between' : 'center',
-                    height: '36px',
-                    marginBottom: '18px',
-                    gap: '10px',
+                    height: '48px',
+                    marginBottom: '28px',
+                    gap: '14px',
                 }}
             >
-                {expanded && (
+                {expanded ? (
                     <div
                         style={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '10px',
                             minWidth: 0,
+                            height: '48px',
                         }}
                     >
-                        <div
+                        <img
+                            src={PILOT_LOGO_URL}
+                            alt="Pilot"
                             style={{
-                                width: '28px',
-                                height: '28px',
-                                borderRadius: '7px',
-                                backgroundColor: 'var(--accent)',
-                                color: 'var(--text-on-accent)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                flex: '0 0 auto',
+                                width: '96px',
+                                height: '34px',
+                                objectFit: 'contain',
+                                display: 'block',
                             }}
-                        >
-                            <Zap size={15} />
-                        </div>
-                        <span
-                            style={{
-                                color: 'var(--text-primary)',
-                                fontSize: '14px',
-                                fontWeight: 700,
-                                letterSpacing: 0,
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                            }}
-                        >
-                            Pilot
-                        </span>
+                        />
                     </div>
+                ) : (
+                    <button
+                        type="button"
+                        onClick={() => setExpanded(true)}
+                        title="Expand sidebar"
+                        style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '10px',
+                            border: '1px solid var(--border)',
+                            backgroundColor: 'var(--surface-subtle)',
+                            color: 'var(--text-secondary)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            transition: 'background-color 160ms ease, color 160ms ease',
+                        }}
+                    >
+                        <PanelLeftOpen size={18} />
+                    </button>
                 )}
 
-                <button
-                    type="button"
-                    onClick={() => setExpanded((value) => !value)}
-                    title={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
-                    style={{
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '6px',
-                        border: '1px solid transparent',
-                        backgroundColor: 'transparent',
-                        color: 'var(--text-secondary)',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'background-color 160ms ease, color 160ms ease',
-                    }}
-                >
-                    <ToggleIcon size={18} />
-                </button>
+                {expanded && (
+                    <button
+                        type="button"
+                        onClick={() => setExpanded((value) => !value)}
+                        title="Collapse sidebar"
+                        style={{
+                            width: '34px',
+                            height: '34px',
+                            borderRadius: '9px',
+                            border: '1px solid var(--border)',
+                            backgroundColor: 'var(--surface-subtle)',
+                            color: 'var(--text-secondary)',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'background-color 160ms ease, color 160ms ease',
+                        }}
+                    >
+                        <ToggleIcon size={18} />
+                    </button>
+                )}
             </div>
 
             {expanded && (
@@ -232,7 +248,7 @@ export function Sidebar({ currentTab, setTab }: SidebarProps) {
                         style={{
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '6px',
+                            gap: '8px',
                             alignItems: 'stretch',
                         }}
                     >
@@ -244,14 +260,63 @@ export function Sidebar({ currentTab, setTab }: SidebarProps) {
                         style={{
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '6px',
+                            gap: '8px',
                             alignItems: 'stretch',
                             marginTop: 'auto',
-                            paddingTop: '12px',
-                            borderTop: '1px solid var(--border)',
                         }}
                     >
-                        {bottomItems.map(renderItem)}
+                        <button
+                            type="button"
+                            onClick={() => window.open(CLI_DOCS_URL, '_blank', 'noopener,noreferrer')}
+                            style={{
+                                position: 'relative',
+                                overflow: 'hidden',
+                                border: '1px solid color-mix(in srgb, var(--accent) 26%, rgba(255, 255, 255, 0.24))',
+                                borderRadius: '12px',
+                                padding: '14px',
+                                marginBottom: '12px',
+                                minHeight: '92px',
+                                textAlign: 'left',
+                                cursor: 'pointer',
+                                color: '#F8F7FC',
+                                background:
+                                    'linear-gradient(135deg, #8800CC 0%, #AA00FF 42%, #0F766E 100%)',
+                                boxShadow: 'var(--shadow-sm)',
+                            }}
+                        >
+                            <div
+                                style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    opacity: 0.18,
+                                    background:
+                                        'radial-gradient(circle at 18% 20%, #FFFFFF 0 1px, transparent 2px), radial-gradient(circle at 72% 34%, #FFFFFF 0 1px, transparent 2px)',
+                                    backgroundSize: '28px 28px',
+                                }}
+                            />
+                            <div style={{ position: 'relative' }}>
+                                <div>
+                                    <div style={{ fontSize: '14px', fontWeight: 800, lineHeight: '18px', letterSpacing: 0 }}>
+                                        Try our CLI
+                                    </div>
+                                    <div style={{ fontSize: '12px', lineHeight: '16px', opacity: 0.82, marginTop: '3px' }}>
+                                        Run Pilot from your terminal when you want full control.
+                                    </div>
+                                </div>
+                            </div>
+                        </button>
+
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '8px',
+                                paddingTop: '14px',
+                                borderTop: '1px solid var(--border)',
+                            }}
+                        >
+                            {bottomItems.map(renderItem)}
+                        </div>
                     </nav>
                 </>
             )}

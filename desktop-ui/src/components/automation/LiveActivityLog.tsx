@@ -1,18 +1,15 @@
-// src/components/automation/LiveActivityLog.tsx
-import React from 'react';
 import { SlidersHorizontal } from 'lucide-react';
 import type { LogEvent } from '../../hooks/usePilot';
 
 interface LiveActivityLogProps {
     logs: LogEvent[];
+    title?: string;
 }
 
-export function LiveActivityLog({ logs }: LiveActivityLogProps) {
+export function LiveActivityLog({ logs, title = 'Live Activity Log' }: LiveActivityLogProps) {
     return (
         <div
             style={{
-                border: '1px solid var(--border)',
-                borderRadius: '12px',
                 backgroundColor: 'var(--surface)',
                 display: 'flex',
                 flexDirection: 'column',
@@ -30,39 +27,34 @@ export function LiveActivityLog({ logs }: LiveActivityLogProps) {
                     backgroundColor: 'var(--surface)',
                 }}
             >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span
-                        style={{
-                            fontSize: '11px',
-                            fontWeight: 600,
-                            color: 'var(--text-secondary)',
-                            letterSpacing: '0.05em',
-                        }}
-                    >
-                        Live Activity Log
-                    </span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    {/* Filter button currently has no behavior wired —
-                        left as a visual placeholder, not claiming to work */}
-                    <button
-                        disabled
-                        title="Coming soon"
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            background: 'transparent',
-                            border: 'none',
-                            color: 'var(--text-muted)',
-                            fontSize: '12px',
-                            cursor: 'not-allowed',
-                            opacity: 0.5,
-                        }}
-                    >
-                        <SlidersHorizontal size={12} /> Filter
-                    </button>
-                </div>
+                <span
+                    style={{
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        color: 'var(--text-secondary)',
+                        letterSpacing: 0,
+                    }}
+                >
+                    {title}
+                </span>
+
+                <button
+                    disabled
+                    title="Coming soon"
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        background: 'transparent',
+                        border: 'none',
+                        color: 'var(--text-muted)',
+                        fontSize: '12px',
+                        cursor: 'not-allowed',
+                        opacity: 0.5,
+                    }}
+                >
+                    <SlidersHorizontal size={12} /> Filter
+                </button>
             </div>
 
             <div
@@ -81,23 +73,14 @@ export function LiveActivityLog({ logs }: LiveActivityLogProps) {
             >
                 {logs.length === 0 ? (
                     <div style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                        Awaiting pipeline execution stream data payload...
+                        Waiting for automation logs.
                     </div>
                 ) : (
                     logs.map((log) => {
-                        const messageText =
+                        const message =
                             typeof log.message === 'string'
                                 ? log.message
                                 : JSON.stringify(log.message);
-
-                        // There is currently no real timestamp anywhere
-                        // in the broadcast pipeline (pilot_ui.py's
-                        // _broadcast() doesn't attach one). Rather than
-                        // fabricate "now" and imply it's accurate, show
-                        // an explicit placeholder. To get real
-                        // timestamps, _broadcast() needs a small addition
-                        // server-side — flagged, not silently faked.
-                        const logTime = '—:—:—';
 
                         return (
                             <div
@@ -111,7 +94,7 @@ export function LiveActivityLog({ logs }: LiveActivityLogProps) {
                                         minWidth: '75px',
                                     }}
                                 >
-                                    [{logTime}]
+                                    [--:--:--]
                                 </span>
                                 <span
                                     style={{
@@ -123,7 +106,7 @@ export function LiveActivityLog({ logs }: LiveActivityLogProps) {
                                                     : 'var(--text-primary)',
                                     }}
                                 >
-                                    {messageText}
+                                    {message}
                                 </span>
                             </div>
                         );

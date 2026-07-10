@@ -1,4 +1,3 @@
-import React from 'react';
 import { ArrowLeft, Check } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { Button } from '../components/shared/Button';
@@ -19,7 +18,7 @@ const themes: ThemeOption[] = [
         description: 'Low glare interface for long automation runs.',
         previewBackground: '#101014',
         previewSurface: '#1B1B21',
-        previewAccent: '#7C3AED',
+        previewAccent: '#AA00FF',
     },
     {
         id: 'light',
@@ -27,7 +26,7 @@ const themes: ThemeOption[] = [
         description: 'Brighter interface for daytime work.',
         previewBackground: '#F7F8FB',
         previewSurface: '#FCFCFD',
-        previewAccent: '#7C3AED',
+        previewAccent: '#AA00FF',
     },
     {
         id: 'system',
@@ -35,7 +34,7 @@ const themes: ThemeOption[] = [
         description: 'Follow your operating system appearance.',
         previewBackground: 'linear-gradient(135deg, #F7F8FB 0 50%, #101014 50% 100%)',
         previewSurface: '#FCFCFD',
-        previewAccent: '#7C3AED',
+        previewAccent: '#AA00FF',
     },
 ];
 

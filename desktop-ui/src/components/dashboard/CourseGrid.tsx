@@ -53,7 +53,7 @@ export function CourseGrid({ courses, onSelectCourse }: CourseGridProps) {
                         fontSize: '13px',
                     }}
                 >
-                    No course data yet. Start an automation run to see live progress here.
+                    No course data yet. Start a study run to see your course progress here.
                 </div>
             )}
 

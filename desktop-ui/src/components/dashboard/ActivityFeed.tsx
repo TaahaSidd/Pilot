@@ -1,157 +1,385 @@
-import { useState } from 'react';
-import {
-    FileSpreadsheet,
-    CheckCircle2,
-    AlertCircle,
-    AlertTriangle,
-    ChevronDown,
-    BookOpen,
-    Brain,
-    Layers,
-} from 'lucide-react';
+import { ExternalLink, Play } from 'lucide-react';
 import { Button } from '../shared/Button';
-import type { LogEvent, LogLevel } from '../../hooks/usePilot';
+import type { LogEvent, PilotStatus, RuntimeState } from '../../hooks/usePilot';
+import type { ReactNode } from 'react';
 
-interface ActivityFeedProps {
+interface StudyRunCardProps {
     logs: LogEvent[];
-    compact?: boolean;
+    runtime: RuntimeState | null;
+    status: PilotStatus;
+    awaitingLogin: boolean;
+    onStartStudyRun?: () => void;
+    onOpenBrowser?: () => void;
+    onConfirmLogin?: () => void;
+    actionDisabled?: boolean;
+    starting?: boolean;
 }
 
-const PAGE_SIZE = 8;
-const COMPACT_PAGE_SIZE = 4;
+type StudyRunMode = 'idle' | 'running' | 'paused' | 'completed' | 'stopped' | 'failed';
 
-function getIcon(level: LogLevel) {
-    switch (level) {
-        case 'success':
-            return <CheckCircle2 size={16} style={{ color: 'var(--success)', marginTop: '2px', flexShrink: 0 }} />;
-        case 'error':
-            return <AlertCircle size={16} style={{ color: 'var(--error)', marginTop: '2px', flexShrink: 0 }} />;
-        case 'warning':
-        case 'action_required':
-            return <AlertTriangle size={16} style={{ color: 'var(--warning)', marginTop: '2px', flexShrink: 0 }} />;
-        case 'course':
-            return <Layers size={16} style={{ color: 'var(--success)', marginTop: '2px', flexShrink: 0 }} />;
-        case 'page':
-            return <BookOpen size={16} style={{ color: 'var(--accent)', marginTop: '2px', flexShrink: 0 }} />;
-        case 'quiz':
-            return <Brain size={16} style={{ color: 'var(--accent)', marginTop: '2px', flexShrink: 0 }} />;
-        default:
-            return <FileSpreadsheet size={16} style={{ color: 'var(--accent)', marginTop: '2px', flexShrink: 0 }} />;
-    }
+function getMode(status: PilotStatus, runtime: RuntimeState | null, awaitingLogin: boolean): StudyRunMode {
+    if ((awaitingLogin || runtime?.awaiting_login) && status === 'running') return 'paused';
+    if (status === 'running') return 'running';
+    if (status === 'done') return 'completed';
+    if (status === 'stopped') return 'stopped';
+    if (status === 'error') return 'failed';
+    return 'idle';
 }
 
-function messageToText(message: LogEvent['message']): string {
-    if (typeof message === 'string') return message;
+function formatDuration(seconds?: number | null) {
+    if (!seconds) return 'Not tracked';
 
-    if (Array.isArray(message)) {
-        return `${message.length} course(s) scanned`;
-    }
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
 
-    if (typeof message === 'object' && message !== null) {
-        const data = message as Record<string, unknown>;
+    if (minutes === 0) return `${remainingSeconds}s`;
+    if (minutes < 60) return remainingSeconds ? `${minutes}m ${remainingSeconds}s` : `${minutes}m`;
 
-        if ('title' in data && 'completion' in data) {
-            return `${String(data.title)} - ${String(data.completion)}%`;
-        }
-
-        if ('current' in data && 'total' in data && 'title' in data) {
-            const type = 'type' in data ? `${String(data.type)} ` : '';
-            return `${String(data.current)}/${String(data.total)} ${type}${String(data.title)}`;
-        }
-    }
-
-    return 'Activity update';
+    const hours = Math.floor(minutes / 60);
+    const leftoverMinutes = minutes % 60;
+    return leftoverMinutes ? `${hours}h ${leftoverMinutes}m` : `${hours}h`;
 }
 
-export function ActivityFeed({ logs, compact = false }: ActivityFeedProps) {
-    const initialVisibleCount = compact ? COMPACT_PAGE_SIZE : PAGE_SIZE;
-    const [visibleCount, setVisibleCount] = useState(initialVisibleCount);
+function formatFinishedAt(value?: string | null) {
+    if (!value) return 'Just now';
 
-    const items = [...logs].reverse().filter((l) => l.level !== 'summary');
-    const visible = items.slice(0, visibleCount);
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'Just now';
 
-    const handleLoadMore = () => {
-        setVisibleCount((prev) => prev + initialVisibleCount);
-    };
+    const isToday = date.toDateString() === new Date().toDateString();
+    const time = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    return isToday ? `Today, ${time}` : `${date.toLocaleDateString()}, ${time}`;
+}
 
+function countNotesSaved(logs: LogEvent[]) {
+    return logs.filter((log) => {
+        const text = typeof log.message === 'string' ? log.message.toLowerCase() : JSON.stringify(log.message).toLowerCase();
+        return text.includes('note saved');
+    }).length;
+}
+
+function currentAction(runtime: RuntimeState | null) {
+    return runtime?.current_action_label || runtime?.current_action || 'Working on your study run';
+}
+
+function pageText(runtime: RuntimeState | null) {
+    if (!runtime) return 'Waiting for page data';
+    if (runtime.module_current_index && runtime.modules_total) {
+        return `${runtime.module_current_index} of ${runtime.modules_total}`;
+    }
+    return runtime.current_page || 'Waiting for page data';
+}
+
+function progressText(runtime: RuntimeState | null) {
+    if (!runtime?.modules_total) return 'Waiting for progress';
+    return `${runtime.modules_processed} of ${runtime.modules_total} topics`;
+}
+
+function progressValue(runtime: RuntimeState | null) {
+    if (!runtime?.modules_total) return 0;
+    return Math.max(0, Math.min(100, runtime.module_progress_percent || runtime.course_run_progress_percent || 0));
+}
+
+function Field({ label, value }: { label: string; value: string | number | null | undefined }) {
     return (
-        <div style={{ minWidth: 0 }}>
-            <h3 style={{
-                fontSize: compact ? '13px' : '16px',
-                fontWeight: 600,
-                color: compact ? 'var(--text-secondary)' : 'var(--text-primary)',
-                marginBottom: compact ? '12px' : '16px',
-                marginTop: 0,
-                letterSpacing: 0,
-            }}>
-                Recent Activity
-            </h3>
-
+        <div
+            style={{
+                display: 'grid',
+                gap: '5px',
+                padding: '12px 0',
+                borderBottom: '1px solid var(--border)',
+            }}
+        >
+            <div style={{ color: 'var(--text-secondary)', fontSize: '12px', lineHeight: '16px' }}>
+                {label}
+            </div>
             <div
                 style={{
-                    backgroundColor: 'var(--surface)',
+                    color: 'var(--text-primary)',
+                    fontSize: '14px',
+                    fontWeight: 700,
+                    lineHeight: '19px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                }}
+                title={String(value ?? 'Not available')}
+            >
+                {value ?? 'Not available'}
+            </div>
+        </div>
+    );
+}
+
+function ProgressBar({ value }: { value: number }) {
+    return (
+        <div style={{ display: 'grid', gap: '8px' }}>
+            <div
+                style={{
+                    height: '8px',
+                    borderRadius: '999px',
+                    backgroundColor: 'var(--surface-subtle)',
                     border: '1px solid var(--border)',
-                    borderRadius: '12px',
-                    padding: compact ? '16px' : '20px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: compact ? '14px' : '18px',
-                    maxHeight: compact ? '236px' : '520px',
-                    minHeight: compact ? '176px' : undefined,
-                    overflowY: 'auto',
+                    overflow: 'hidden',
                 }}
             >
-                {items.length === 0 && (
-                    <div style={{ fontSize: '13px', color: 'var(--text-secondary)', textAlign: 'center', padding: '12px 0' }}>
-                        No activity yet this session. Start a run to see live updates here.
+                <div
+                    style={{
+                        width: `${value}%`,
+                        height: '100%',
+                        borderRadius: '999px',
+                        backgroundColor: 'var(--accent)',
+                        transition: 'width 180ms ease',
+                    }}
+                />
+            </div>
+            <div style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>
+                {value}% complete
+            </div>
+        </div>
+    );
+}
+
+function StatusPill({ mode }: { mode: StudyRunMode }) {
+    const styles = {
+        idle: { label: 'Ready', color: 'var(--text-secondary)', bg: 'var(--surface-subtle)' },
+        running: { label: 'Running', color: 'var(--accent)', bg: 'var(--accent-soft)' },
+        paused: { label: 'Action required', color: 'var(--warning)', bg: 'var(--warning-soft)' },
+        completed: { label: 'Completed', color: 'var(--success)', bg: 'var(--success-soft)' },
+        stopped: { label: 'Stopped', color: 'var(--warning)', bg: 'var(--warning-soft)' },
+        failed: { label: 'Failed', color: 'var(--error)', bg: 'var(--error-soft)' },
+    }[mode];
+
+    return (
+        <span
+            style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '7px',
+                width: 'fit-content',
+                borderRadius: '999px',
+                padding: '6px 10px',
+                backgroundColor: styles.bg,
+                color: styles.color,
+                fontSize: '12px',
+                fontWeight: 800,
+            }}
+        >
+            <span
+                style={{
+                    width: '7px',
+                    height: '7px',
+                    borderRadius: '999px',
+                    backgroundColor: styles.color,
+                    boxShadow: mode === 'running' ? '0 0 0 5px var(--accent-soft)' : undefined,
+                }}
+            />
+            {styles.label}
+        </span>
+    );
+}
+
+function CardShell({ children }: { children: ReactNode }) {
+    return (
+        <div
+            style={{
+                backgroundColor: 'var(--surface)',
+                border: '1px solid var(--border)',
+                borderRadius: '12px',
+                padding: '22px',
+                minHeight: '300px',
+            }}
+        >
+            {children}
+        </div>
+    );
+}
+
+function EmptyState({ onStartStudyRun, actionDisabled, starting }: StudyRunCardProps) {
+    return (
+        <CardShell>
+            <div
+                style={{
+                    minHeight: '248px',
+                    display: 'grid',
+                    placeItems: 'center',
+                    textAlign: 'center',
+                }}
+            >
+                <div style={{ display: 'grid', justifyItems: 'center', gap: '14px' }}>
+                    <div
+                        style={{
+                            width: '44px',
+                            height: '44px',
+                            borderRadius: '14px',
+                            display: 'grid',
+                            placeItems: 'center',
+                            backgroundColor: 'var(--accent-soft)',
+                            color: 'var(--accent)',
+                        }}
+                    >
+                        <Play size={20} />
                     </div>
-                )}
-
-                {visible.map((entry) => (
-                    <div key={entry._id} style={{ display: 'flex', gap: '14px', fontSize: '13px' }}>
-                        {getIcon(entry.level)}
-
-                        <div style={{ minWidth: 0 }}>
-                            <div
-                                style={{
-                                    color: 'var(--text-primary)',
-                                    lineHeight: '18px',
-                                    wordBreak: 'break-word',
-                                }}
-                            >
-                                {messageToText(entry.message)}
-                            </div>
-
-                            <div
-                                style={{
-                                    color: 'var(--text-muted)',
-                                    fontSize: '11px',
-                                    marginTop: '3px',
-                                    letterSpacing: 0,
-                                }}
-                            >
-                                {entry.level.replace('_', ' ')}
-                            </div>
+                    <div>
+                        <div style={{ color: 'var(--text-primary)', fontSize: '15px', fontWeight: 800, marginBottom: '5px' }}>
+                            Ready to Study
+                        </div>
+                        <div style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '20px' }}>
+                            No study session is currently running.
                         </div>
                     </div>
-                ))}
-
-                {visibleCount < items.length && (
-                    <div style={{ borderTop: '1px solid var(--border)', paddingTop: '12px', marginTop: '4px' }}>
+                    {onStartStudyRun && (
                         <Button
-                            variant="ghost"
                             size="sm"
-                            icon={ChevronDown}
-                            iconPosition="right"
-                            fullWidth
-                            onClick={handleLoadMore}
-                            style={{ color: 'var(--text-muted)', fontSize: '12px' }}
+                            icon={Play}
+                            onClick={onStartStudyRun}
+                            disabled={actionDisabled}
+                            loading={starting}
+                            loadingText="Starting"
                         >
-                            View Older Activity
+                            Start Study Run
                         </Button>
+                    )}
+                </div>
+            </div>
+        </CardShell>
+    );
+}
+
+function LiveState({ runtime, mode, onOpenBrowser, onConfirmLogin }: StudyRunCardProps & { mode: 'running' | 'paused' }) {
+    const value = progressValue(runtime);
+
+    return (
+        <CardShell>
+            <div style={{ display: 'grid', gap: '18px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: '12px' }}>
+                    <div style={{ minWidth: 0 }}>
+                        <StatusPill mode={mode} />
+                        <h4 style={{ margin: '14px 0 6px', color: 'var(--text-primary)', fontSize: '20px', lineHeight: '26px' }}>
+                            {mode === 'paused' ? 'Study Run Paused' : currentAction(runtime)}
+                        </h4>
+                        <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '20px' }}>
+                            {mode === 'paused'
+                                ? 'Waiting for login verification.'
+                                : runtime?.current_module || runtime?.current_page || 'Pilot is preparing the next study step.'}
+                        </p>
+                    </div>
+                </div>
+
+                <div>
+                    <Field label="Current Course" value={runtime?.current_course} />
+                    <Field label="Current Module" value={runtime?.current_module} />
+                    <Field label="Page" value={pageText(runtime)} />
+                </div>
+
+                <div style={{ display: 'grid', gap: '8px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}>
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>Progress</span>
+                        <span style={{ color: 'var(--text-primary)', fontSize: '12px', fontWeight: 700 }}>
+                            {progressText(runtime)}
+                        </span>
+                    </div>
+                    <ProgressBar value={value} />
+                </div>
+
+                {mode === 'paused' && (
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', paddingTop: '2px' }}>
+                        {onOpenBrowser && (
+                            <Button size="sm" variant="secondary" icon={ExternalLink} onClick={onOpenBrowser}>
+                                Open Browser
+                            </Button>
+                        )}
+                        {onConfirmLogin && (
+                            <Button size="sm" onClick={onConfirmLogin}>
+                                I've Finished
+                            </Button>
+                        )}
                     </div>
                 )}
             </div>
+        </CardShell>
+    );
+}
+
+function SummaryState({ runtime, logs, mode }: StudyRunCardProps & { mode: 'completed' | 'stopped' | 'failed' }) {
+    const notesSaved = mode === 'completed' ? countNotesSaved(logs) : 0;
+    const isFailure = mode === 'failed';
+    const title = isFailure ? 'Study Run Failed' : mode === 'stopped' ? 'Study Run Stopped' : 'Study Run Complete';
+    const message = isFailure
+        ? 'Pilot could not finish the study run.'
+        : mode === 'stopped'
+            ? 'The study run has ended. Start a new run when you are ready.'
+            : 'Your study run finished successfully.';
+
+    return (
+        <CardShell>
+            <div style={{ display: 'grid', gap: '18px' }}>
+                <div style={{ minWidth: 0 }}>
+                    <h4 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '18px', lineHeight: '24px' }}>
+                        {title}
+                    </h4>
+                    <p style={{ margin: '6px 0 0', color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '19px' }}>
+                        {message}
+                    </p>
+                    <div style={{ marginTop: '8px' }}>
+                        <StatusPill mode={mode} />
+                    </div>
+                </div>
+
+                {isFailure && runtime?.error && (
+                    <div
+                        style={{
+                            borderRadius: '10px',
+                            border: '1px solid color-mix(in srgb, var(--error) 26%, var(--border))',
+                            backgroundColor: 'var(--error-soft)',
+                            color: 'var(--text-primary)',
+                            padding: '12px',
+                            fontSize: '13px',
+                            lineHeight: '19px',
+                        }}
+                    >
+                        {runtime.error}
+                    </div>
+                )}
+
+                <div>
+                    <Field label="Duration" value={formatDuration(runtime?.elapsed_seconds)} />
+                    <Field label="Result" value={mode === 'completed' ? 'Completed successfully' : mode === 'stopped' ? 'Stopped by user' : 'Needs attention'} />
+                    {mode === 'completed' && (
+                        <Field label="Notes generated" value={notesSaved || 'Not tracked'} />
+                    )}
+                    <Field label="Finished" value={formatFinishedAt(runtime?.finished_at)} />
+                </div>
+            </div>
+        </CardShell>
+    );
+}
+
+export function ActivityFeed(props: StudyRunCardProps) {
+    const mode = getMode(props.status, props.runtime, props.awaitingLogin);
+    const heading = mode === 'running' || mode === 'paused' ? 'Current Study Run' : 'Study Run';
+
+    return (
+        <div style={{ minWidth: 0 }}>
+            <h3
+                style={{
+                    fontSize: '16px',
+                    fontWeight: 700,
+                    color: 'var(--text-primary)',
+                    marginBottom: '16px',
+                    marginTop: 0,
+                    letterSpacing: 0,
+                }}
+            >
+                {heading}
+            </h3>
+
+            {mode === 'idle' && <EmptyState {...props} />}
+            {mode === 'running' && <LiveState {...props} mode="running" />}
+            {mode === 'paused' && <LiveState {...props} mode="paused" />}
+            {mode === 'completed' && <SummaryState {...props} mode="completed" />}
+            {mode === 'stopped' && <SummaryState {...props} mode="stopped" />}
+            {mode === 'failed' && <SummaryState {...props} mode="failed" />}
         </div>
     );
 }

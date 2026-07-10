@@ -1,6 +1,6 @@
 // src/context/usePilotContext.tsx
 
-import React, {
+import {
     createContext,
     useContext,
     type ReactNode,

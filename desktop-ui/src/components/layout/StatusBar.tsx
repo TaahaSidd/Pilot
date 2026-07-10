@@ -1,5 +1,4 @@
 // src/components/layout/StatusBar.tsx
-import React from 'react';
 
 interface StatusBarProps {
     wsState: string;

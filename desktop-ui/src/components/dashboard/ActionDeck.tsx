@@ -1,5 +1,4 @@
 // src/components/dashboard/ActionDeck.tsx
-import React from 'react';
 import { Play, FileText, Eye } from 'lucide-react';
 
 interface ActionDeckProps {

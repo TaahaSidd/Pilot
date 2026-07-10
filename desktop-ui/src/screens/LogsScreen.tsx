@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { LogFilterBar, type DateRangeFilter, type StatusFilter } from '../components/logs/LogFilterBar';
 import { LogHistoryRow } from '../components/logs/LogHistoryRow';
 import { pilotApi, type HistorySessionSummary } from '../api/api';
@@ -48,7 +48,7 @@ function getSessionTitle(session: HistorySessionSummary) {
     }
 
     if (session.type === 'notes') return 'Notes generation';
-    if (session.type === 'workflow') return 'Workflow automation';
+    if (session.type === 'workflow') return 'Study session';
 
     return 'Pilot session';
 }
@@ -65,7 +65,7 @@ function getSummary(session: HistorySessionSummary) {
     const processed = summary.modules_processed ?? summary.modules_started ?? 0;
     const total = summary.modules_total ?? 0;
 
-    return total ? `${processed}/${total} modules processed` : `${processed} modules processed`;
+        return total ? `${processed}/${total} topics studied` : `${processed} topics studied`;
 }
 
 function isInDateRange(iso: string | null, filter: DateRangeFilter) {
@@ -87,7 +87,15 @@ function isInDateRange(iso: string | null, filter: DateRangeFilter) {
     return now - startedAt <= 30 * dayMs;
 }
 
-export function LogsScreen() {
+export function LogsScreen({
+    onOpenNotes,
+    onResumeStudy,
+    onOpenCourse,
+}: {
+    onOpenNotes?: () => void;
+    onResumeStudy?: () => void;
+    onOpenCourse?: () => void;
+}) {
     const [sessions, setSessions] = useState<HistorySessionSummary[]>([]);
     const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
     const [dateRangeFilter, setDateRangeFilter] = useState<DateRangeFilter>('all');
@@ -115,7 +123,7 @@ export function LogsScreen() {
                 }
             } catch {
                 if (!cancelled) {
-                    setError('Could not load activity history.');
+                    setError('Could not load recent sessions.');
                 }
             } finally {
                 if (!cancelled) {
@@ -135,10 +143,10 @@ export function LogsScreen() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
             <div>
                 <h1 style={{ fontSize: '24px', fontWeight: 600, letterSpacing: 0, marginBottom: '6px', color: 'var(--text-primary)' }}>
-                    Activity Archive
+                    History
                 </h1>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
-                    View a history of your past automation sessions, including performance metrics and completed tasks.
+                    Review past study sessions, generated notes, and anything that needed attention.
                 </p>
             </div>
 
@@ -169,7 +177,7 @@ export function LogsScreen() {
                         color: 'var(--text-muted)'
                     }}>
                         <div>Date</div>
-                        <div>Course / project</div>
+                        <div>Course / run</div>
                         <div>Summary</div>
                         <div>Time taken</div>
                         <div>Result</div>
@@ -189,7 +197,7 @@ export function LogsScreen() {
 
                     {!loading && !error && filteredSessions.length === 0 && (
                         <div style={{ padding: '24px', color: 'var(--text-secondary)', fontSize: '13px' }}>
-                            No activity sessions match these filters.
+                            No study sessions match these filters.
                         </div>
                     )}
 
@@ -202,6 +210,9 @@ export function LogsScreen() {
                             summary={getSummary(session)}
                             duration={formatDuration(session.duration_seconds)}
                             status={mapStatus(session.status)}
+                            onOpenNotes={onOpenNotes}
+                            onResumeStudy={onResumeStudy}
+                            onOpenCourse={onOpenCourse}
                         />
                     ))}
                 </div>

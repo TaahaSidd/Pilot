@@ -3,12 +3,12 @@ import { BookOpen, CircleHelp, LifeBuoy, MessageSquareText } from 'lucide-react'
 const helpItems = [
     {
         title: 'Getting started',
-        description: 'Set up your profile, start automation, and open generated notes from the dashboard.',
+        description: 'Set up your profile, start a study run, and open generated notes from the dashboard.',
         icon: BookOpen,
     },
     {
-        title: 'Automation help',
-        description: 'Use the automation screen to watch the current run, activity log, and browser state.',
+        title: 'Study run help',
+        description: 'Use the dashboard to follow your current course, topic, progress, and updates.',
         icon: LifeBuoy,
     },
     {
@@ -34,7 +34,7 @@ export function HelpScreen() {
                     Help
                 </h1>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '14px', margin: 0 }}>
-                    Quick reference for using Pilot while your automation runs.
+                    Quick reference for using Pilot as your Amity study assistant.
                 </p>
             </div>
 
@@ -129,7 +129,7 @@ export function HelpScreen() {
                         Need more control?
                     </h2>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '20px', margin: 0 }}>
-                        Open Settings from the bottom of the sidebar to manage identity, theme, browser behavior, and automation preferences.
+                        Open Settings from the bottom of the sidebar to manage your profile, updates, appearance, and study preferences.
                     </p>
                 </div>
             </section>

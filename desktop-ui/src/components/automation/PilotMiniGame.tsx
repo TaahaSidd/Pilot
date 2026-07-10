@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Gamepad2, RotateCcw, X } from 'lucide-react';
 
 const WORDS = ['learn', 'focus', 'notes', 'class', 'study', 'brain'];
@@ -177,7 +177,7 @@ export function PilotMiniGame() {
                             display: 'flex',
                             flexDirection: 'column',
                             gap: '16px',
-                            boxShadow: '0 24px 80px rgba(0, 0, 0, 0.45)',
+                            boxShadow: 'var(--shadow-lg)',
                         }}
                     >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>

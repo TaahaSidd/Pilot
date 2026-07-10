@@ -1,5 +1,4 @@
-import { ListChecks, Layers, Timer } from 'lucide-react';
-import { StatCard } from './StatCard';
+import type { ReactNode } from 'react';
 import type { PilotStatus, CourseSummary, RuntimeState } from '../../hooks/usePilot';
 
 interface StatsGridProps {
@@ -19,6 +18,24 @@ function formatElapsed(seconds: number | null | undefined) {
     return `${mins}m ${secs}s`;
 }
 
+function formatEstimatedTime(runtime: RuntimeState | null, isRunning: boolean) {
+    if (!isRunning) return 'Not running';
+
+    const elapsed = runtime?.elapsed_seconds ?? 0;
+    const percent = runtime?.module_progress_percent ?? runtime?.course_run_progress_percent ?? 0;
+
+    if (elapsed <= 0 || percent <= 0) {
+        return 'Calculating';
+    }
+
+    if (percent >= 100) {
+        return 'Almost done';
+    }
+
+    const remainingSeconds = Math.round((elapsed * (100 - percent)) / percent);
+    return formatElapsed(remainingSeconds);
+}
+
 function getElapsedProgress(runtime: RuntimeState | null) {
     if (runtime?.modules_total) {
         return Math.max(0, Math.min(runtime.module_progress_percent, 100));
@@ -28,20 +45,182 @@ function getElapsedProgress(runtime: RuntimeState | null) {
     return Math.max(0, Math.min((seconds / 1800) * 100, 100));
 }
 
-function ElapsedProgress({ percent, isRunning }: { percent: number; isRunning: boolean }) {
+function MetricCard({
+    title,
+    value,
+    label,
+    visual,
+}: {
+    title: string;
+    value: string | number;
+    label: string;
+    visual: ReactNode;
+}) {
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '2px' }}>
+        <div
+            style={{
+                backgroundColor: 'color-mix(in srgb, var(--accent) 8%, var(--surface))',
+                border: '1px solid color-mix(in srgb, var(--accent) 18%, var(--border))',
+                borderRadius: '12px',
+                padding: '20px',
+                display: 'grid',
+                gridTemplateColumns: 'minmax(0, 1fr) 104px',
+                gap: '18px',
+                alignItems: 'center',
+                minWidth: 0,
+            }}
+        >
+            <div style={{ minWidth: 0 }}>
+                <div
+                    style={{
+                        color: 'var(--text-secondary)',
+                        fontSize: '13px',
+                        fontWeight: 500,
+                        letterSpacing: 0,
+                        marginBottom: '14px',
+                    }}
+                >
+                    {title}
+                </div>
+                <div
+                    style={{
+                        color: 'var(--text-primary)',
+                        fontSize: '34px',
+                        fontWeight: 800,
+                        letterSpacing: 0,
+                        lineHeight: '38px',
+                    }}
+                >
+                    {value}
+                </div>
+                <div
+                    style={{
+                        color: 'var(--text-secondary)',
+                        fontSize: '13px',
+                        lineHeight: '18px',
+                        marginTop: '6px',
+                    }}
+                >
+                    {label}
+                </div>
+            </div>
+
+            {visual}
+        </div>
+    );
+}
+
+function CompletionRing({
+    percent,
+    label,
+    size = 88,
+    stroke = 10,
+}: {
+    percent: number;
+    label: string;
+    size?: number;
+    stroke?: number;
+}) {
+    const radius = (size - stroke) / 2;
+    const center = size / 2;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (percent / 100) * circumference;
+
+    return (
+        <div
+            style={{
+                width: `${size}px`,
+                height: `${size}px`,
+                position: 'relative',
+                display: 'grid',
+                placeItems: 'center',
+                justifySelf: 'end',
+            }}
+            aria-label={label}
+        >
+            <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden="true">
+                <circle
+                    cx={center}
+                    cy={center}
+                    r={radius}
+                    fill="none"
+                    stroke="var(--border)"
+                    strokeWidth={stroke}
+                />
+                <circle
+                    cx={center}
+                    cy={center}
+                    r={radius}
+                    fill="none"
+                    stroke="var(--accent)"
+                    strokeWidth={stroke}
+                    strokeLinecap="round"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={offset}
+                    transform={`rotate(-90 ${center} ${center})`}
+                    style={{ transition: 'stroke-dashoffset 180ms ease' }}
+                />
+            </svg>
+            <span
+                style={{
+                    position: 'absolute',
+                    color: 'var(--text-primary)',
+                    fontSize: '17px',
+                    fontWeight: 800,
+                    letterSpacing: 0,
+                }}
+            >
+                {percent}%
+            </span>
+        </div>
+    );
+}
+
+function StudySegments({ percent, label }: { percent: number; label: string }) {
+    return (
+        <div
+            aria-label={label}
+            style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(5, 1fr)',
+                gap: '5px',
+                width: '104px',
+                height: '50px',
+                alignItems: 'stretch',
+            }}
+        >
+            {Array.from({ length: 10 }).map((_, index) => {
+                const segmentPercent = ((index + 1) / 10) * 100;
+                const isFilled = percent >= segmentPercent;
+
+                return (
+                    <span
+                        key={index}
+                        style={{
+                            borderRadius: '999px',
+                            backgroundColor: isFilled ? 'var(--accent)' : 'var(--surface-subtle)',
+                            border: isFilled ? '1px solid var(--accent)' : '1px solid var(--border)',
+                            transition: 'background-color 180ms ease, border-color 180ms ease',
+                        }}
+                    />
+                );
+            })}
+        </div>
+    );
+}
+
+function ElapsedVisual({ percent, label }: { percent: number; label: string }) {
+    return (
+        <div style={{ justifySelf: 'end' }}>
             <div
-                aria-label="Elapsed progress"
+                aria-label={label}
                 style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(4, 1fr)',
-                    gap: '6px',
-                    height: '14px',
-                    padding: '3px',
-                    borderRadius: '999px',
-                    backgroundColor: 'var(--surface-subtle)',
-                    border: '1px solid var(--border)',
+                    gap: '5px',
+                    width: '96px',
+                    height: '62px',
+                    alignItems: 'end',
                 }}
             >
                 {[0, 1, 2, 3].map((segment) => {
@@ -55,94 +234,27 @@ function ElapsedProgress({ percent, isRunning }: { percent: number; isRunning: b
                                 position: 'relative',
                                 overflow: 'hidden',
                                 borderRadius: '999px',
-                                backgroundColor: 'var(--border)',
+                                backgroundColor: 'var(--surface-subtle)',
+                                border: '1px solid var(--border)',
+                                height: '100%',
                             }}
                         >
                             <div
                                 style={{
-                                    width: `${fill * 100}%`,
-                                    height: '100%',
+                                    position: 'absolute',
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    height: `${fill * 100}%`,
                                     borderRadius: '999px',
                                     backgroundColor: 'var(--accent)',
-                                    transition: 'width 180ms ease',
+                                    transition: 'height 180ms ease',
                                 }}
                             />
                         </div>
                     );
                 })}
             </div>
-
-            <span>
-                {isRunning ? `${Math.round(percent)}% run progress` : 'Last tracked run'}
-            </span>
-        </div>
-    );
-}
-
-function SegmentedProgress({ percent, label }: { percent: number; label: string }) {
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '2px' }}>
-            <div
-                aria-label={label}
-                style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(16, 1fr)',
-                    gap: '4px',
-                    height: '28px',
-                    alignItems: 'stretch',
-                }}
-            >
-                {Array.from({ length: 16 }).map((_, index) => {
-                    const segmentPercent = ((index + 1) / 16) * 100;
-                    const isFilled = percent >= segmentPercent;
-
-                    return (
-                        <span
-                            key={index}
-                            style={{
-                                borderRadius: '999px',
-                                backgroundColor: isFilled ? 'var(--accent)' : 'var(--surface-subtle)',
-                                border: isFilled ? '1px solid var(--accent)' : '1px solid var(--border)',
-                                boxShadow: isFilled ? '0 0 0 1px var(--accent-soft)' : 'none',
-                                transition: 'background-color 180ms ease, border-color 180ms ease',
-                            }}
-                        />
-                    );
-                })}
-            </div>
-
-            <span>{label}</span>
-        </div>
-    );
-}
-
-function CourseProgress({ percent, label }: { percent: number; label: string }) {
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '2px' }}>
-            <div
-                aria-label="Course progress"
-                style={{
-                    width: '100%',
-                    height: '14px',
-                    padding: '3px',
-                    borderRadius: '999px',
-                    backgroundColor: 'var(--surface-subtle)',
-                    border: '1px solid var(--border)',
-                    overflow: 'hidden',
-                }}
-            >
-                <div
-                    style={{
-                        width: `${percent}%`,
-                        height: '100%',
-                        borderRadius: '999px',
-                        backgroundColor: 'var(--accent)',
-                        transition: 'width 180ms ease',
-                    }}
-                />
-            </div>
-
-            <span>{label}</span>
         </div>
     );
 }
@@ -154,36 +266,33 @@ export function StatsGrid({
     modulesCompletedThisRun,
 }: StatsGridProps) {
     const isRunning = status === 'running';
-
-    const coursesInProgress = courses
-        ? courses.filter((course) => course.completion < 100).length
-        : null;
+    const liveRuntime = isRunning ? runtime : null;
 
     const coursesComplete = courses
         ? courses.filter((course) => course.completion === 100).length
         : null;
 
     const courseTotal = courses?.length ?? 0;
-    const coursesInProgressValue = coursesInProgress === null
-        ? '0/0'
-        : `${coursesInProgress}/${courseTotal}`;
     const courseProgressPercent = courseTotal > 0
-        ? Math.round((coursesInProgress / courseTotal) * 100)
+        ? Math.round(((coursesComplete ?? 0) / courseTotal) * 100)
         : 0;
-    const courseProgressLabel = coursesComplete === null
-        ? 'Run the agent to see live course data'
-        : `${coursesComplete} complete`;
 
-    const modulesValue = runtime?.modules_total
-        ? `${runtime.modules_processed}/${runtime.modules_total}`
-        : String(modulesCompletedThisRun);
+    const modulesValue = liveRuntime?.modules_total
+        ? `${liveRuntime.modules_processed}/${liveRuntime.modules_total}`
+        : isRunning
+            ? String(modulesCompletedThisRun)
+            : '0/0';
 
-    const modulesSubtext = runtime?.modules_total
-        ? `${runtime.module_progress_percent}% processed`
-        : 'This session includes retries and failures';
+    const modulesSubtext = liveRuntime?.modules_total
+        ? `${liveRuntime.module_progress_percent}% complete`
+        : isRunning
+            ? 'Topics studied this session'
+            : 'No active study run';
 
-    const elapsedProgress = getElapsedProgress(runtime);
-    const modulesProgress = runtime?.modules_total ? runtime.module_progress_percent : 0;
+    const elapsedProgress = getElapsedProgress(liveRuntime);
+    const modulesProgress = liveRuntime?.modules_total ? liveRuntime.module_progress_percent : 0;
+    const estimatedTime = formatEstimatedTime(liveRuntime, isRunning);
+    const estimatedLabel = isRunning ? 'Estimated time remaining' : 'Starts after a study run begins';
 
     return (
         <div
@@ -194,25 +303,25 @@ export function StatsGrid({
                 minWidth: 0,
             }}
         >
-            <StatCard
-                title="Courses In Progress"
-                value={coursesInProgressValue}
-                icon={Layers}
-                subtext={<CourseProgress percent={courseProgressPercent} label={courseProgressLabel} />}
+            <MetricCard
+                title="Course Progress"
+                value={courseTotal > 0 ? `${coursesComplete ?? 0}/${courseTotal}` : '0/0'}
+                label="Courses completed"
+                visual={<CompletionRing percent={courseProgressPercent} label={`Course progress ${courseProgressPercent}%`} />}
             />
 
-            <StatCard
-                title={runtime?.run_type === 'notes' ? 'Notes Progress' : 'Modules Processed'}
+            <MetricCard
+                title={liveRuntime?.run_type === 'notes' ? 'Notes Progress' : 'Study Progress'}
                 value={modulesValue}
-                icon={ListChecks}
-                subtext={<SegmentedProgress percent={modulesProgress} label={modulesSubtext} />}
+                label={modulesSubtext}
+                visual={<StudySegments percent={modulesProgress} label={modulesSubtext} />}
             />
 
-            <StatCard
-                title="Elapsed Time"
-                value={formatElapsed(runtime?.elapsed_seconds)}
-                icon={Timer}
-                subtext={<ElapsedProgress percent={elapsedProgress} isRunning={isRunning} />}
+            <MetricCard
+                title="Estimated Time"
+                value={estimatedTime}
+                label={estimatedLabel}
+                visual={<ElapsedVisual percent={elapsedProgress} label={estimatedLabel} />}
             />
         </div>
     );

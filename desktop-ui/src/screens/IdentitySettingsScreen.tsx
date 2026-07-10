@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '../components/shared/Button';
 import { Input } from '../components/shared/Input';
 import { ArrowLeft, Save } from 'lucide-react';

@@ -135,6 +135,20 @@ export function usePilot(): UsePilotResult {
 
     // ── Status polling ──────────────────────────────────────────
 
+    const pollRuntime = useCallback(async () => {
+        try {
+            const data = await pilotApi.getRuntime();
+            setRuntime(data);
+
+            if (data.awaiting_login) {
+                setAwaitingLogin(true);
+            }
+        } catch {
+            // Runtime details are best-effort. Status polling still owns
+            // the basic connected/running state for the dashboard.
+        }
+    }, []);
+
     const pollStatus = useCallback(async () => {
         try {
             const data = await pilotApi.getStatus();
@@ -142,6 +156,7 @@ export function usePilot(): UsePilotResult {
             setStatus(data.status);
             setStatusError(data.error);
             setConfigured(data.configured);
+            await pollRuntime();
 
             if (data.status !== "running") {
                 setAwaitingLogin(false);
@@ -151,7 +166,7 @@ export function usePilot(): UsePilotResult {
         } finally {
             setStatusLoading(false);
         }
-    }, []);
+    }, [pollRuntime]);
 
     // Load the last known course list once when the UI starts.
     // Live websocket "summary" events will overwrite this whenever
@@ -329,17 +344,15 @@ export function usePilot(): UsePilotResult {
 
     const startWorkflow = useCallback(async () => {
         const result = await pilotApi.startWorkflow();
-        if (result.started) {
-            await pollStatus();
-        }
+        await pollStatus();
+        window.setTimeout(pollStatus, 750);
         return result;
     }, [pollStatus]);
 
     const startNotes = useCallback(async () => {
         const result = await pilotApi.startNotes();
-        if (result.started) {
-            await pollStatus();
-        }
+        await pollStatus();
+        window.setTimeout(pollStatus, 750);
         return result;
     }, [pollStatus]);
 

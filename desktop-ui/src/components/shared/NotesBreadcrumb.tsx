@@ -17,10 +17,11 @@ export function NotesBreadcrumb({ items }: Props) {
             style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
+                gap: 'var(--space-2)',
                 minWidth: 0,
                 color: 'var(--text-secondary)',
-                fontSize: '13px',
+                fontSize: 'var(--type-small-size)',
+                lineHeight: 'var(--type-small-line)',
             }}
         >
             <Library size={16} color="var(--accent)" aria-hidden="true" />

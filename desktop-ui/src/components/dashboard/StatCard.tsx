@@ -20,7 +20,7 @@ export function StatCard({ title, value, subtext, icon: IconComponent }: StatCar
             gap: '12px',
             flex: 1,
             minWidth: 0,
-            transition: 'border-color 150ms ease'
+            transition: 'border-color var(--motion-base) var(--ease-standard), background-color var(--motion-base) var(--ease-standard)'
         }}>
             <div style={{
                 display: 'flex',

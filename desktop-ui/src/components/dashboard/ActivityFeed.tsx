@@ -1,7 +1,8 @@
-import { ExternalLink, Play } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import { Button } from '../shared/Button';
 import type { LogEvent, PilotStatus, RuntimeState } from '../../hooks/usePilot';
 import type { ReactNode } from 'react';
+import { Card, ProgressBar as PilotProgressBar, StatusBadge, type StatusBadgeTone } from '../ui';
 
 interface StudyRunCardProps {
     logs: LogEvent[];
@@ -111,91 +112,24 @@ function Field({ label, value }: { label: string; value: string | number | null 
     );
 }
 
-function ProgressBar({ value }: { value: number }) {
-    return (
-        <div style={{ display: 'grid', gap: '8px' }}>
-            <div
-                style={{
-                    height: '8px',
-                    borderRadius: '999px',
-                    backgroundColor: 'var(--surface-subtle)',
-                    border: '1px solid var(--border)',
-                    overflow: 'hidden',
-                }}
-            >
-                <div
-                    style={{
-                        width: `${value}%`,
-                        height: '100%',
-                        borderRadius: '999px',
-                        backgroundColor: 'var(--accent)',
-                        transition: 'width 180ms ease',
-                    }}
-                />
-            </div>
-            <div style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>
-                {value}% complete
-            </div>
-        </div>
-    );
-}
-
-function StatusPill({ mode }: { mode: StudyRunMode }) {
-    const styles = {
-        idle: { label: 'Ready', color: 'var(--text-secondary)', bg: 'var(--surface-subtle)' },
-        running: { label: 'Running', color: 'var(--accent)', bg: 'var(--accent-soft)' },
-        paused: { label: 'Action required', color: 'var(--warning)', bg: 'var(--warning-soft)' },
-        completed: { label: 'Completed', color: 'var(--success)', bg: 'var(--success-soft)' },
-        stopped: { label: 'Stopped', color: 'var(--warning)', bg: 'var(--warning-soft)' },
-        failed: { label: 'Failed', color: 'var(--error)', bg: 'var(--error-soft)' },
-    }[mode];
-
-    return (
-        <span
-            style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '7px',
-                width: 'fit-content',
-                borderRadius: '999px',
-                padding: '6px 10px',
-                backgroundColor: styles.bg,
-                color: styles.color,
-                fontSize: '12px',
-                fontWeight: 800,
-            }}
-        >
-            <span
-                style={{
-                    width: '7px',
-                    height: '7px',
-                    borderRadius: '999px',
-                    backgroundColor: styles.color,
-                    boxShadow: mode === 'running' ? '0 0 0 5px var(--accent-soft)' : undefined,
-                }}
-            />
-            {styles.label}
-        </span>
-    );
+function statusToneForMode(mode: StudyRunMode): StatusBadgeTone {
+    if (mode === 'idle') return 'ready';
+    if (mode === 'running') return 'running';
+    if (mode === 'paused') return 'attention';
+    if (mode === 'completed') return 'completed';
+    if (mode === 'stopped') return 'stopped';
+    return 'failed';
 }
 
 function CardShell({ children }: { children: ReactNode }) {
     return (
-        <div
-            style={{
-                backgroundColor: 'var(--surface)',
-                border: '1px solid var(--border)',
-                borderRadius: '12px',
-                padding: '22px',
-                minHeight: '300px',
-            }}
-        >
+        <Card padding="lg" style={{ minHeight: '340px' }}>
             {children}
-        </div>
+        </Card>
     );
 }
 
-function EmptyState({ onStartStudyRun, actionDisabled, starting }: StudyRunCardProps) {
+function EmptyState() {
     return (
         <CardShell>
             <div
@@ -206,40 +140,17 @@ function EmptyState({ onStartStudyRun, actionDisabled, starting }: StudyRunCardP
                     textAlign: 'center',
                 }}
             >
-                <div style={{ display: 'grid', justifyItems: 'center', gap: '14px' }}>
-                    <div
-                        style={{
-                            width: '44px',
-                            height: '44px',
-                            borderRadius: '14px',
-                            display: 'grid',
-                            placeItems: 'center',
-                            backgroundColor: 'var(--accent-soft)',
-                            color: 'var(--accent)',
-                        }}
-                    >
-                        <Play size={20} />
-                    </div>
+                <div style={{ display: 'grid', justifyItems: 'center', gap: '8px' }}>
                     <div>
-                        <div style={{ color: 'var(--text-primary)', fontSize: '15px', fontWeight: 800, marginBottom: '5px' }}>
+                        <div style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: 700, marginBottom: '7px' }}>
                             Ready to Study
                         </div>
                         <div style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '20px' }}>
-                            No study session is currently running.
+                            Press Start Study Run to begin.
+                            <br />
+                            Pilot will read your topics and prepare notes automatically.
                         </div>
                     </div>
-                    {onStartStudyRun && (
-                        <Button
-                            size="sm"
-                            icon={Play}
-                            onClick={onStartStudyRun}
-                            disabled={actionDisabled}
-                            loading={starting}
-                            loadingText="Starting"
-                        >
-                            Start Study Run
-                        </Button>
-                    )}
                 </div>
             </div>
         </CardShell>
@@ -254,8 +165,8 @@ function LiveState({ runtime, mode, onOpenBrowser, onConfirmLogin }: StudyRunCar
             <div style={{ display: 'grid', gap: '18px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: '12px' }}>
                     <div style={{ minWidth: 0 }}>
-                        <StatusPill mode={mode} />
-                        <h4 style={{ margin: '14px 0 6px', color: 'var(--text-primary)', fontSize: '20px', lineHeight: '26px' }}>
+                        <StatusBadge tone={statusToneForMode(mode)} label={mode === 'paused' ? 'Needs attention' : undefined} />
+                        <h4 style={{ margin: '14px 0 6px', color: 'var(--text-primary)', fontSize: '22px', fontWeight: 720, lineHeight: '28px' }}>
                             {mode === 'paused' ? 'Study Run Paused' : currentAction(runtime)}
                         </h4>
                         <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '20px' }}>
@@ -279,7 +190,7 @@ function LiveState({ runtime, mode, onOpenBrowser, onConfirmLogin }: StudyRunCar
                             {progressText(runtime)}
                         </span>
                     </div>
-                    <ProgressBar value={value} />
+                    <PilotProgressBar value={value} label={`${value}% complete`} />
                 </div>
 
                 {mode === 'paused' && (
@@ -315,14 +226,14 @@ function SummaryState({ runtime, logs, mode }: StudyRunCardProps & { mode: 'comp
         <CardShell>
             <div style={{ display: 'grid', gap: '18px' }}>
                 <div style={{ minWidth: 0 }}>
-                    <h4 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '18px', lineHeight: '24px' }}>
+                    <h4 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '22px', fontWeight: 720, lineHeight: '28px' }}>
                         {title}
                     </h4>
                     <p style={{ margin: '6px 0 0', color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '19px' }}>
                         {message}
                     </p>
                     <div style={{ marginTop: '8px' }}>
-                        <StatusPill mode={mode} />
+                        <StatusBadge tone={statusToneForMode(mode)} />
                     </div>
                 </div>
 
@@ -374,7 +285,7 @@ export function ActivityFeed(props: StudyRunCardProps) {
                 {heading}
             </h3>
 
-            {mode === 'idle' && <EmptyState {...props} />}
+            {mode === 'idle' && <EmptyState />}
             {mode === 'running' && <LiveState {...props} mode="running" />}
             {mode === 'paused' && <LiveState {...props} mode="paused" />}
             {mode === 'completed' && <SummaryState {...props} mode="completed" />}

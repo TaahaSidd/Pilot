@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Button } from '../components/shared/Button';
-import { Input } from '../components/shared/Input';
 import { ArrowLeft, Save } from 'lucide-react';
+import { Button, Card, Input, PageHeader, Skeleton } from '../components/ui';
 import { useToast } from '../hooks/useToast';
 import { Toast } from '../components/shared/Toast';
 import { pilotApi, ApiError, NetworkError } from '../api/api';
@@ -10,12 +9,9 @@ interface IdentitySettingsScreenProps {
     onBack: () => void;
 }
 
-// Fixed placeholder shown for secret fields we never receive from the
-// backend (GET /config deliberately omits groq_api_key and password).
-// This is NOT real data — it's a constant signal meaning "something
-// is saved." The moment the user types here, the field becomes
-// "touched" and the placeholder is replaced by their real input.
-const MASKED_PLACEHOLDER = '••••••••••••';
+// Fixed placeholder shown for secret fields we never receive from the backend.
+// This is not real data. It only means something is already saved.
+const MASKED_PLACEHOLDER = '************';
 
 export function IdentitySettingsScreen({ onBack }: IdentitySettingsScreenProps) {
     const { toast, showToast, hideToast } = useToast();
@@ -23,14 +19,10 @@ export function IdentitySettingsScreen({ onBack }: IdentitySettingsScreenProps) 
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 
-    // non-secret fields — prefilled with REAL values from GET /config
     const [username, setUsername] = useState('');
     const [displayName, setDisplayName] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
 
-    // secret fields — start at the masked placeholder. "touched"
-    // tracks whether the user has actually typed something new;
-    // only touched fields get sent on save.
     const [groqApiKey, setGroqApiKey] = useState(MASKED_PLACEHOLDER);
     const [groqTouched, setGroqTouched] = useState(false);
 
@@ -75,8 +67,6 @@ export function IdentitySettingsScreen({ onBack }: IdentitySettingsScreenProps) 
     };
 
     const handleGroqFocus = () => {
-        // clear the placeholder on first focus so the user types into
-        // an empty field rather than appending to dots
         if (!groqTouched && groqApiKey === MASKED_PLACEHOLDER) {
             setGroqApiKey('');
         }
@@ -102,8 +92,6 @@ export function IdentitySettingsScreen({ onBack }: IdentitySettingsScreenProps) 
                 phone_number: phoneNumber,
             };
 
-            // only send secrets the user actually changed — an
-            // untouched field means "leave this as-is" server-side
             if (groqTouched && groqApiKey.trim().length > 0) {
                 payload.groq_api_key = groqApiKey;
             }
@@ -116,10 +104,8 @@ export function IdentitySettingsScreen({ onBack }: IdentitySettingsScreenProps) 
                 throw new Error('Server did not confirm the save.');
             }
 
-            showToast('Your security credentials have been updated.', 'success');
+            showToast('Your profile and keys have been updated.', 'success');
 
-            // reset secret fields back to masked state — they're saved
-            // now, so there's no reason to keep showing raw input
             setGroqApiKey(MASKED_PLACEHOLDER);
             setGroqTouched(false);
             setPassword(MASKED_PLACEHOLDER);
@@ -139,74 +125,87 @@ export function IdentitySettingsScreen({ onBack }: IdentitySettingsScreenProps) 
 
     if (loading) {
         return (
-            <div style={{ padding: '24px', color: 'var(--text-secondary)', fontSize: '14px' }}>
-                Loading your settings…
+            <div style={{ maxWidth: 'var(--layout-readable)', margin: '0 auto', width: '100%', display: 'grid', gap: 'var(--space-3)' }}>
+                <Skeleton height="24px" width="220px" />
+                <Skeleton height="18px" width="84%" />
+                <Skeleton height="160px" />
             </div>
         );
     }
 
     return (
-        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div style={{ width: '100%', maxWidth: 'var(--layout-readable)', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
             <Button variant="ghost" icon={ArrowLeft} onClick={onBack} style={{ width: 'fit-content' }}>
                 Back to Settings
             </Button>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                {/* Intelligence Section */}
-                <section style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '12px', padding: '24px' }}>
-                    <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>Intelligence</h2>
-                    <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '24px' }}>
-                        Manage your LLM access keys. These are stored locally and used for agent orchestration.
-                    </p>
+            <PageHeader
+                title="Profile and API keys"
+                description="Update your name, Amity login details, or your Groq API key."
+            />
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+                <Card style={{ display: 'grid', gap: 'var(--space-5)' }}>
+                    <div>
+                        <h2 className="pilot-type-section-title" style={{ color: 'var(--text-primary)', margin: '0 0 var(--space-2)' }}>
+                            Intelligence
+                        </h2>
+                        <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
+                            Manage the API key Pilot uses to generate notes.
+                        </p>
+                    </div>
                     <Input
-                        label="Groq API Key"
-                        description="Leave as-is to keep your current key, or click in to replace it."
+                        label="Groq API key"
+                        helperText="Leave as-is to keep your current key, or click in to replace it."
                         type="password"
                         value={groqApiKey}
                         onFocus={handleGroqFocus}
-                        onChange={(e) => handleGroqChange(e.target.value)}
+                        onChange={(event) => handleGroqChange(event.target.value)}
                     />
-                </section>
+                </Card>
 
-                {/* Credentials Section */}
-                <section style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '12px', padding: '24px' }}>
-                    <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>Amity Credentials</h2>
-                    <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '24px' }}>
-                        These details authorize your automated browser sessions with the campus portal.
-                    </p>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <Card style={{ display: 'grid', gap: 'var(--space-5)' }}>
+                    <div>
+                        <h2 className="pilot-type-section-title" style={{ color: 'var(--text-primary)', margin: '0 0 var(--space-2)' }}>
+                            Amity login
+                        </h2>
+                        <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
+                            Pilot uses these details to open your Amity study material.
+                        </p>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
                         <Input
-                            label="Institutional Email"
+                            label="Amity username"
                             value={username}
-                            onChange={(e) => setUsername(e.target.value)}
+                            onChange={(event) => setUsername(event.target.value)}
                         />
                         <Input
-                            label="Portal Password"
-                            description="Leave as-is to keep your current password, or click in to replace it."
+                            label="Password"
+                            helperText="Leave as-is to keep your current password, or click in to replace it."
                             type="password"
                             value={password}
                             onFocus={handlePasswordFocus}
-                            onChange={(e) => handlePasswordChange(e.target.value)}
+                            onChange={(event) => handlePasswordChange(event.target.value)}
                         />
                         <Input
-                            label="Display Name"
+                            label="Display name"
                             value={displayName}
-                            onChange={(e) => setDisplayName(e.target.value)}
+                            onChange={(event) => setDisplayName(event.target.value)}
                         />
                         <Input
-                            label="Phone Number"
-                            description="Used to auto-fill feedback forms on the portal."
+                            label="Phone number"
+                            helperText="Used to fill forms on the portal when needed."
                             value={phoneNumber}
-                            onChange={(e) => setPhoneNumber(e.target.value)}
+                            onChange={(event) => setPhoneNumber(event.target.value)}
                         />
                     </div>
-                </section>
+                </Card>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', paddingTop: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-3)', paddingTop: 'var(--space-2)' }}>
                 <Button variant="ghost" onClick={onBack} disabled={saving}>Cancel</Button>
                 <Button variant="primary" icon={Save} onClick={handleSave} disabled={saving}>
-                    {saving ? 'Saving…' : 'Save Changes'}
+                    {saving ? 'Saving...' : 'Save Changes'}
                 </Button>
             </div>
 

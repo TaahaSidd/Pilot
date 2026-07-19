@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { PilotStatus, CourseSummary, RuntimeState } from '../../hooks/usePilot';
+import { Card } from '../ui';
 
 interface StatsGridProps {
     status: PilotStatus;
@@ -56,28 +57,35 @@ function MetricCard({
     label: string;
     visual: ReactNode;
 }) {
+    const valueText = String(value);
+    const valueIsLong = valueText.length > 5;
+
     return (
-        <div
+        <Card
+            className="pilot-metric-card"
+            padding="md"
             style={{
-                backgroundColor: 'color-mix(in srgb, var(--accent) 8%, var(--surface))',
-                border: '1px solid color-mix(in srgb, var(--accent) 18%, var(--border))',
-                borderRadius: '12px',
-                padding: '20px',
+                backgroundColor: 'var(--surface)',
+                border: 'var(--stroke-thin, 1px) solid var(--border)',
+                boxShadow: 'var(--shadow-xs)',
                 display: 'grid',
-                gridTemplateColumns: 'minmax(0, 1fr) 104px',
-                gap: '18px',
+                gridTemplateColumns: 'minmax(0, 1fr) minmax(76px, 104px)',
+                gap: 'var(--space-5)',
                 alignItems: 'center',
+                minHeight: '154px',
                 minWidth: 0,
+                overflow: 'hidden',
             }}
         >
             <div style={{ minWidth: 0 }}>
                 <div
                     style={{
                         color: 'var(--text-secondary)',
-                        fontSize: '13px',
-                        fontWeight: 500,
+                        fontSize: 'var(--type-label-size)',
+                        lineHeight: 'var(--type-label-line)',
+                        fontWeight: 'var(--type-label-weight)',
                         letterSpacing: 0,
-                        marginBottom: '14px',
+                        marginBottom: 'var(--space-3)',
                     }}
                 >
                     {title}
@@ -85,10 +93,11 @@ function MetricCard({
                 <div
                     style={{
                         color: 'var(--text-primary)',
-                        fontSize: '34px',
-                        fontWeight: 800,
+                        fontSize: valueIsLong ? 'clamp(24px, 2vw, 30px)' : 'clamp(26px, 3vw, 34px)',
+                        fontWeight: 'var(--type-card-value-weight)',
                         letterSpacing: 0,
-                        lineHeight: '38px',
+                        lineHeight: 1.12,
+                        overflowWrap: 'anywhere',
                     }}
                 >
                     {value}
@@ -96,9 +105,9 @@ function MetricCard({
                 <div
                     style={{
                         color: 'var(--text-secondary)',
-                        fontSize: '13px',
-                        lineHeight: '18px',
-                        marginTop: '6px',
+                        fontSize: 'var(--type-small-size)',
+                        lineHeight: 'var(--type-small-line)',
+                        marginTop: 'var(--space-1)',
                     }}
                 >
                     {label}
@@ -106,7 +115,7 @@ function MetricCard({
             </div>
 
             {visual}
-        </div>
+        </Card>
     );
 }
 
@@ -131,6 +140,7 @@ function CompletionRing({
             style={{
                 width: `${size}px`,
                 height: `${size}px`,
+                maxWidth: '100%',
                 position: 'relative',
                 display: 'grid',
                 placeItems: 'center',
@@ -158,7 +168,7 @@ function CompletionRing({
                     strokeDasharray={circumference}
                     strokeDashoffset={offset}
                     transform={`rotate(-90 ${center} ${center})`}
-                    style={{ transition: 'stroke-dashoffset 180ms ease' }}
+                    style={{ transition: 'stroke-dashoffset var(--motion-slow) var(--ease-enter)' }}
                 />
             </svg>
             <span
@@ -166,7 +176,7 @@ function CompletionRing({
                     position: 'absolute',
                     color: 'var(--text-primary)',
                     fontSize: '17px',
-                    fontWeight: 800,
+                    fontWeight: 700,
                     letterSpacing: 0,
                 }}
             >
@@ -183,8 +193,8 @@ function StudySegments({ percent, label }: { percent: number; label: string }) {
             style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(5, 1fr)',
-                gap: '5px',
-                width: '104px',
+                gap: 'var(--space-1)',
+                width: 'min(104px, 100%)',
                 height: '50px',
                 alignItems: 'stretch',
             }}
@@ -197,10 +207,9 @@ function StudySegments({ percent, label }: { percent: number; label: string }) {
                     <span
                         key={index}
                         style={{
-                            borderRadius: '999px',
+                            borderRadius: 'var(--radius-pill)',
                             backgroundColor: isFilled ? 'var(--accent)' : 'var(--surface-subtle)',
-                            border: isFilled ? '1px solid var(--accent)' : '1px solid var(--border)',
-                            transition: 'background-color 180ms ease, border-color 180ms ease',
+                            border: isFilled ? 'var(--stroke-thin) solid var(--accent)' : 'var(--stroke-thin) solid var(--border)',
                         }}
                     />
                 );
@@ -211,14 +220,14 @@ function StudySegments({ percent, label }: { percent: number; label: string }) {
 
 function ElapsedVisual({ percent, label }: { percent: number; label: string }) {
     return (
-        <div style={{ justifySelf: 'end' }}>
+        <div style={{ justifySelf: 'end', width: 'min(96px, 100%)' }}>
             <div
                 aria-label={label}
                 style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(4, 1fr)',
-                    gap: '5px',
-                    width: '96px',
+                    gap: 'var(--space-1)',
+                    width: '100%',
                     height: '62px',
                     alignItems: 'end',
                 }}
@@ -233,9 +242,9 @@ function ElapsedVisual({ percent, label }: { percent: number; label: string }) {
                             style={{
                                 position: 'relative',
                                 overflow: 'hidden',
-                                borderRadius: '999px',
+                                borderRadius: 'var(--radius-pill)',
                                 backgroundColor: 'var(--surface-subtle)',
-                                border: '1px solid var(--border)',
+                                border: 'var(--stroke-thin) solid var(--border)',
                                 height: '100%',
                             }}
                         >
@@ -246,9 +255,9 @@ function ElapsedVisual({ percent, label }: { percent: number; label: string }) {
                                     right: 0,
                                     bottom: 0,
                                     height: `${fill * 100}%`,
-                                    borderRadius: '999px',
+                                    borderRadius: 'var(--radius-pill)',
                                     backgroundColor: 'var(--accent)',
-                                    transition: 'height 180ms ease',
+                                    transition: 'height var(--motion-slow) var(--ease-enter)',
                                 }}
                             />
                         </div>
@@ -281,7 +290,7 @@ export function StatsGrid({
         ? `${liveRuntime.modules_processed}/${liveRuntime.modules_total}`
         : isRunning
             ? String(modulesCompletedThisRun)
-            : '0/0';
+            : 'No run';
 
     const modulesSubtext = liveRuntime?.modules_total
         ? `${liveRuntime.module_progress_percent}% complete`
@@ -296,29 +305,30 @@ export function StatsGrid({
 
     return (
         <div
+            className="pilot-stats-grid"
             style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(3, minmax(180px, 1fr))',
-                gap: '16px',
+                gridTemplateColumns: 'repeat(3, minmax(220px, 1fr))',
+                gap: 'var(--space-5)',
                 minWidth: 0,
             }}
         >
             <MetricCard
-                title="Course Progress"
+                title="Courses"
                 value={courseTotal > 0 ? `${coursesComplete ?? 0}/${courseTotal}` : '0/0'}
-                label="Courses completed"
+                label={`${courseProgressPercent}% complete`}
                 visual={<CompletionRing percent={courseProgressPercent} label={`Course progress ${courseProgressPercent}%`} />}
             />
 
             <MetricCard
-                title={liveRuntime?.run_type === 'notes' ? 'Notes Progress' : 'Study Progress'}
+                title={liveRuntime?.run_type === 'notes' ? 'Notes' : 'Topics'}
                 value={modulesValue}
                 label={modulesSubtext}
                 visual={<StudySegments percent={modulesProgress} label={modulesSubtext} />}
             />
 
             <MetricCard
-                title="Estimated Time"
+                title="Time"
                 value={estimatedTime}
                 label={estimatedLabel}
                 visual={<ElapsedVisual percent={elapsedProgress} label={estimatedLabel} />}

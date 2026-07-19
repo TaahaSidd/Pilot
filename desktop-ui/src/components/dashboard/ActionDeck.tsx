@@ -1,5 +1,6 @@
 // src/components/dashboard/ActionDeck.tsx
 import { Play, FileText, Eye } from 'lucide-react';
+import { Button } from '../ui';
 
 interface ActionDeckProps {
     status: string;
@@ -12,72 +13,32 @@ export function ActionDeck({ status, startWorkflow, startNotes, toggleBrowser }:
     const isRunning = status === 'running';
 
     return (
-        <div style={{ display: 'flex', gap: '12px', marginBottom: '32px' }}>
-            <button
+        <div style={{ display: 'flex', gap: 'var(--space-3)', marginBottom: 'var(--space-8)', flexWrap: 'wrap' }}>
+            <Button
+                variant="primary"
+                icon={Play}
                 onClick={startWorkflow}
                 disabled={isRunning}
-                style={{
-                    backgroundColor: 'var(--accent)',
-                    color: '#FFF',
-                    border: 'none',
-                    padding: '12px 24px',
-                    borderRadius: '6px',
-                    fontWeight: 600,
-                    fontSize: '14px',
-                    cursor: isRunning ? 'not-allowed' : 'pointer',
-                    opacity: isRunning ? 0.5 : 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    transition: 'background-color 150ms'
-                }}
             >
-                <Play size={16} fill="currentColor" />
-                {isRunning ? 'Processing Run...' : 'Start Automation'}
-            </button>
+                {isRunning ? 'Study run in progress' : 'Start Study Run'}
+            </Button>
 
-            <button
+            <Button
+                variant="secondary"
+                icon={FileText}
                 onClick={startNotes}
                 disabled={isRunning}
-                style={{
-                    backgroundColor: 'transparent',
-                    color: 'var(--text-primary)',
-                    border: '1px solid var(--border)',
-                    padding: '12px 24px',
-                    borderRadius: '6px',
-                    fontWeight: 600,
-                    fontSize: '14px',
-                    cursor: isRunning ? 'not-allowed' : 'pointer',
-                    opacity: isRunning ? 0.5 : 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    transition: 'all 150ms'
-                }}
             >
-                <FileText size={16} />
-                Generate Study Notes
-            </button>
+                Generate Notes
+            </Button>
 
-            <button
+            <Button
+                variant="ghost"
+                icon={Eye}
                 onClick={toggleBrowser}
-                style={{
-                    backgroundColor: 'transparent',
-                    color: 'var(--text-secondary)',
-                    border: '1px solid var(--border)',
-                    padding: '12px 24px',
-                    borderRadius: '6px',
-                    fontWeight: 500,
-                    fontSize: '14px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                }}
             >
-                <Eye size={16} />
-                Show/Hide Browser Window
-            </button>
+                Browser
+            </Button>
         </div>
     );
 }

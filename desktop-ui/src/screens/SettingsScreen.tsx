@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { SettingRow } from '../components/settings/SettingRow';
+import { PageHeader } from '../components/ui';
+import { openExternalUrl } from '../utils/openExternal';
 import { IdentitySettingsScreen } from './IdentitySettingsScreen';
 import { NotificationSettingsScreen } from './NotificationSettingsScreen';
+import tauriConfig from '../../src-tauri/tauri.conf.json';
 
-const APP_VERSION = '0.0.0';
+const APP_VERSION = tauriConfig.version;
 const PILOT_REPO_URL = 'https://github.com/TaahaSidd/Pilot';
 
 function Section({
@@ -15,14 +18,14 @@ function Section({
     children: ReactNode;
 }) {
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <h3 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-secondary)', margin: 0 }}>
+        <section style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+            <h2 className="pilot-type-section-title" style={{ color: 'var(--text-secondary)', margin: 0 }}>
                 {title}
-            </h3>
+            </h2>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
                 {children}
             </div>
-        </div>
+        </section>
     );
 }
 
@@ -51,15 +54,11 @@ export function SettingsScreen({
     }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', maxWidth: '860px', minHeight: '100%' }}>
-            <div>
-                <h1 style={{ fontSize: '24px', fontWeight: 700, letterSpacing: 0, marginBottom: '6px', color: 'var(--text-primary)' }}>
-                    Settings
-                </h1>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '14px', margin: 0 }}>
-                    Manage your account, notifications, and Pilot app information.
-                </p>
-            </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-8)', maxWidth: 'var(--layout-readable)', margin: '0 auto', width: '100%', minHeight: '100%' }}>
+            <PageHeader
+                title="Settings"
+                description="Manage your account, notifications, and Pilot app information."
+            />
 
             <Section title="Account">
                 <SettingRow
@@ -100,16 +99,16 @@ export function SettingsScreen({
             <footer
                 style={{
                     marginTop: 'auto',
-                    paddingTop: '26px',
+                    paddingTop: 'var(--space-6)',
                     display: 'flex',
                     alignItems: 'flex-end',
                     justifyContent: 'space-between',
-                    gap: '24px',
+                    gap: 'var(--space-6)',
                     color: 'var(--text-muted)',
-                    fontSize: '13px',
+                    fontSize: 'var(--type-body-small-size)',
                 }}
             >
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 'var(--space-2)' }}>
                     <img
                         src="/PilotSVG.svg"
                         alt="Pilot"
@@ -122,10 +121,10 @@ export function SettingsScreen({
                     />
                     <span>Study Assistant for Amity students.</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '13px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', fontSize: 'var(--type-body-small-size)' }}>
                     <button
                         type="button"
-                        onClick={() => window.open(PILOT_REPO_URL, '_blank', 'noopener,noreferrer')}
+                        onClick={() => void openExternalUrl(PILOT_REPO_URL)}
                         style={{
                             border: 0,
                             background: 'transparent',
@@ -140,7 +139,7 @@ export function SettingsScreen({
                     </button>
                     <button
                         type="button"
-                        onClick={() => window.open(`${PILOT_REPO_URL}/issues`, '_blank', 'noopener,noreferrer')}
+                        onClick={() => void openExternalUrl(`${PILOT_REPO_URL}/issues`)}
                         style={{
                             border: 0,
                             background: 'transparent',

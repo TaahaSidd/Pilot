@@ -1,0 +1,90 @@
+@keyframes pilot-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pilot-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pilot-live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.72;
+    transform: scale(1.18);
+  }
+}
+
+@keyframes pilot-badge-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pilot-word-shake {
+  0%,
+  100% { transform: translateX(0); }
+  20%,
+  60% { transform: translateX(-5px); }
+  40%,
+  80% { transform: translateX(5px); }
+}
+
+@keyframes pilot-word-pop {
+  0% { transform: scale(0.96); }
+  70% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+
+.pilot-page-transition {
+  animation: pilot-fade-up var(--motion-page) var(--ease-enter) both;
+}
+
+.pilot-attention-banner,
+.pilot-metric-card {
+  animation: pilot-fade-up var(--motion-standard) var(--ease-enter) both;
+}
+
+.pilot-live-dot {
+  animation: pilot-live-pulse 1800ms var(--ease-standard) infinite;
+}
+
+.pilot-unread-badge {
+  animation: pilot-badge-pop var(--motion-standard) var(--ease-enter) both;
+  transform-origin: center;
+}
+
+.pilot-word-board-shake {
+  animation: pilot-word-shake var(--motion-emphasized) var(--ease-standard);
+}
+
+.pilot-word-tile:not(:empty) {
+  animation: pilot-word-pop var(--motion-standard) var(--ease-enter);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
+}

@@ -1,0 +1,205 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--background);
+}
+
+body.pilot-modal-open main {
+  overflow: hidden !important;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+button:disabled {
+  pointer-events: none;
+}
+
+aside {
+  will-change: transform;
+}
+
+.pilot-button,
+.pilot-sidebar-button,
+.pilot-sidebar-promo,
+.pilot-inline-button,
+.pilot-mini-game-card,
+.pilot-titlebar-button,
+.pilot-window-button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pilot-button,
+.pilot-sidebar-button,
+.pilot-sidebar-promo,
+.pilot-inline-button,
+.pilot-mini-game-card,
+.pilot-titlebar-button,
+.pilot-window-button {
+  transform: translateY(0) scale(1);
+  transition:
+    background-color var(--motion-fast) var(--ease-standard),
+    color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    opacity var(--motion-fast) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard);
+}
+
+.pilot-button[data-loading='true'] {
+  cursor: wait !important;
+}
+
+.pilot-button:hover:not(:disabled) {
+  background-color: var(--pilot-button-hover-bg, var(--surface-subtle)) !important;
+}
+
+.pilot-titlebar-button:hover:not(:disabled),
+.pilot-window-button:hover:not(:disabled),
+.pilot-sidebar-button:hover:not(:disabled),
+.pilot-inline-button:hover:not(:disabled) {
+  background-color: var(--surface-subtle) !important;
+  color: var(--text-primary) !important;
+}
+
+.pilot-titlebar-button:active:not(:disabled),
+.pilot-window-button:active:not(:disabled),
+.pilot-sidebar-button:active:not(:disabled),
+.pilot-sidebar-promo:active:not(:disabled),
+.pilot-inline-button:active:not(:disabled),
+.pilot-button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.pilot-window-button-close:hover:not(:disabled) {
+  background-color: var(--error) !important;
+  color: var(--text-on-accent) !important;
+}
+
+.pilot-window-button-close:active:not(:disabled) {
+  background-color: var(--error-hover) !important;
+  color: var(--text-on-accent) !important;
+}
+
+.pilot-metric-card,
+.pilot-card,
+.pilot-word-tile,
+.pilot-progress-fill {
+  transition:
+    background-color var(--motion-standard) var(--ease-standard),
+    border-color var(--motion-standard) var(--ease-standard),
+    color var(--motion-standard) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-standard);
+}
+
+.pilot-progress-fill {
+  transition: width var(--motion-slow) var(--ease-enter);
+}
+
+.pilot-skeleton {
+  position: relative;
+  overflow: hidden;
+}
+
+.pilot-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--text-primary) 7%, transparent),
+    transparent
+  );
+  animation: pilot-skeleton-shimmer 1400ms var(--ease-standard) infinite;
+}
+
+@keyframes pilot-skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pilot-skeleton::after {
+    animation: none;
+  }
+}
+
+.pilot-card-interactive {
+  cursor: pointer;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pilot-button:hover:not(:disabled),
+  .pilot-sidebar-promo:hover:not(:disabled),
+  .pilot-mini-game-card:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-card);
+  }
+
+  .pilot-metric-card:hover {
+    border-color: var(--border-hover) !important;
+    background-color: var(--surface-card-hover) !important;
+  }
+
+  .pilot-card-interactive:hover {
+    border-color: var(--border-hover) !important;
+    background-color: var(--surface-card-hover) !important;
+    box-shadow: var(--shadow-hover) !important;
+    transform: translateY(-2px);
+  }
+}
+
+@media (max-width: 1480px) {
+  .pilot-stats-grid {
+    grid-template-columns: repeat(2, minmax(220px, 1fr)) !important;
+  }
+}
+
+@media (max-width: 1320px) {
+  .pilot-metric-card {
+    grid-template-columns: minmax(0, 1fr) minmax(70px, 88px) !important;
+    padding: var(--space-5) !important;
+    gap: var(--space-4) !important;
+  }
+}
+
+@media (max-width: 1180px) {
+  .pilot-stats-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
+}

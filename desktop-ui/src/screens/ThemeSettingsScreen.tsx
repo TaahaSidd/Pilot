@@ -1,6 +1,6 @@
 import { ArrowLeft, Check } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
-import { Button } from '../components/shared/Button';
+import { Button, PageHeader } from '../components/ui';
 
 type ThemeOption = {
     id: 'light' | 'dark' | 'system';
@@ -15,7 +15,7 @@ const themes: ThemeOption[] = [
     {
         id: 'dark',
         label: 'Dark',
-        description: 'Low glare interface for long automation runs.',
+        description: 'Low glare interface for longer study sessions.',
         previewBackground: '#101014',
         previewSurface: '#1B1B21',
         previewAccent: '#AA00FF',
@@ -42,18 +42,16 @@ export function ThemeSettingsScreen({ onBack }: { onBack: () => void }) {
     const { theme, setTheme } = useTheme();
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-8)', maxWidth: 'var(--layout-readable)', margin: '0 auto', width: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
                 <Button variant="ghost" icon={ArrowLeft} onClick={onBack} style={{ width: 'fit-content' }}>
                     Back
                 </Button>
-
-                <h1 style={{ fontSize: '20px', margin: 0, color: 'var(--text-primary)' }}>
-                    Appearance
-                </h1>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+            <PageHeader title="Appearance" description="Choose how Pilot looks on this device." />
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--space-4)' }}>
                 {themes.map((item) => {
                     const isActive = theme === item.id;
 
@@ -62,12 +60,12 @@ export function ThemeSettingsScreen({ onBack }: { onBack: () => void }) {
                             key={item.id}
                             onClick={() => setTheme(item.id)}
                             style={{
-                                background: 'var(--surface)',
-                                borderRadius: '12px',
-                                padding: '18px',
-                                border: isActive ? '2px solid var(--accent)' : '1px solid var(--border)',
+                                background: 'var(--surface-card)',
+                                borderRadius: 'var(--radius-card)',
+                                padding: 'var(--space-5)',
+                                border: isActive ? 'var(--stroke-medium) solid var(--accent)' : 'var(--stroke-thin) solid var(--border-subtle)',
                                 cursor: 'pointer',
-                                transition: 'border-color 150ms ease, background-color 150ms ease',
+                                transition: 'border-color var(--motion-fast) var(--ease-standard), background-color var(--motion-fast) var(--ease-standard), transform var(--motion-fast) var(--ease-standard)',
                                 textAlign: 'left',
                                 color: 'inherit',
                             }}
@@ -75,9 +73,9 @@ export function ThemeSettingsScreen({ onBack }: { onBack: () => void }) {
                             <div
                                 style={{
                                     height: '92px',
-                                    borderRadius: '10px',
-                                    marginBottom: '16px',
-                                    border: '1px solid var(--border)',
+                                    borderRadius: 'var(--radius-control)',
+                                    marginBottom: 'var(--space-4)',
+                                    border: 'var(--stroke-thin) solid var(--border-subtle)',
                                     overflow: 'hidden',
                                     position: 'relative',
                                 }}
@@ -90,23 +88,23 @@ export function ThemeSettingsScreen({ onBack }: { onBack: () => void }) {
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        gap: '10px',
+                                        gap: 'var(--space-3)',
                                     }}
                                 >
-                                    <span style={{ width: '44px', height: '28px', borderRadius: '7px', background: item.previewSurface, border: '1px solid rgba(0, 0, 0, 0.08)' }} />
-                                    <span style={{ width: '28px', height: '28px', borderRadius: '999px', background: item.previewAccent }} />
+                                    <span style={{ width: '44px', height: '28px', borderRadius: 'var(--radius-control)', background: item.previewSurface, border: '1px solid rgba(0, 0, 0, 0.08)' }} />
+                                    <span style={{ width: '28px', height: '28px', borderRadius: 'var(--radius-pill)', background: item.previewAccent }} />
                                 </div>
                             </div>
 
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
-                                <h3 style={{ margin: 0, fontSize: '15px', color: 'var(--text-primary)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--space-3)' }}>
+                                <h3 className="pilot-type-subsection-title" style={{ margin: 0, color: 'var(--text-primary)' }}>
                                     {item.label}
                                 </h3>
 
                                 {isActive && <Check size={16} color="var(--accent)" />}
                             </div>
 
-                            <p style={{ margin: '8px 0 0', fontSize: '12px', lineHeight: '18px', color: 'var(--text-secondary)' }}>
+                            <p style={{ margin: 'var(--space-2) 0 0', fontSize: 'var(--type-body-small-size)', lineHeight: 'var(--type-body-small-line)', color: 'var(--text-secondary)' }}>
                                 {item.description}
                             </p>
                         </button>

@@ -34,12 +34,12 @@ export function Toast({ message, type, onClose, persistent = false, position = '
 
     const positionStyle = position === 'top-right'
         ? {
-            top: '24px',
-            right: '24px',
+            top: 'var(--space-6)',
+            right: 'var(--space-6)',
             transform: 'none',
         }
         : {
-            bottom: '32px',
+            bottom: 'var(--space-8)',
             left: '50%',
             transform: 'translateX(-50%)',
         };
@@ -50,19 +50,18 @@ export function Toast({ message, type, onClose, persistent = false, position = '
             ...positionStyle,
             backgroundColor: colors[type],
             color: type === 'normal' ? 'var(--text-primary)' : 'var(--text-on-accent)',
-            padding: '12px 32px',
-            borderRadius: '50px',
-            fontSize: '14px',
+            padding: 'var(--space-3) var(--space-6)',
+            borderRadius: 'var(--radius-pill)',
+            fontSize: 'var(--type-body-size)',
             fontWeight: 500,
             boxShadow: 'var(--shadow-md)',
-            // Snappy entrance, smooth exit
             animation: isLeaving
                 ? 'slideDownFade 400ms cubic-bezier(0.4, 0, 0.2, 1) forwards'
                 : 'slideUpFade 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards',
-            zIndex: 9999,
+            zIndex: 'var(--z-toast)',
             display: 'flex',
             alignItems: 'center',
-            gap: '16px',
+            gap: 'var(--space-4)',
             pointerEvents: 'auto'
         }}>
             {message}
@@ -73,7 +72,7 @@ export function Toast({ message, type, onClose, persistent = false, position = '
                     cursor: 'pointer', opacity: 0.6, fontSize: '16px', padding: '0'
                 }}
             >
-                &times;
+                x
             </button>
         </div>
     );

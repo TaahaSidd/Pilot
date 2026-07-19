@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { LogFilterBar, type DateRangeFilter, type StatusFilter } from '../components/logs/LogFilterBar';
 import { LogHistoryRow } from '../components/logs/LogHistoryRow';
+import { Card, EmptyState, MessageBar, PageHeader } from '../components/ui';
+import { HistorySkeleton } from '../components/shared/SkeletonScreens';
 import { pilotApi, type HistorySessionSummary } from '../api/api';
 
 function formatDate(iso: string | null) {
@@ -65,7 +67,7 @@ function getSummary(session: HistorySessionSummary) {
     const processed = summary.modules_processed ?? summary.modules_started ?? 0;
     const total = summary.modules_total ?? 0;
 
-        return total ? `${processed}/${total} topics studied` : `${processed} topics studied`;
+    return total ? `${processed}/${total} topics studied` : `${processed} topics studied`;
 }
 
 function isInDateRange(iso: string | null, filter: DateRangeFilter) {
@@ -140,17 +142,16 @@ export function LogsScreen({
     }, []);
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-            <div>
-                <h1 style={{ fontSize: '24px', fontWeight: 600, letterSpacing: 0, marginBottom: '6px', color: 'var(--text-primary)' }}>
-                    History
-                </h1>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
-                    Review past study sessions, generated notes, and anything that needed attention.
-                </p>
-            </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-8)' }}>
+            <PageHeader
+                title="History"
+                description="Review past study sessions, generated notes, and anything that needed attention."
+            />
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {loading ? (
+                <HistorySkeleton />
+            ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
                 <LogFilterBar
                     resultCount={filteredSessions.length}
                     statusFilter={statusFilter}
@@ -159,20 +160,15 @@ export function LogsScreen({
                     onDateRangeChange={setDateRangeFilter}
                 />
 
-                <div style={{
-                    border: '1px solid var(--border)',
-                    borderRadius: '8px',
-                    overflow: 'hidden',
-                    backgroundColor: 'var(--surface)'
-                }}>
+                <Card padding="sm" style={{ padding: 0, overflow: 'hidden' }}>
                     <div style={{
                         display: 'grid',
                         gridTemplateColumns: '1.2fr 3.5fr 1.5fr 1.2fr 1fr',
-                        padding: '12px 20px',
-                        borderBottom: '1px solid var(--border)',
+                        padding: 'var(--space-3) var(--space-5)',
+                        borderBottom: 'var(--stroke-thin) solid var(--border-subtle)',
                         backgroundColor: 'var(--surface-subtle)',
-                        fontSize: '11px',
-                        fontWeight: 600,
+                        fontSize: 'var(--type-caption-size)',
+                        fontWeight: 650,
                         letterSpacing: 0,
                         color: 'var(--text-muted)'
                     }}>
@@ -183,22 +179,19 @@ export function LogsScreen({
                         <div>Result</div>
                     </div>
 
-                    {loading && (
-                        <div style={{ padding: '24px', color: 'var(--text-secondary)', fontSize: '13px' }}>
-                            Loading history...
-                        </div>
-                    )}
-
                     {error && (
-                        <div style={{ padding: '24px', color: 'var(--error)', fontSize: '13px' }}>
-                            {error}
+                        <div style={{ padding: 'var(--space-5)' }}>
+                            <MessageBar tone="error" title="History could not load" message={error} />
                         </div>
                     )}
 
                     {!loading && !error && filteredSessions.length === 0 && (
-                        <div style={{ padding: '24px', color: 'var(--text-secondary)', fontSize: '13px' }}>
-                            No study sessions match these filters.
-                        </div>
+                        <EmptyState
+                            title={sessions.length === 0 ? 'No study sessions yet.' : 'No sessions match these filters.'}
+                            message={sessions.length === 0
+                                ? 'Start a study run or generate notes to build your session history.'
+                                : 'Try a different status or date range.'}
+                        />
                     )}
 
                     {!loading && !error && filteredSessions.map((session) => (
@@ -215,8 +208,9 @@ export function LogsScreen({
                             onOpenCourse={onOpenCourse}
                         />
                     ))}
-                </div>
+                </Card>
             </div>
+            )}
         </div>
     );
 }

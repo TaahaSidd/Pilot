@@ -17,32 +17,32 @@ export function TerminalLog({ logs }: TerminalLogProps) {
             case 'error': return 'var(--error)';
             case 'warning': return 'var(--warning)';
             case 'success': return 'var(--success)';
-            case 'page': return '#33b5e5';
+            case 'page': return 'var(--info)';
             default: return 'var(--text-secondary)';
         }
     };
 
     return (
         <div style={{
-            backgroundColor: '#050505',
-            border: '1px solid var(--border)',
-            borderRadius: '8px',
-            padding: '16px',
-            fontFamily: 'Geist Mono, monospace',
-            fontSize: '13px',
+            backgroundColor: 'var(--surface-overlay)',
+            border: 'var(--stroke-thin) solid var(--border-subtle)',
+            borderRadius: 'var(--radius-card)',
+            padding: 'var(--space-4)',
+            fontFamily: 'var(--font-mono)',
+            fontSize: 'var(--type-body-small-size)',
             height: '320px',
             overflowY: 'auto',
             display: 'flex',
             flexDirection: 'column',
-            gap: '4px'
+            gap: 'var(--space-1)'
         }}>
             {logs.length === 0 ? (
                 <div style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                    &gt;_ Pipe idle. Awaiting engine transmission strings...
+                    Waiting for session logs.
                 </div>
             ) : (
                 logs.map((log) => (
-                    <div key={log._id} style={{ display: 'flex', gap: '8px', lineHeight: '20px' }}>
+                    <div key={log._id} style={{ display: 'flex', gap: 'var(--space-2)', lineHeight: '20px' }}>
                         <span style={{ color: getColorByLevel(log.level), fontWeight: 600 }}>
                             [{log.level.toUpperCase()}]
                         </span>

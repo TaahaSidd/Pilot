@@ -1,0 +1,117 @@
+:root {
+  /* Spacing */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Radius */
+  --radius-control: 8px;
+  --radius-card: 12px;
+  --radius-panel: 14px;
+  --radius-dialog: 16px;
+  --radius-pill: 999px;
+
+  /* Stroke */
+  --stroke-thin: 1px;
+  --stroke-focus: 2px;
+
+  /* Typography */
+  --font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+
+  --type-display-size: 32px;
+  --type-display-line: 40px;
+  --type-display-weight: 700;
+
+  --type-page-title-size: 28px;
+  --type-page-title-line: 36px;
+  --type-page-title-weight: 700;
+
+  --type-section-title-size: 20px;
+  --type-section-title-line: 28px;
+  --type-section-title-weight: 650;
+
+  --type-subsection-title-size: 17px;
+  --type-subsection-title-line: 24px;
+  --type-subsection-title-weight: 600;
+
+  --type-card-title-size: 15px;
+  --type-card-title-line: 22px;
+  --type-card-title-weight: 600;
+
+  --type-card-value-size: 32px;
+  --type-card-value-line: 36px;
+  --type-card-value-weight: 700;
+
+  --type-body-size: 14px;
+  --type-body-line: 21px;
+  --type-body-weight: 400;
+
+  --type-small-size: 13px;
+  --type-small-line: 19px;
+  --type-small-weight: 400;
+
+  --type-label-size: 12px;
+  --type-label-line: 18px;
+  --type-label-weight: 500;
+
+  --type-caption-size: 11px;
+  --type-caption-line: 16px;
+  --type-caption-weight: 500;
+
+  /* Icon sizes */
+  --icon-xs: 12px;
+  --icon-sm: 16px;
+  --icon-md: 18px;
+  --icon-lg: 20px;
+  --icon-xl: 24px;
+
+  /* Layout */
+  --layout-page-max: 1440px;
+  --layout-readable: 780px;
+  --app-gutter: 36px;
+  --app-gutter-sm: 24px;
+  --app-topbar-gutter: 28px;
+
+  /* Z-index */
+  --z-titlebar: 50;
+  --z-sidebar: 40;
+  --z-overlay: 80;
+  --z-dialog: 100;
+  --z-toast: 120;
+
+  /* Motion */
+  --motion-instant: 80ms;
+  --motion-fast: 120ms;
+  --motion-standard: 180ms;
+  --motion-base: var(--motion-standard);
+  --motion-emphasized: 260ms;
+  --motion-slow: 320ms;
+  --motion-page: 180ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-enter: cubic-bezier(0, 0, 0, 1);
+  --ease-exit: cubic-bezier(0.3, 0, 1, 1);
+  --ease-linear: linear;
+  --ease-standard-accelerate: var(--ease-exit);
+  --ease-standard-decelerate: var(--ease-enter);
+  --ease-emphasized: var(--ease-standard);
+  --ease-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --ease-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+}
+
+@media (max-width: 960px) {
+  :root,
+  [data-theme='light'],
+  [data-theme='dark'] {
+    --app-gutter: var(--app-gutter-sm);
+    --app-topbar-gutter: var(--app-gutter-sm);
+  }
+}

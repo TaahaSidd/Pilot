@@ -45,13 +45,13 @@ export function NotificationCard({
             style={{
                 width: '100%',
                 border: 0,
-                borderBottom: isLast ? 0 : '1px solid var(--border)',
+                borderBottom: isLast ? 0 : 'var(--stroke-thin) solid var(--border-subtle)',
                 borderRadius: 0,
                 backgroundColor: notification.read ? 'var(--surface)' : 'var(--surface-subtle)',
-                padding: '14px 18px',
+                padding: 'var(--space-4) var(--space-5)',
                 display: 'grid',
                 gridTemplateColumns: '42px minmax(0, 1fr) minmax(96px, auto)',
-                gap: '14px',
+                gap: 'var(--space-4)',
                 alignItems: 'center',
                 textAlign: 'left',
                 color: 'inherit',
@@ -62,7 +62,7 @@ export function NotificationCard({
                 style={{
                     width: '36px',
                     height: '36px',
-                    borderRadius: '8px',
+                    borderRadius: 'var(--radius-control)',
                     backgroundColor: meta.bg,
                     color: meta.color,
                     display: 'flex',
@@ -79,8 +79,8 @@ export function NotificationCard({
                         display: 'block',
                         color: 'var(--text-primary)',
                         fontSize: '15px',
-                        fontWeight: notification.read ? 600 : 700,
-                        lineHeight: '21px',
+                        fontWeight: notification.read ? 600 : 650,
+                        lineHeight: 'var(--type-card-title-line)',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
@@ -92,8 +92,8 @@ export function NotificationCard({
                     style={{
                         display: 'block',
                         color: 'var(--text-secondary)',
-                        fontSize: '13px',
-                        lineHeight: '19px',
+                        fontSize: 'var(--type-small-size)',
+                        lineHeight: 'var(--type-small-line)',
                         marginTop: '3px',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
@@ -111,18 +111,18 @@ export function NotificationCard({
                     justifyContent: 'flex-end',
                     gap: '10px',
                     color: 'var(--text-muted)',
-                    fontSize: '12px',
+                    fontSize: 'var(--type-label-size)',
                     whiteSpace: 'nowrap',
                 }}
             >
                 {!notification.read && (
                     <span
                         style={{
-                            borderRadius: '999px',
+                            borderRadius: 'var(--radius-pill)',
                             backgroundColor: 'var(--accent-soft)',
                             color: 'var(--accent)',
                             padding: '4px 9px',
-                            fontWeight: 700,
+                            fontWeight: 600,
                         }}
                     >
                         New

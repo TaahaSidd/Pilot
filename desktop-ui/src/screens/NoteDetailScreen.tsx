@@ -1,8 +1,9 @@
 import { ArrowLeft } from 'lucide-react';
 import type { NoteFileResponse } from '../api/api';
-import { Button } from '../components/shared/Button';
+import { Button } from '../components/ui';
 import { MarkdownNoteViewer } from '../components/notes/MarkdownNoteViewer';
 import { NotesBreadcrumb, type NotesBreadcrumbItem } from '../components/shared/NotesBreadcrumb';
+import { GuidedTour, type GuidedTourStep } from '../components/shared/GuidedTour';
 
 function getPathParts(path: string) {
     const parts = path.split('/').filter(Boolean);
@@ -44,6 +45,24 @@ function getDuplicateTitleLineIndex(content: string, noteTitle: string) {
         : null;
 }
 
+const noteDetailTourSteps: GuidedTourStep[] = [
+    {
+        target: 'note-detail-back',
+        title: 'Back to notes',
+        description: 'Use this to return to the note list for the current module.',
+    },
+    {
+        target: 'note-detail-breadcrumb',
+        title: 'Note location',
+        description: 'This path shows where the note belongs in your course library.',
+    },
+    {
+        target: 'note-reader',
+        title: 'Read markdown notes',
+        description: 'Pilot formats headings, lists, code, and key terms so the note is easier to study.',
+    },
+];
+
 export function NoteDetailScreen({
     note,
     onBack,
@@ -57,30 +76,40 @@ export function NoteDetailScreen({
     const duplicateTitleLineIndex = getDuplicateTitleLineIndex(note.content, note.title);
 
     return (
-        <div style={{ padding: '0 24px', maxWidth: '980px', margin: '0 auto' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                    <Button variant="ghost" icon={ArrowLeft} onClick={onBack} style={{ width: 'fit-content' }}>
+        <div style={{ maxWidth: 'var(--layout-readable)', margin: '0 auto', width: '100%' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-8)' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+                    <Button data-tour-id="note-detail-back" variant="ghost" icon={ArrowLeft} onClick={onBack} style={{ width: 'fit-content' }}>
                         Back
                     </Button>
 
-                    <NotesBreadcrumb items={breadcrumbItems} />
+                    <div data-tour-id="note-detail-breadcrumb">
+                        <NotesBreadcrumb items={breadcrumbItems} />
+                    </div>
                 </div>
 
-                <article style={{ color: 'var(--text-primary)' }}>
-                    <h2 style={{ fontSize: '13px', color: 'var(--accent)', fontWeight: 600, letterSpacing: 0, margin: 0 }}>
+                <article style={{ color: 'var(--text-primary)', paddingBottom: 'var(--space-16)' }}>
+                    <div style={{ color: 'var(--accent)', fontSize: 'var(--type-label-size)', fontWeight: 600, lineHeight: 'var(--type-label-line)', marginBottom: 'var(--space-2)' }}>
                         {pathParts.course} / {pathParts.module}
-                    </h2>
-                    <h1 style={{ fontSize: '34px', fontWeight: 700, lineHeight: '1.2', margin: '8px 0 24px' }}>
+                    </div>
+                    <h1 style={{ fontSize: 'clamp(34px, 4vw, 42px)', fontWeight: 700, lineHeight: '1.18', margin: '0 0 var(--space-8)', letterSpacing: 0 }}>
                         {note.title}
                     </h1>
 
-                    <MarkdownNoteViewer
-                        content={note.content}
-                        skipLineIndex={duplicateTitleLineIndex}
-                    />
+                    <div data-tour-id="note-reader">
+                        <MarkdownNoteViewer
+                            content={note.content}
+                            skipLineIndex={duplicateTitleLineIndex}
+                        />
+                    </div>
                 </article>
             </div>
+
+            <GuidedTour
+                storageKey="pilot-note-reader-tour-v1"
+                steps={noteDetailTourSteps}
+                devAlwaysShow
+            />
         </div>
     );
 }

@@ -11,38 +11,37 @@ export function StatusBar({ wsState, status }: StatusBarProps) {
     return (
         <footer style={{
             height: '30px',
-            borderTop: '1px solid var(--border)',
+            borderTop: 'var(--stroke-thin) solid var(--border-subtle)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '0 14px',
-            fontSize: '12px',
+            padding: '0 var(--space-4, 16px)',
+            fontSize: 'var(--type-label-size)',
             color: 'var(--text-secondary)',
             backgroundColor: 'var(--surface)',
             flexShrink: 0,
         }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2, 8px)' }}>
                 <span
                     style={{
                         width: '7px',
                         height: '7px',
-                        borderRadius: '999px',
+                        borderRadius: 'var(--radius-pill)',
                         backgroundColor: connected ? 'var(--success)' : 'var(--error)',
-                        boxShadow: connected ? '0 0 8px rgba(34, 197, 94, 0.45)' : 'none',
+                        boxShadow: connected ? '0 0 0 4px var(--success-soft)' : 'none',
                     }}
                 />
-                <span>Engine</span>
                 <strong style={{
                     color: connected ? 'var(--success)' : 'var(--error)',
                     fontWeight: 600,
                     textTransform: 'capitalize',
                 }}>
-                    {connected ? 'connected' : 'disconnected'}
+                    {connected ? 'Ready' : 'Offline'}
                 </strong>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span>Mode:</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2, 8px)' }}>
+                <span>Run:</span>
                 <strong style={{
                     color: 'var(--text-primary)',
                     fontWeight: 600,

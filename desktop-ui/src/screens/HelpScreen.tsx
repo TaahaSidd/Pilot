@@ -9,6 +9,8 @@ import {
     ShieldAlert,
     Sparkles,
 } from 'lucide-react';
+import { Card } from '../components/ui';
+import { openExternalUrl } from '../utils/openExternal';
 
 const PILOT_REPO_URL = 'https://github.com/TaahaSidd/Pilot';
 
@@ -127,18 +129,18 @@ function CategoryCard({
             style={{
                 position: 'relative',
                 overflow: 'hidden',
-                backgroundColor: 'var(--surface)',
-                border: active ? '1px solid var(--accent)' : '1px solid var(--border)',
-                borderRadius: '12px',
-                padding: '20px',
+                backgroundColor: 'var(--surface-card)',
+                border: `var(--stroke-thin) solid ${active ? 'var(--accent)' : 'var(--border-subtle)'}`,
+                borderRadius: 'var(--radius-card)',
+                padding: 'var(--space-5)',
                 display: 'grid',
-                gap: '14px',
+                gap: 'var(--space-4)',
                 textAlign: 'left',
                 color: 'inherit',
                 cursor: 'pointer',
                 minHeight: '178px',
                 boxShadow: active ? 'var(--shadow-focus)' : undefined,
-                transition: 'border-color 150ms ease, box-shadow 150ms ease',
+                transition: 'border-color var(--motion-fast) var(--ease-standard), box-shadow var(--motion-fast) var(--ease-standard), transform var(--motion-fast) var(--ease-standard)',
             }}
         >
             <Icon
@@ -156,12 +158,12 @@ function CategoryCard({
             />
 
             <div style={{ position: 'relative', zIndex: 1, alignSelf: 'end' }}>
-                <h2 style={{ color: 'var(--text-primary)', fontSize: '16px', fontWeight: 800, margin: '0 0 10px' }}>
+                <h2 className="pilot-type-subsection-title" style={{ color: 'var(--text-primary)', margin: '0 0 var(--space-3)' }}>
                     {category.title}
                 </h2>
-                <div style={{ display: 'grid', gap: '6px' }}>
+                <div style={{ display: 'grid', gap: 'var(--space-2)' }}>
                     {category.items.map((item) => (
-                        <div key={item} style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '18px' }}>
+                        <div key={item} style={{ color: 'var(--text-secondary)', fontSize: 'var(--type-body-small-size)', lineHeight: 'var(--type-body-small-line)' }}>
                             {item}
                         </div>
                     ))}
@@ -181,38 +183,29 @@ function CategoryDetail({
     onSelectArticle: (article: string) => void;
 }) {
     return (
-        <section
-            style={{
-                backgroundColor: 'var(--surface)',
-                border: '1px solid var(--border)',
-                borderRadius: '12px',
-                padding: '20px',
-                display: 'grid',
-                gap: '14px',
-            }}
-        >
+        <Card style={{ display: 'grid', gap: 'var(--space-4)' }}>
             <div>
-                <h2 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: 800, margin: '0 0 6px' }}>
+                <h2 className="pilot-type-section-title" style={{ color: 'var(--text-primary)', margin: '0 0 var(--space-2)' }}>
                     {category.title}
                 </h2>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '20px', margin: 0 }}>
+                <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--type-body-small-size)', lineHeight: 'var(--type-body-small-line)', margin: 0 }}>
                     {category.summary}
                 </p>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 'var(--space-3)' }}>
                 {category.items.map((item) => (
                     <button
                         type="button"
                         key={item}
                         onClick={() => onSelectArticle(item)}
                         style={{
-                            border: '1px solid var(--border)',
-                            borderRadius: '10px',
-                            padding: '12px',
+                            border: 'var(--stroke-thin) solid var(--border-subtle)',
+                            borderRadius: 'var(--radius-control)',
+                            padding: 'var(--space-3)',
                             color: 'var(--text-primary)',
-                            fontSize: '13px',
-                            fontWeight: 700,
+                            fontSize: 'var(--type-body-small-size)',
+                            fontWeight: 650,
                             backgroundColor: 'var(--surface-subtle)',
                             textAlign: 'left',
                             cursor: 'pointer',
@@ -227,21 +220,21 @@ function CategoryDetail({
             {selectedArticle && (
                 <div
                     style={{
-                        border: '1px solid var(--border)',
-                        borderRadius: '10px',
-                        padding: '16px',
+                        border: 'var(--stroke-thin) solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-control)',
+                        padding: 'var(--space-4)',
                         backgroundColor: 'var(--background)',
                     }}
                 >
-                    <div style={{ color: 'var(--text-primary)', fontSize: '15px', fontWeight: 800, marginBottom: '6px' }}>
+                    <div style={{ color: 'var(--text-primary)', fontSize: 'var(--type-body-size)', fontWeight: 700, marginBottom: 'var(--space-2)' }}>
                         {selectedArticle}
                     </div>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '20px', margin: 0 }}>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--type-body-small-size)', lineHeight: 'var(--type-body-small-line)', margin: 0 }}>
                         {getArticleText(category.title, selectedArticle)}
                     </p>
                 </div>
             )}
-        </section>
+        </Card>
     );
 }
 
@@ -255,7 +248,7 @@ function FAQItem({
     onToggle: () => void;
 }) {
     return (
-        <div style={{ borderBottom: '1px solid var(--border)' }}>
+        <div style={{ borderBottom: 'var(--stroke-thin) solid var(--border-subtle)' }}>
             <button
                 type="button"
                 onClick={onToggle}
@@ -265,26 +258,26 @@ function FAQItem({
                     background: 'transparent',
                     color: 'var(--text-primary)',
                     cursor: 'pointer',
-                    padding: '16px 0',
+                    padding: 'var(--space-4) 0',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    gap: '18px',
+                    gap: 'var(--space-5)',
                     textAlign: 'left',
                     font: 'inherit',
-                    fontSize: '14px',
-                    fontWeight: 700,
+                    fontSize: 'var(--type-body-size)',
+                    fontWeight: 650,
                 }}
             >
                 {item.question}
                 <ChevronDown
                     size={16}
                     color="var(--text-muted)"
-                    style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 150ms ease' }}
+                    style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform var(--motion-base) var(--ease-emphasized)' }}
                 />
             </button>
             {open && (
-                <p style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '20px', margin: '0 0 16px' }}>
+                <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--type-body-small-size)', lineHeight: 'var(--type-body-small-line)', margin: '0 0 var(--space-4)' }}>
                     {item.answer}
                 </p>
             )}
@@ -296,23 +289,44 @@ export function HelpScreen() {
     const [openQuestion, setOpenQuestion] = useState(0);
     const [selectedCategory, setSelectedCategory] = useState(categories[0]);
     const [selectedArticle, setSelectedArticle] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const normalizedSearch = searchQuery.trim().toLowerCase();
+
+    const visibleCategories = normalizedSearch
+        ? categories.filter((category) => {
+            const categoryText = [
+                category.title,
+                category.summary,
+                ...category.items,
+                ...category.items.map((item) => getArticleText(category.title, item)),
+            ].join(' ').toLowerCase();
+
+            return categoryText.includes(normalizedSearch);
+        })
+        : categories;
+
+    const visibleQuestions = normalizedSearch
+        ? questions.filter((item) => `${item.question} ${item.answer}`.toLowerCase().includes(normalizedSearch))
+        : questions;
+
+    const activeCategory = visibleCategories.find((category) => category.title === selectedCategory.title) ?? visibleCategories[0] ?? null;
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '34px', maxWidth: '1060px', margin: '0 auto', width: '100%' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-8)', maxWidth: '1060px', margin: '0 auto', width: '100%' }}>
             <section
                 style={{
                     display: 'grid',
-                    gap: '20px',
+                    gap: 'var(--space-5)',
                     justifyItems: 'center',
                     textAlign: 'center',
-                    padding: '22px 0 10px',
+                    padding: 'var(--space-6) 0 var(--space-3)',
                 }}
             >
                 <div>
-                    <h1 style={{ fontSize: '32px', fontWeight: 800, letterSpacing: 0, margin: '0 0 8px', color: 'var(--text-primary)' }}>
+                    <h1 className="pilot-type-page-title" style={{ letterSpacing: 0, margin: '0 0 var(--space-2)', color: 'var(--text-primary)' }}>
                         Help Center
                     </h1>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '15px', lineHeight: '22px', margin: 0 }}>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--type-body-size)', lineHeight: 'var(--type-body-line)', margin: 0 }}>
                         Everything you need to use Pilot as your Amity study assistant.
                     </p>
                 </div>
@@ -323,18 +337,22 @@ export function HelpScreen() {
                         height: '44px',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '10px',
-                        padding: '0 14px',
-                        border: '1px solid var(--border)',
-                        borderRadius: '10px',
-                        backgroundColor: 'var(--surface)',
+                        gap: 'var(--space-3)',
+                        padding: '0 var(--space-4)',
+                        border: 'var(--stroke-thin) solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-control)',
+                        backgroundColor: 'var(--surface-card)',
                         color: 'var(--text-muted)',
                     }}
                 >
                     <Search size={17} />
                     <input
                         placeholder="Search help..."
-                        readOnly
+                        value={searchQuery}
+                        onChange={(event) => {
+                            setSearchQuery(event.target.value);
+                            setSelectedArticle(null);
+                        }}
                         style={{
                             width: '100%',
                             border: 0,
@@ -349,15 +367,15 @@ export function HelpScreen() {
             </section>
 
             <section style={{ display: 'grid', gap: '16px' }}>
-                <h2 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', margin: 0, textAlign: 'center' }}>
-                    Browse help topics
+                <h2 className="pilot-type-section-title" style={{ color: 'var(--text-primary)', margin: 0, textAlign: 'center' }}>
+                    {normalizedSearch ? 'Search results' : 'Browse help topics'}
                 </h2>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
-                    {categories.map((category) => (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 'var(--space-4)' }}>
+                    {visibleCategories.map((category) => (
                         <CategoryCard
                             key={category.title}
                             category={category}
-                            active={selectedCategory.title === category.title}
+                            active={activeCategory?.title === category.title}
                             onClick={() => {
                                 setSelectedCategory(category);
                                 setSelectedArticle(null);
@@ -367,33 +385,43 @@ export function HelpScreen() {
                 </div>
             </section>
 
-            <CategoryDetail
-                category={selectedCategory}
-                selectedArticle={selectedArticle}
-                onSelectArticle={setSelectedArticle}
-            />
+            {activeCategory ? (
+                <CategoryDetail
+                    category={activeCategory}
+                    selectedArticle={selectedArticle}
+                    onSelectArticle={setSelectedArticle}
+                />
+            ) : (
+                <Card style={{ textAlign: 'center', padding: 'var(--space-8)' }}>
+                    <h2 className="pilot-type-section-title" style={{ color: 'var(--text-primary)', margin: '0 0 var(--space-2)' }}>
+                        No help topics found
+                    </h2>
+                    <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
+                        Try a different search, like notes, login, quota, or settings.
+                    </p>
+                </Card>
+            )}
 
-            <section style={{ display: 'grid', gap: '12px' }}>
-                <h2 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
+            <section style={{ display: 'grid', gap: 'var(--space-3)' }}>
+                <h2 className="pilot-type-section-title" style={{ color: 'var(--text-primary)', margin: 0 }}>
                     Popular questions
                 </h2>
-                <div
-                    style={{
-                        backgroundColor: 'var(--surface)',
-                        border: '1px solid var(--border)',
-                        borderRadius: '12px',
-                        padding: '0 18px',
-                    }}
-                >
-                    {questions.map((item, index) => (
-                        <FAQItem
-                            key={item.question}
-                            item={item}
-                            open={openQuestion === index}
-                            onToggle={() => setOpenQuestion(openQuestion === index ? -1 : index)}
-                        />
-                    ))}
-                </div>
+                <Card padding="sm" style={{ padding: '0 var(--space-5)' }}>
+                    {visibleQuestions.length > 0 ? (
+                        visibleQuestions.map((item, index) => (
+                            <FAQItem
+                                key={item.question}
+                                item={item}
+                                open={openQuestion === index}
+                                onToggle={() => setOpenQuestion(openQuestion === index ? -1 : index)}
+                            />
+                        ))
+                    ) : (
+                        <p style={{ color: 'var(--text-secondary)', margin: 0, padding: 'var(--space-5) 0' }}>
+                            No matching questions yet.
+                        </p>
+                    )}
+                </Card>
             </section>
 
             <section
@@ -401,30 +429,30 @@ export function HelpScreen() {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    gap: '18px',
-                    borderTop: '1px solid var(--border)',
-                    paddingTop: '22px',
+                    gap: 'var(--space-5)',
+                    borderTop: 'var(--stroke-thin) solid var(--border-subtle)',
+                    paddingTop: 'var(--space-6)',
                     color: 'var(--text-secondary)',
-                    fontSize: '13px',
+                    fontSize: 'var(--type-body-small-size)',
                 }}
             >
-                <div style={{ display: 'grid', gap: '4px' }}>
-                    <div style={{ color: 'var(--text-primary)', fontSize: '15px', fontWeight: 800 }}>
+                <div style={{ display: 'grid', gap: 'var(--space-1)' }}>
+                    <div style={{ color: 'var(--text-primary)', fontSize: 'var(--type-body-size)', fontWeight: 700 }}>
                         Still need help?
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)', flexWrap: 'wrap' }}>
                     <button
                         type="button"
-                        onClick={() => window.open(`${PILOT_REPO_URL}/issues`, '_blank', 'noopener,noreferrer')}
+                        onClick={() => void openExternalUrl(`${PILOT_REPO_URL}/issues`)}
                         style={{ border: 0, background: 'transparent', color: 'var(--text-secondary)', textDecoration: 'underline', cursor: 'pointer', font: 'inherit' }}
                     >
                         Report an issue
                     </button>
                     <button
                         type="button"
-                        onClick={() => window.open(PILOT_REPO_URL, '_blank', 'noopener,noreferrer')}
+                        onClick={() => void openExternalUrl(PILOT_REPO_URL)}
                         style={{ border: 0, background: 'transparent', color: 'var(--text-secondary)', textDecoration: 'underline', cursor: 'pointer', font: 'inherit' }}
                     >
                         GitHub

@@ -1,6 +1,6 @@
 import { ArrowLeft } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { Button } from '../components/shared/Button';
+import { Button, Card, PageHeader } from '../components/ui';
 import { useNotifications, type NotificationPreferences } from '../context/NotificationContext';
 
 function SwitchRow({
@@ -22,18 +22,18 @@ function SwitchRow({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                gap: '18px',
-                padding: '14px 0',
-                borderBottom: '1px solid var(--border)',
+                gap: 'var(--space-5)',
+                padding: 'var(--space-3) 0',
+                borderBottom: 'var(--stroke-thin) solid var(--border-subtle)',
                 cursor: disabled ? 'not-allowed' : 'pointer',
                 opacity: disabled ? 0.54 : 1,
             }}
         >
             <span style={{ minWidth: 0 }}>
-                <span style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', letterSpacing: 0 }}>
+                <span style={{ display: 'block', fontSize: 'var(--type-body-size)', fontWeight: 600, color: 'var(--text-primary)', letterSpacing: 0 }}>
                     {label}
                 </span>
-                <span style={{ display: 'block', fontSize: '12px', color: 'var(--text-muted)', marginTop: '3px', lineHeight: '16px' }}>
+                <span style={{ display: 'block', fontSize: 'var(--type-body-small-size)', color: 'var(--text-muted)', marginTop: 'var(--space-1)', lineHeight: 'var(--type-body-small-line)' }}>
                     {description}
                 </span>
             </span>
@@ -42,11 +42,11 @@ function SwitchRow({
                 style={{
                     width: '42px',
                     height: '24px',
-                    borderRadius: '999px',
+                    borderRadius: 'var(--radius-pill)',
                     padding: '3px',
                     backgroundColor: checked ? 'var(--accent)' : 'var(--surface-subtle)',
                     border: `1px solid ${checked ? 'var(--accent)' : 'var(--border)'}`,
-                    transition: 'background-color 150ms ease, border-color 150ms ease',
+                    transition: 'background-color var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard)',
                     flex: '0 0 auto',
                 }}
             >
@@ -55,10 +55,10 @@ function SwitchRow({
                         display: 'block',
                         width: '16px',
                         height: '16px',
-                        borderRadius: '999px',
+                        borderRadius: 'var(--radius-pill)',
                         backgroundColor: 'var(--text-on-accent)',
                         transform: checked ? 'translateX(18px)' : 'translateX(0)',
-                        transition: 'transform 150ms ease',
+                        transition: 'transform var(--motion-base) var(--ease-emphasized)',
                     }}
                 />
             </span>
@@ -76,20 +76,13 @@ function SwitchRow({
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
     return (
-        <section style={{ display: 'grid', gap: '12px' }}>
-            <h2 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-secondary)', margin: 0 }}>
+        <section style={{ display: 'grid', gap: 'var(--space-2)' }}>
+            <h2 className="pilot-type-section-title" style={{ color: 'var(--text-secondary)', margin: 0 }}>
                 {title}
             </h2>
-            <div
-                style={{
-                    backgroundColor: 'var(--surface)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '12px',
-                    padding: '2px 16px',
-                }}
-            >
+            <Card padding="sm" style={{ padding: '0 var(--space-4)' }}>
                 {children}
-            </div>
+            </Card>
         </section>
     );
 }
@@ -102,21 +95,17 @@ export function NotificationSettingsScreen({ onBack }: { onBack: () => void }) {
     };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '28px', maxWidth: '860px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)', maxWidth: 'var(--layout-readable)', margin: '0 auto', width: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
                 <Button variant="ghost" icon={ArrowLeft} onClick={onBack} style={{ width: 'fit-content' }}>
                     Back to Settings
                 </Button>
             </div>
 
-            <div>
-                <h1 style={{ fontSize: '24px', fontWeight: 700, letterSpacing: 0, margin: 0, color: 'var(--text-primary)' }}>
-                    Notifications
-                </h1>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: '20px', margin: '6px 0 0' }}>
-                    Choose which Pilot updates you want to see.
-                </p>
-            </div>
+            <PageHeader
+                title="Notifications"
+                description="Choose which Pilot updates you want to see."
+            />
 
             <Section title="General">
                 <SwitchRow

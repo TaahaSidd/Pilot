@@ -1,4 +1,6 @@
 import { AlertCircle, AlertTriangle, X } from 'lucide-react';
+import type { CSSProperties } from 'react';
+import { Button, IconButton } from '../ui';
 
 interface InterventionBannerProps {
     title: string;
@@ -30,86 +32,61 @@ export function InterventionBanner({
     const Icon = severity === 'error' ? AlertCircle : AlertTriangle;
 
     return (
-        <div style={{
-            border: `1px solid ${color}`,
+        <div className="pilot-attention-banner" style={{
+            border: `var(--stroke-thin) solid ${color}`,
             backgroundColor,
-            padding: '16px',
-            borderRadius: '10px',
+            padding: 'var(--space-4)',
+            borderRadius: 'var(--radius-card)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            gap: '16px',
+            gap: 'var(--space-4)',
         }}>
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'flex-start', minWidth: 0 }}>
                 <Icon size={18} style={{ color, marginTop: '2px', flex: '0 0 auto' }} />
-                <div>
-                    <h4 style={{ color, fontWeight: 700, fontSize: '15px', marginBottom: '4px' }}>
+                <div style={{ minWidth: 0 }}>
+                    <h4 style={{ color, fontWeight: 700, fontSize: 'var(--type-body-size)', margin: '0 0 var(--space-1)' }}>
                         {title}
                     </h4>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '19px', margin: 0 }}>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--type-body-small-size)', lineHeight: 'var(--type-body-small-line)', margin: 0 }}>
                         {message}
                     </p>
                 </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: '0 0 auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', flex: '0 0 auto' }}>
                 {secondaryAction && (
-                    <button
-                        type="button"
+                    <Button
+                        variant="secondary"
+                        size="sm"
                         onClick={secondaryAction.onClick}
-                        style={{
-                            backgroundColor: 'transparent',
-                            color: 'var(--text-primary)',
-                            border: '1px solid var(--border)',
-                            padding: '9px 12px',
-                            borderRadius: '7px',
-                            fontWeight: 700,
-                            fontSize: '13px',
-                            cursor: 'pointer',
-                        }}
                     >
                         {secondaryAction.label}
-                    </button>
+                    </Button>
                 )}
 
                 {primaryAction && (
-                    <button
-                        type="button"
+                    <Button
+                        variant="primary"
+                        size="sm"
                         onClick={primaryAction.onClick}
                         style={{
-                            backgroundColor: color,
-                            color: 'var(--text-on-accent)',
-                            border: 'none',
-                            padding: '10px 14px',
-                            borderRadius: '7px',
-                            fontWeight: 700,
-                            fontSize: '13px',
-                            cursor: 'pointer',
-                        }}
+                            '--pilot-button-bg': color,
+                            '--pilot-button-hover-bg': color,
+                            '--pilot-button-color': 'var(--text-on-accent)',
+                        } as CSSProperties}
                     >
                         {primaryAction.label}
-                    </button>
+                    </Button>
                 )}
 
                 {dismissible && (
-                    <button
-                        type="button"
+                    <IconButton
+                        icon={X}
+                        label="Dismiss"
+                        size="sm"
                         onClick={onDismiss}
-                        title="Dismiss"
-                        style={{
-                            width: '32px',
-                            height: '32px',
-                            borderRadius: '7px',
-                            border: '1px solid var(--border)',
-                            backgroundColor: 'transparent',
-                            color: 'var(--text-secondary)',
-                            display: 'grid',
-                            placeItems: 'center',
-                            cursor: 'pointer',
-                        }}
-                    >
-                        <X size={15} />
-                    </button>
+                    />
                 )}
             </div>
         </div>

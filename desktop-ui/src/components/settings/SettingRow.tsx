@@ -1,4 +1,3 @@
-// src/components/settings/SettingRow.tsx
 import { ChevronRight } from 'lucide-react';
 
 interface SettingRowProps {
@@ -16,29 +15,28 @@ export function SettingRow({ label, description, actionLabel, onClick }: Setting
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '16px 0',
-                borderBottom: '1px solid var(--border)',
+                gap: 'var(--space-5)',
+                padding: 'var(--space-4) 0',
+                borderBottom: 'var(--stroke-thin) solid var(--border-subtle)',
                 cursor: onClick ? 'pointer' : 'default',
-                transition: 'opacity 150ms ease'
+                transition: 'opacity var(--motion-fast) var(--ease-standard), background-color var(--motion-fast) var(--ease-standard)'
             }}
         >
-            {/* Left Content Cluster without Icons */}
             <div style={{ display: 'flex', alignItems: 'center' }}>
                 <div>
-                    <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+                    <div style={{ fontSize: 'var(--type-body-size)', fontWeight: 550, color: 'var(--text-primary)', letterSpacing: 0 }}>
                         {label}
                     </div>
-                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px', lineHeight: '16px' }}>
+                    <div style={{ fontSize: 'var(--type-body-small-size)', color: 'var(--text-muted)', marginTop: 'var(--space-1)', lineHeight: 'var(--type-body-small-line)' }}>
                         {description}
                     </div>
                 </div>
             </div>
 
-            {/* Right Action Cluster */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', flexShrink: 0 }}>
                 {actionLabel && (
                     <span style={{
-                        fontSize: '12px',
+                        fontSize: 'var(--type-body-small-size)',
                         color: 'var(--text-secondary)',
                         fontWeight: 500
                     }}>

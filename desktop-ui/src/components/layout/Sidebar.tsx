@@ -5,15 +5,16 @@ import {
     FileText,
     HelpCircle,
     LayoutDashboard,
-    PanelLeftClose,
-    PanelLeftOpen,
     Settings,
     type LucideIcon,
 } from 'lucide-react';
+import { openExternalUrl } from '../../utils/openExternal';
 
 interface SidebarProps {
     currentTab: string;
     setTab: (tab: string) => void;
+    expanded: boolean;
+    onClose?: () => void;
 }
 
 type SidebarItem = {
@@ -49,12 +50,12 @@ function Tooltip({ label }: { label: string }) {
                 backgroundColor: 'var(--surface-overlay)',
                 color: 'var(--text-primary)',
                 padding: '6px 10px',
-                borderRadius: '6px',
+                borderRadius: 'var(--radius-control)',
                 fontSize: '12px',
                 whiteSpace: 'nowrap',
                 zIndex: 20,
-                boxShadow: 'var(--shadow-md)',
-                border: '1px solid var(--border)',
+                boxShadow: 'var(--shadow-dialog)',
+                border: 'var(--stroke-thin) solid var(--border)',
             }}
         >
             {label}
@@ -81,6 +82,7 @@ function SidebarButton({
 
     return (
         <button
+            className="pilot-sidebar-button"
             type="button"
             onClick={onSelect}
             onMouseEnter={() => onHover(item.id)}
@@ -91,16 +93,16 @@ function SidebarButton({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: expanded ? 'flex-start' : 'center',
-                gap: '13px',
+                gap: 'var(--space-3)',
                 width: expanded ? '100%' : '40px',
                 height: '42px',
-                borderRadius: '10px',
-                border: '1px solid transparent',
-                backgroundColor: active ? 'color-mix(in srgb, var(--accent) 12%, var(--surface))' : 'transparent',
-                color: active ? 'var(--accent)' : 'var(--text-secondary)',
+                borderRadius: 'var(--radius-control)',
+                border: active ? 'var(--stroke-thin) solid var(--border-subtle)' : 'var(--stroke-thin) solid transparent',
+                backgroundColor: active ? 'var(--surface-selected)' : 'transparent',
+                color: active ? 'var(--text-primary)' : 'var(--text-secondary)',
                 cursor: 'pointer',
-                transition: 'background-color 160ms ease, color 160ms ease, border-color 160ms ease',
-                padding: expanded ? '0 12px' : 0,
+                transition: 'background-color var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard), transform var(--motion-fast) var(--ease-standard)',
+                padding: expanded ? '0 var(--space-3)' : 0,
                 fontSize: '14px',
                 fontWeight: active ? 700 : 500,
                 letterSpacing: 0,
@@ -126,10 +128,8 @@ function SidebarButton({
     );
 }
 
-export function Sidebar({ currentTab, setTab }: SidebarProps) {
-    const [expanded, setExpanded] = useState(true);
+export function Sidebar({ currentTab, setTab, expanded, onClose }: SidebarProps) {
     const [hoveredId, setHoveredId] = useState<string | null>(null);
-    const ToggleIcon = expanded ? PanelLeftClose : PanelLeftOpen;
 
     const renderItem = (item: SidebarItem) => (
         <SidebarButton
@@ -141,11 +141,12 @@ export function Sidebar({ currentTab, setTab }: SidebarProps) {
             onHover={setHoveredId}
             onSelect={() => {
                 if (item.href) {
-                    window.open(item.href, '_blank', 'noopener,noreferrer');
+                    void openExternalUrl(item.href);
                     return;
                 }
 
                 setTab(item.id);
+                onClose?.();
             }}
         />
     );
@@ -153,92 +154,55 @@ export function Sidebar({ currentTab, setTab }: SidebarProps) {
     return (
         <aside
             style={{
-                width: expanded ? '264px' : '56px',
-                backgroundColor: 'color-mix(in srgb, var(--surface) 88%, var(--background))',
-                borderRight: '1px solid var(--border)',
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                bottom: 0,
+                zIndex: 'var(--z-sidebar)',
+                width: '264px',
+                backgroundColor: 'var(--surface)',
+                borderRight: 'var(--stroke-thin) solid var(--border-subtle)',
                 display: 'flex',
                 flexDirection: 'column',
-                padding: expanded ? '18px 14px' : '12px 8px',
-                height: '100vh',
-                transition: 'width 180ms ease, padding 180ms ease',
-                flex: '0 0 auto',
+                padding: 'var(--space-5) var(--space-4) var(--space-4)',
+                height: '100%',
+                transform: expanded ? 'translateX(0)' : 'translateX(-100%)',
+                transition: 'transform var(--motion-slow) var(--ease-emphasized), box-shadow var(--motion-slow) var(--ease-standard)',
+                overflowX: 'hidden',
+                overflowY: 'auto',
+                pointerEvents: expanded ? 'auto' : 'none',
+                boxShadow: expanded ? 'var(--shadow-lg)' : 'none',
             }}
         >
             <div
                 style={{
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: expanded ? 'space-between' : 'center',
-                    height: '48px',
-                    marginBottom: '28px',
-                    gap: '14px',
+                    justifyContent: 'flex-start',
+                    height: '44px',
+                    marginBottom: 'var(--space-6)',
+                    gap: 'var(--space-4)',
                 }}
             >
-                {expanded ? (
-                    <div
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        minWidth: 0,
+                        height: '44px',
+                    }}
+                >
+                    <img
+                        src={PILOT_LOGO_URL}
+                        alt="Pilot"
                         style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            minWidth: 0,
-                            height: '48px',
-                        }}
-                    >
-                        <img
-                            src={PILOT_LOGO_URL}
-                            alt="Pilot"
-                            style={{
-                                width: '96px',
-                                height: '34px',
-                                objectFit: 'contain',
-                                display: 'block',
-                            }}
-                        />
-                    </div>
-                ) : (
-                    <button
-                        type="button"
-                        onClick={() => setExpanded(true)}
-                        title="Expand sidebar"
-                        style={{
-                            width: '40px',
-                            height: '40px',
-                            borderRadius: '10px',
-                            border: '1px solid var(--border)',
-                            backgroundColor: 'var(--surface-subtle)',
-                            color: 'var(--text-secondary)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: 'pointer',
-                            transition: 'background-color 160ms ease, color 160ms ease',
-                        }}
-                    >
-                        <PanelLeftOpen size={18} />
-                    </button>
-                )}
-
-                {expanded && (
-                    <button
-                        type="button"
-                        onClick={() => setExpanded((value) => !value)}
-                        title="Collapse sidebar"
-                        style={{
-                            width: '34px',
+                            width: '96px',
                             height: '34px',
-                            borderRadius: '9px',
-                            border: '1px solid var(--border)',
-                            backgroundColor: 'var(--surface-subtle)',
-                            color: 'var(--text-secondary)',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            transition: 'background-color 160ms ease, color 160ms ease',
+                            objectFit: 'contain',
+                            display: 'block',
                         }}
-                    >
-                        <ToggleIcon size={18} />
-                    </button>
-                )}
+                    />
+                </div>
             </div>
 
             {expanded && (
@@ -248,7 +212,7 @@ export function Sidebar({ currentTab, setTab }: SidebarProps) {
                         style={{
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '8px',
+                            gap: 'var(--space-2)',
                             alignItems: 'stretch',
                         }}
                     >
@@ -260,27 +224,28 @@ export function Sidebar({ currentTab, setTab }: SidebarProps) {
                         style={{
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '8px',
+                            gap: 'var(--space-2)',
                             alignItems: 'stretch',
                             marginTop: 'auto',
                         }}
                     >
                         <button
+                            className="pilot-sidebar-promo"
                             type="button"
-                            onClick={() => window.open(CLI_DOCS_URL, '_blank', 'noopener,noreferrer')}
+                            onClick={() => void openExternalUrl(CLI_DOCS_URL)}
                             style={{
                                 position: 'relative',
                                 overflow: 'hidden',
-                                border: '1px solid color-mix(in srgb, var(--accent) 26%, rgba(255, 255, 255, 0.24))',
-                                borderRadius: '12px',
-                                padding: '14px',
-                                marginBottom: '12px',
-                                minHeight: '92px',
+                                border: 'var(--stroke-thin) solid color-mix(in srgb, var(--accent) 26%, rgba(255, 255, 255, 0.24))',
+                                borderRadius: 'var(--radius-card)',
+                                padding: 'var(--space-4)',
+                                marginBottom: 'var(--space-3)',
+                                minHeight: '78px',
                                 textAlign: 'left',
                                 cursor: 'pointer',
-                                color: '#F8F7FC',
+                                color: 'var(--color-brand-50)',
                                 background:
-                                    'linear-gradient(135deg, #8800CC 0%, #AA00FF 42%, #0F766E 100%)',
+                                    'linear-gradient(135deg, var(--color-brand-600) 0%, var(--accent) 42%, var(--success) 100%)',
                                 boxShadow: 'var(--shadow-sm)',
                             }}
                         >
@@ -290,7 +255,7 @@ export function Sidebar({ currentTab, setTab }: SidebarProps) {
                                     inset: 0,
                                     opacity: 0.18,
                                     background:
-                                        'radial-gradient(circle at 18% 20%, #FFFFFF 0 1px, transparent 2px), radial-gradient(circle at 72% 34%, #FFFFFF 0 1px, transparent 2px)',
+                                        'radial-gradient(circle at 18% 20%, var(--color-brand-50) 0 1px, transparent 2px), radial-gradient(circle at 72% 34%, var(--color-brand-50) 0 1px, transparent 2px)',
                                     backgroundSize: '28px 28px',
                                 }}
                             />
@@ -299,7 +264,7 @@ export function Sidebar({ currentTab, setTab }: SidebarProps) {
                                     <div style={{ fontSize: '14px', fontWeight: 800, lineHeight: '18px', letterSpacing: 0 }}>
                                         Try our CLI
                                     </div>
-                                    <div style={{ fontSize: '12px', lineHeight: '16px', opacity: 0.82, marginTop: '3px' }}>
+                                    <div style={{ fontSize: '12px', lineHeight: '15px', opacity: 0.82, marginTop: '3px' }}>
                                         Run Pilot from your terminal when you want full control.
                                     </div>
                                 </div>
@@ -310,9 +275,9 @@ export function Sidebar({ currentTab, setTab }: SidebarProps) {
                             style={{
                                 display: 'flex',
                                 flexDirection: 'column',
-                                gap: '8px',
-                                paddingTop: '14px',
-                                borderTop: '1px solid var(--border)',
+                                gap: 'var(--space-2)',
+                                paddingTop: 'var(--space-3)',
+                                borderTop: 'var(--stroke-thin) solid var(--border-subtle)',
                             }}
                         >
                             {bottomItems.map(renderItem)}

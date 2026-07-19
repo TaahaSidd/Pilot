@@ -1,28 +1,26 @@
-import { Bell } from 'lucide-react';
+import notificationsEmpty from '../../assets/empty-states/notifications.svg';
+import { EmptyState } from '../ui';
 
 export function NotificationEmptyState() {
     return (
-        <div
-            style={{
-                border: '1px solid var(--border)',
-                borderRadius: '12px',
-                backgroundColor: 'var(--surface)',
-                padding: '40px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '12px',
-                color: 'var(--text-secondary)',
-                textAlign: 'center',
-            }}
-        >
-            <Bell size={28} color="var(--text-muted)" />
-            <div style={{ color: 'var(--text-primary)', fontSize: '15px', fontWeight: 600 }}>
-                No notifications yet.
-            </div>
-            <div style={{ fontSize: '13px' }}>
-                Pilot will notify you when a run finishes or needs attention.
-            </div>
+        <div style={{ minHeight: '320px', display: 'grid', placeItems: 'center' }}>
+            <EmptyState
+                title="No notifications yet."
+                message="Pilot will notify you when a run finishes or needs attention."
+                illustration={
+                    <img
+                        src={notificationsEmpty}
+                        alt=""
+                        aria-hidden="true"
+                        style={{
+                            width: '180px',
+                            maxWidth: '52%',
+                            height: 'auto',
+                            opacity: 0.92,
+                        }}
+                    />
+                }
+            />
         </div>
     );
 }

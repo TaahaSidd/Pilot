@@ -1,5 +1,5 @@
 // src/components/shared/Button.tsx
-import React, { useState } from 'react';
+import React from 'react';
 import type { LucideIcon } from 'lucide-react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -23,20 +23,18 @@ export function Button({
     loading = false,
     loadingText,
     style,
+    className,
     disabled,
     ...props
 }: ButtonProps) {
-    const [isHovered, setIsHovered] = useState(false);
-    const [isFocused, setIsFocused] = useState(false);
     const isDisabled = disabled || loading;
 
-    // Color matrix design tokens mapping dashboard context styles
     const getVariantStyles = () => {
         if (disabled && !loading) {
             return {
                 bg: 'var(--surface-subtle)',
-                color: 'var(--text-muted)',
-                border: '1px solid var(--border)'
+                color: 'var(--text-disabled)',
+                border: 'var(--stroke-thin) solid var(--border)'
             };
         }
         switch (variant) {
@@ -44,35 +42,35 @@ export function Button({
                 return {
                     bg: 'var(--surface-subtle)',
                     color: 'var(--text-secondary)',
-                    border: '1px solid var(--border)',
+                    border: 'var(--stroke-thin) solid var(--border)',
                     hoverBg: 'var(--surface-overlay)'
                 };
             case 'danger':
                 return {
                     bg: 'var(--error)',
                     color: 'var(--text-on-accent)',
-                    border: '1px solid transparent',
+                    border: 'var(--stroke-thin) solid transparent',
                     hoverBg: 'var(--error-hover)'
                 };
             case 'ghost':
                 return {
                     bg: 'transparent',
                     color: 'var(--text-muted)',
-                    border: '1px solid transparent',
+                    border: 'var(--stroke-thin) solid transparent',
                     hoverBg: 'var(--surface-subtle)'
                 };
             case 'outline':
                 return {
                     bg: 'transparent',
                     color: 'var(--text-primary)',
-                    border: '1px solid var(--border)',
+                    border: 'var(--stroke-thin) solid var(--border)',
                     hoverBg: 'var(--surface-subtle)'
                 };
             default: // Primary
                 return {
                     bg: 'var(--accent)',
                     color: 'var(--text-on-accent)',
-                    border: '1px solid transparent',
+                    border: 'var(--stroke-thin) solid transparent',
                     hoverBg: 'var(--accent-hover)'
                 };
         }
@@ -80,9 +78,9 @@ export function Button({
 
     const getSizeStyles = () => {
         switch (size) {
-            case 'sm': return { padding: '6px 12px', fontSize: '12px', gap: '6px', iconSize: 13 };
-            case 'lg': return { padding: '12px 24px', fontSize: '15px', gap: '10px', iconSize: 18 };
-            default: return { padding: '9px 16px', fontSize: '13px', gap: '8px', iconSize: 15 };
+            case 'sm': return { padding: '6px 12px', fontSize: '12px', gap: '6px', iconSize: 13, minHeight: '32px' };
+            case 'lg': return { padding: '12px 24px', fontSize: '15px', gap: '10px', iconSize: 18, minHeight: '44px' };
+            default: return { padding: '9px 16px', fontSize: '13px', gap: '8px', iconSize: 15, minHeight: '38px' };
         }
     };
 
@@ -92,45 +90,38 @@ export function Button({
     return (
         <button
             {...props}
-            onMouseEnter={() => !isDisabled && setIsHovered(true)}
-            onMouseLeave={() => !isDisabled && setIsHovered(false)}
-            onFocus={(event) => {
-                setIsFocused(true);
-                props.onFocus?.(event);
-            }}
-            onBlur={(event) => {
-                setIsFocused(false);
-                props.onBlur?.(event);
-            }}
+            className={['pilot-button', className].filter(Boolean).join(' ')}
+            data-variant={variant}
+            data-loading={loading ? 'true' : undefined}
             disabled={isDisabled}
             aria-busy={loading}
             style={{
+                '--pilot-button-bg': vStyle.bg,
+                '--pilot-button-hover-bg': vStyle.hoverBg ?? vStyle.bg,
+                '--pilot-button-color': vStyle.color,
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: sStyle.gap,
                 padding: sStyle.padding,
+                minHeight: sStyle.minHeight,
                 fontSize: sStyle.fontSize,
-                fontWeight: 500,
-                borderRadius: '6px',
-                backgroundColor: isHovered && vStyle.hoverBg ? vStyle.hoverBg : vStyle.bg,
+                fontWeight: 600,
+                lineHeight: '18px',
+                borderRadius: 'var(--radius-control)',
+                backgroundColor: 'var(--pilot-button-bg)',
                 color: vStyle.color,
                 border: vStyle.border,
                 cursor: isDisabled ? 'not-allowed' : 'pointer',
                 width: fullWidth ? '100%' : 'auto',
-                transition: 'all 150ms ease',
                 fontFamily: 'inherit',
-                outline: isFocused ? '2px solid var(--accent)' : 'none',
-                outlineOffset: '2px',
+                outline: 'none',
                 opacity: isDisabled ? 0.6 : 1,
                 ...style
-            }}
+            } as React.CSSProperties}
         >
             {loading && (
                 <>
-                    <style>
-                        {'@keyframes pilot-button-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }'}
-                    </style>
                     <span
                         style={{
                             width: sStyle.iconSize,
@@ -139,13 +130,13 @@ export function Button({
                             borderTopColor: 'transparent',
                             borderRadius: '999px',
                             flexShrink: 0,
-                            animation: 'pilot-button-spin 700ms linear infinite',
+                            animation: 'pilot-spin 700ms linear infinite',
                         }}
                     />
                 </>
             )}
             {!loading && Icon && iconPosition === 'left' && <Icon size={sStyle.iconSize} style={{ flexShrink: 0 }} />}
-            <span>{loading && loadingText ? loadingText : children}</span>
+            <span className="pilot-button-label">{loading && loadingText ? loadingText : children}</span>
             {!loading && Icon && iconPosition === 'right' && <Icon size={sStyle.iconSize} style={{ flexShrink: 0 }} />}
         </button>
     );

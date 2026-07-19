@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { Button } from '../components/shared/Button';
-import { Input } from '../components/shared/Input';
+import { Button, Input } from '../components/ui';
 import { Toast } from '../components/shared/Toast';
 import { useToast } from '../hooks/useToast';
 import { InfoModal } from '../components/shared/InfoModal';
 import { pilotApi, ApiError, NetworkError } from '../api/api';
+import heroImage from '../assets/hero.png';
 
 interface OnboardingScreenProps {
     onComplete: () => void;
@@ -47,7 +47,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
     };
 
     const validateAndNext = () => {
-        if (step === 1 && data.groqApiKey.length < 1) return showToast('Please enter Groq API Key', 'error');
+        if (step === 1 && data.groqApiKey.length < 1) return showToast('Please enter your Groq API key.', 'error');
         if (step === 2 && (!data.email.includes('@') || data.password.length < 6)) return showToast('Valid Amity credentials required', 'error');
         if (step === 3 && data.phoneNumber.replace(/\D/g, '').length < 10) return showToast('Invalid phone number', 'error');
         if (step === 4 && data.name.length < 2) return showToast('Please enter your name', 'error');
@@ -56,47 +56,47 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
         else saveConfig();
     };
 
-    const stepTitle = step === 1 ? 'Connect your AI' : step === 2 ? 'Link your Amity Account' : step === 3 ? 'A few more details' : 'Welcome aboard!';
+    const stepTitle = step === 1 ? 'Connect your AI' : step === 2 ? 'Link your Amity account' : step === 3 ? 'A few more details' : 'Welcome aboard!';
     const stepSubtitle = step === 1 ? 'Enter your Groq API key.' : step === 2 ? 'Sync your study materials.' : step === 3 ? 'Auto-fill forms on your behalf.' : 'Final step to personalize.';
 
     return (
-        <div style={{ display: 'flex', width: '100vw', height: '100vh', backgroundColor: 'var(--bg-app)', overflow: 'hidden' }}>
-            <div style={{ flex: 1, display: 'flex', padding: '64px' }}>
+        <div style={{ display: 'flex', width: '100vw', height: '100vh', backgroundColor: 'var(--background)', overflow: 'hidden' }}>
+            <div style={{ flex: 1, display: 'flex', padding: 'var(--space-10)' }}>
                 <div style={{ width: '100%', maxWidth: '400px', margin: '0 auto', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                     <div style={{ margin: 'auto 0' }}>
                         <div>
-                            <h1 style={{ color: 'var(--text-primary)', fontSize: '28px', fontWeight: 700 }}>{stepTitle}</h1>
-                            <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginTop: '8px' }}>{stepSubtitle}</p>
+                            <h1 className="pilot-type-page-title" style={{ color: 'var(--text-primary)', margin: 0 }}>{stepTitle}</h1>
+                            <p style={{ color: 'var(--text-secondary)', marginTop: 'var(--space-2)', marginBottom: 0 }}>{stepSubtitle}</p>
                         </div>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '32px' }}>
-                            {step === 1 && <Input label="Groq API Key" type="password" value={data.groqApiKey} onChange={(e) => setData({ ...data, groqApiKey: e.target.value })} />}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)', marginTop: 'var(--space-8)' }}>
+                            {step === 1 && <Input label="Groq API key" type="password" value={data.groqApiKey} onChange={(e) => setData({ ...data, groqApiKey: e.target.value })} />}
                             {step === 2 && (
                                 <>
-                                    <Input label="Amity Email" value={data.email} onChange={(e) => setData({ ...data, email: e.target.value })} />
-                                    <Input label="Amity Password" type="password" value={data.password} onChange={(e) => setData({ ...data, password: e.target.value })} />
+                                    <Input label="Amity email" value={data.email} onChange={(e) => setData({ ...data, email: e.target.value })} />
+                                    <Input label="Amity password" type="password" value={data.password} onChange={(e) => setData({ ...data, password: e.target.value })} />
                                 </>
                             )}
-                            {step === 3 && <Input label="Phone Number" value={data.phoneNumber} onChange={(e) => setData({ ...data, phoneNumber: e.target.value })} />}
+                            {step === 3 && <Input label="Phone number" value={data.phoneNumber} onChange={(e) => setData({ ...data, phoneNumber: e.target.value })} />}
                             {step === 4 && <Input label="What should we call you?" value={data.name} onChange={(e) => setData({ ...data, name: e.target.value })} />}
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '12px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', marginTop: 'var(--space-3)' }}>
                                 <Button variant="primary" onClick={validateAndNext} disabled={saving} style={{ width: '100%' }}>
-                                    {saving ? 'Saving...' : step === TOTAL_STEPS ? 'Get Started' : 'Continue'}
+                                    {saving ? 'Saving...' : step === TOTAL_STEPS ? 'Get started' : 'Continue'}
                                 </Button>
                                 <div style={{ textAlign: 'center' }}>
-                                    {step === 1 && <span onClick={() => setModalType('groq')} style={{ color: 'var(--primary)', fontSize: '13px', cursor: 'pointer', textDecoration: 'underline' }}>Where do I find my API key?</span>}
-                                    {step === 2 && <span onClick={() => setModalType('amity')} style={{ color: 'var(--primary)', fontSize: '13px', cursor: 'pointer', textDecoration: 'underline' }}>Why do you need my credentials?</span>}
+                                    {step === 1 && <span onClick={() => setModalType('groq')} style={{ color: 'var(--accent)', fontSize: 'var(--type-body-small-size)', cursor: 'pointer', textDecoration: 'underline' }}>Where do I find my API key?</span>}
+                                    {step === 2 && <span onClick={() => setModalType('amity')} style={{ color: 'var(--accent)', fontSize: 'var(--type-body-small-size)', cursor: 'pointer', textDecoration: 'underline' }}>Why do you need my credentials?</span>}
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)', textAlign: 'center', paddingTop: '20px' }}>
+                    <div style={{ fontSize: 'var(--type-caption-size)', color: 'var(--text-secondary)', textAlign: 'center', paddingTop: 'var(--space-5)' }}>
                         By continuing, you agree to our{' '}
-                        <span onClick={() => setModalType('legal')} style={{ color: 'var(--primary)', cursor: 'pointer', textDecoration: 'underline' }}>Terms of Service</span>
+                        <span onClick={() => setModalType('legal')} style={{ color: 'var(--accent)', cursor: 'pointer', textDecoration: 'underline' }}>Terms of Service</span>
                         {' '}and{' '}
-                        <span onClick={() => setModalType('legal')} style={{ color: 'var(--primary)', cursor: 'pointer', textDecoration: 'underline' }}>Privacy Policy</span>.
+                        <span onClick={() => setModalType('legal')} style={{ color: 'var(--accent)', cursor: 'pointer', textDecoration: 'underline' }}>Privacy Policy</span>.
                     </div>
                 </div>
             </div>
@@ -104,15 +104,15 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
             <div
                 style={{
                     flex: 1,
-                    backgroundColor: 'var(--bg-secondary)',
-                    backgroundImage: `linear-gradient(color-mix(in srgb, var(--background) 26%, transparent), color-mix(in srgb, var(--background) 26%, transparent)), url('https://images.unsplash.com/photo-1779126931857-f12866cf7049?fm=jpg&q=60&w=3000&auto=format&fit=crop')`,
+                    backgroundColor: 'var(--surface-subtle)',
+                    backgroundImage: `linear-gradient(color-mix(in srgb, var(--background) 18%, transparent), color-mix(in srgb, var(--background) 18%, transparent)), url(${heroImage})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     display: 'flex',
                     alignItems: 'flex-end',
                     justifyContent: 'flex-end',
-                    padding: '80px',
-                    borderLeft: '1px solid var(--border)',
+                    padding: 'var(--space-10)',
+                    borderLeft: 'var(--stroke-thin) solid var(--border-subtle)',
                 }}
             >
                 <div
@@ -120,21 +120,21 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
                         color: 'var(--text-on-accent)',
                         textAlign: 'right',
                         maxWidth: '650px',
-                        padding: '50px',
-                        borderRadius: '24px',
+                        padding: 'var(--space-8)',
+                        borderRadius: 'var(--radius-panel)',
                         backgroundColor: 'color-mix(in srgb, var(--surface) 24%, transparent)',
                         backdropFilter: 'blur(15px)',
-                        border: '1px solid color-mix(in srgb, var(--border) 70%, transparent)',
+                        border: 'var(--stroke-thin) solid color-mix(in srgb, var(--border) 70%, transparent)',
                         boxShadow: 'var(--shadow-lg)',
                     }}
                 >
-                    <h2 style={{ fontSize: '42px', fontWeight: 700, lineHeight: '1.2', margin: 0 }}>Your Amity study assistant.</h2>
-                    <p style={{ fontSize: '18px', opacity: 0.8, marginTop: '24px', lineHeight: '1.6' }}>Pilot helps you study, generate notes, and keep track of coursework from your Amity portal.</p>
+                    <h2 style={{ fontSize: 'clamp(34px, 4vw, 42px)', fontWeight: 700, lineHeight: '1.2', margin: 0 }}>Your Amity study assistant.</h2>
+                    <p style={{ fontSize: 'var(--type-section-title-size)', opacity: 0.84, marginTop: 'var(--space-6)', lineHeight: '1.6' }}>Pilot helps you study, generate notes, and keep track of coursework from your Amity portal.</p>
                 </div>
             </div>
 
             <InfoModal isOpen={modalType === 'groq'} onClose={() => setModalType(null)} title="Finding your Groq API Key">
-                1. Head over to <a href="https://console.groq.com" target="_blank" rel="noreferrer" style={{ color: 'var(--primary)' }}>console.groq.com</a> and log in.<br /><br />
+                1. Head over to <a href="https://console.groq.com" target="_blank" rel="noreferrer" style={{ color: 'var(--accent)' }}>console.groq.com</a> and log in.<br /><br />
                 2. Look for the <b>API Keys</b> tab in the sidebar.<br /><br />
                 3. Create a new key, copy it, and paste it here!
             </InfoModal>

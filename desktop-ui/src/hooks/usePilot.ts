@@ -87,6 +87,7 @@ interface UsePilotResult {
     // arrived this session.
     currentCourseText: string | null;
     currentModuleText: string | null;
+    coursesLoading: boolean;
 
     // actions — each forwards to api.ts, hook just reacts to the result
     startWorkflow: () => Promise<StartResponse>;
@@ -122,6 +123,7 @@ export function usePilot(): UsePilotResult {
     const [wsState, setWsState] = useState<WsConnectionState>("connecting");
     const [awaitingLogin, setAwaitingLogin] = useState(false);
     const [courses, setCourses] = useState<CourseSummary[] | null>(null);
+    const [coursesLoading, setCoursesLoading] = useState(true);
     const [modulesCompletedThisRun, setModulesCompletedThisRun] = useState(0);
     const [runtime, setRuntime] = useState<RuntimeState | null>(null);
     const [config, setConfig] = useState<ConfigResponse | null>(null);
@@ -177,6 +179,8 @@ export function usePilot(): UsePilotResult {
             setCourses(data.courses);
         } catch {
             // Ignore if no history exists yet.
+        } finally {
+            setCoursesLoading(false);
         }
     }, []);
 
@@ -389,6 +393,7 @@ export function usePilot(): UsePilotResult {
         config,
         currentCourseText,
         currentModuleText,
+        coursesLoading,
         startWorkflow,
         startNotes,
         stopRuntime,

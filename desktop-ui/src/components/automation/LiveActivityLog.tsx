@@ -10,7 +10,7 @@ export function LiveActivityLog({ logs, title = 'Live Activity Log' }: LiveActiv
     return (
         <div
             style={{
-                backgroundColor: 'var(--surface)',
+                backgroundColor: 'var(--surface-card)',
                 display: 'flex',
                 flexDirection: 'column',
                 overflow: 'hidden',
@@ -22,14 +22,14 @@ export function LiveActivityLog({ logs, title = 'Live Activity Log' }: LiveActiv
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    padding: '14px 20px',
-                    borderBottom: '1px solid var(--border)',
-                    backgroundColor: 'var(--surface)',
+                    padding: 'var(--space-4) var(--space-5)',
+                    borderBottom: 'var(--stroke-thin) solid var(--border-subtle)',
+                    backgroundColor: 'var(--surface-card)',
                 }}
             >
                 <span
                     style={{
-                        fontSize: '12px',
+                        fontSize: 'var(--type-caption-size)',
                         fontWeight: 600,
                         color: 'var(--text-secondary)',
                         letterSpacing: 0,
@@ -44,11 +44,11 @@ export function LiveActivityLog({ logs, title = 'Live Activity Log' }: LiveActiv
                     style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '6px',
+                        gap: 'var(--space-2)',
                         background: 'transparent',
                         border: 'none',
                         color: 'var(--text-muted)',
-                        fontSize: '12px',
+                        fontSize: 'var(--type-caption-size)',
                         cursor: 'not-allowed',
                         opacity: 0.5,
                     }}
@@ -59,21 +59,21 @@ export function LiveActivityLog({ logs, title = 'Live Activity Log' }: LiveActiv
 
             <div
                 style={{
-                    padding: '24px',
+                    padding: 'var(--space-6)',
                     backgroundColor: 'var(--surface-subtle)',
                     height: '320px',
                     overflowY: 'auto',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '10px',
-                    fontFamily: 'monospace',
-                    fontSize: '13px',
+                    gap: 'var(--space-3)',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 'var(--type-body-small-size)',
                     lineHeight: '1.6',
                 }}
             >
                 {logs.length === 0 ? (
                     <div style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                        Waiting for automation logs.
+                        Waiting for session logs.
                     </div>
                 ) : (
                     logs.map((log) => {
@@ -85,7 +85,7 @@ export function LiveActivityLog({ logs, title = 'Live Activity Log' }: LiveActiv
                         return (
                             <div
                                 key={log._id}
-                                style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}
+                                style={{ display: 'flex', gap: 'var(--space-4)', alignItems: 'flex-start' }}
                             >
                                 <span
                                     style={{

@@ -1,5 +1,7 @@
 import type { CourseSummary } from '../../hooks/usePilot';
 import cardBg from '../../assets/images/card-bg.jpg';
+import coursesEmpty from '../../assets/empty-states/courses.svg';
+import { Card, EmptyState, ProgressBar, SectionHeader } from '../ui';
 
 interface CourseGridProps {
     courses: CourseSummary[] | null;
@@ -7,77 +9,41 @@ interface CourseGridProps {
 }
 
 export function CourseGrid({ courses, onSelectCourse }: CourseGridProps) {
+    const emptyTitle = courses === null ? 'Your courses will show up here.' : 'No courses here yet.';
+    const emptyMessage = courses === null
+        ? 'Start a study run and Pilot will bring in your Amity courses.'
+        : 'Once your courses are available, Pilot will organize them here.';
 
     return (
-        <div>
-            <div
-                style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '16px',
-                }}
-            >
-                <h3
-                    style={{
-                        fontSize: '16px',
-                        fontWeight: 600,
-                        color: 'var(--text-primary)',
-                        margin: 0,
-                    }}
-                >
-                    Courses
-                </h3>
+        <div style={{ display: 'grid', gap: 'var(--space-4)' }}>
+            <SectionHeader title="Courses" meta={courses ? `${courses.length} found` : undefined} />
 
-                {courses && (
-                    <span
-                        style={{
-                            fontSize: '12px',
-                            color: 'var(--text-muted)',
-                        }}
-                    >
-                        {courses.length} found
-                    </span>
-                )}
-            </div>
-
-            {courses === null && (
-                <div
-                    style={{
-                        backgroundColor: 'var(--surface)',
-                        border: '1px solid var(--border)',
-                        borderRadius: '12px',
-                        padding: '32px',
-                        textAlign: 'center',
-                        color: 'var(--text-secondary)',
-                        fontSize: '13px',
-                    }}
-                >
-                    No course data yet. Start a study run to see your course progress here.
-                </div>
-            )}
-
-            {courses !== null && courses.length === 0 && (
-                <div
-                    style={{
-                        backgroundColor: 'var(--surface)',
-                        border: '1px solid var(--border)',
-                        borderRadius: '12px',
-                        padding: '32px',
-                        textAlign: 'center',
-                        color: 'var(--text-secondary)',
-                        fontSize: '13px',
-                    }}
-                >
-                    No courses found on the portal for this account.
-                </div>
+            {(courses === null || courses.length === 0) && (
+                <Card style={{ minHeight: '320px', display: 'grid', placeItems: 'center' }}>
+                    <EmptyState
+                        title={emptyTitle}
+                        message={emptyMessage}
+                        illustration={(
+                            <img
+                                src={coursesEmpty}
+                                alt=""
+                                aria-hidden="true"
+                                style={{
+                                    width: '220px',
+                                    maxWidth: '56%',
+                                    height: 'auto',
+                                }}
+                            />
+                        )}
+                    />
+                </Card>
             )}
 
             {courses !== null && courses.length > 0 && (
                 <div
                     style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
                         gap: '16px',
                     }}
                 >
@@ -86,33 +52,38 @@ export function CourseGrid({ courses, onSelectCourse }: CourseGridProps) {
 
                         return (
                             <button
+                                className={onSelectCourse ? 'pilot-card pilot-card-interactive' : 'pilot-card'}
                                 key={course.id ?? course.title}
                                 onClick={() => onSelectCourse?.(course)}
                                 style={{
-                                    backgroundColor: 'var(--surface)',
-                                    border: '1px solid var(--border)',
-                                    borderRadius: '12px',
+                                    backgroundColor: 'var(--surface-card)',
+                                    border: 'var(--stroke-thin) solid var(--border-subtle)',
+                                    borderRadius: 'var(--radius-card)',
+                                    boxShadow: 'var(--shadow-card)',
+                                    color: 'var(--text-primary)',
                                     display: 'flex',
                                     flexDirection: 'column',
-                                    minHeight: '260px',
+                                    minHeight: '230px',
                                     padding: 0,
                                     textAlign: 'left',
                                     cursor: onSelectCourse ? 'pointer' : 'default',
+                                    font: 'inherit',
+                                    width: '100%',
                                 }}
                             >
                                 <div
                                     style={{
                                         width: '100%',
-                                        padding: '12px 12px 0',
+                                        padding: 'var(--space-3) var(--space-3) 0',
                                         boxSizing: 'border-box',
                                     }}
                                 >
                                     <div
                                         style={{
                                             width: '100%',
-                                            height: '132px',
+                                            height: '104px',
                                             overflow: 'hidden',
-                                            borderRadius: '10px',
+                                            borderRadius: 'var(--radius-control)',
                                             backgroundColor: 'var(--surface-subtle)',
                                         }}
                                     >
@@ -131,10 +102,10 @@ export function CourseGrid({ courses, onSelectCourse }: CourseGridProps) {
 
                                 <div
                                     style={{
-                                        padding: '16px',
+                                        padding: 'var(--space-4)',
                                         display: 'flex',
                                         flexDirection: 'column',
-                                        gap: '12px',
+                                        gap: 'var(--space-3)',
                                         flex: 1,
                                     }}
                                 >
@@ -143,16 +114,16 @@ export function CourseGrid({ courses, onSelectCourse }: CourseGridProps) {
                                             display: 'flex',
                                             justifyContent: 'space-between',
                                             alignItems: 'flex-start',
-                                            gap: '10px',
+                                            gap: 'var(--space-3)',
                                         }}
                                     >
                                         <h4
                                             style={{
-                                                fontSize: '14px',
-                                                fontWeight: 600,
+                                                fontSize: 'var(--type-body-size)',
+                                                fontWeight: 560,
                                                 color: 'var(--text-primary)',
                                                 margin: 0,
-                                                lineHeight: '20px',
+                                                lineHeight: 'var(--type-body-line)',
                                                 letterSpacing: 0,
                                             }}
                                         >
@@ -166,12 +137,12 @@ export function CourseGrid({ courses, onSelectCourse }: CourseGridProps) {
                                                 display: 'flex',
                                                 justifyContent: 'space-between',
                                                 alignItems: 'center',
-                                                marginBottom: '8px',
+                                                marginBottom: 'var(--space-2)',
                                             }}
                                         >
                                             <span
                                                 style={{
-                                                    fontSize: '12px',
+                                                    fontSize: 'var(--type-body-small-size)',
                                                     fontWeight: 600,
                                                     color: isComplete
                                                         ? 'var(--success)'
@@ -183,7 +154,7 @@ export function CourseGrid({ courses, onSelectCourse }: CourseGridProps) {
 
                                             <span
                                                 style={{
-                                                    fontSize: '12px',
+                                                    fontSize: 'var(--type-body-small-size)',
                                                     fontWeight: 600,
                                                     color: 'var(--text-muted)',
                                                 }}
@@ -192,25 +163,11 @@ export function CourseGrid({ courses, onSelectCourse }: CourseGridProps) {
                                             </span>
                                         </div>
 
-                                        <div
-                                            style={{
-                                                width: '100%',
-                                                height: '6px',
-                                                backgroundColor: 'var(--border)',
-                                                borderRadius: '3px',
-                                                overflow: 'hidden',
-                                            }}
-                                        >
-                                            <div
-                                                style={{
-                                                    width: `${course.completion}%`,
-                                                    height: '100%',
-                                                    backgroundColor: isComplete
-                                                        ? 'var(--success)'
-                                                        : 'var(--accent)',
-                                                }}
-                                            />
-                                        </div>
+                                        <ProgressBar
+                                            value={course.completion}
+                                            tone={isComplete ? 'success' : 'accent'}
+                                            height="6px"
+                                        />
                                     </div>
                                 </div>
                             </button>

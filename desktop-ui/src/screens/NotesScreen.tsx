@@ -14,10 +14,13 @@ import { NotesCourseGrid } from '../components/notes/NotesCourseGrid';
 import { NotesModuleGrid } from '../components/notes/NotesModuleGrid';
 import { NotesFileGrid } from '../components/notes/NotesFileGrid';
 import { NotesBreadcrumb, type NotesBreadcrumbItem } from '../components/shared/NotesBreadcrumb';
+import { NotesSkeleton } from '../components/shared/SkeletonScreens';
+import { GuidedTour, type GuidedTourStep } from '../components/shared/GuidedTour';
 import { NoteDetailScreen } from './NoteDetailScreen';
-import { Button } from '../components/shared/Button';
+import { Button, MessageBar, PageHeader } from '../components/ui';
 
 type View = 'courses' | 'modules' | 'notes';
+const NOTE_READ_STORAGE_KEY = 'pilot-notes-read-at';
 
 function normalizeTitle(value: string) {
     return value
@@ -27,8 +30,59 @@ function normalizeTitle(value: string) {
         .trim();
 }
 
+function getNotesTourSteps(currentView: View): GuidedTourStep[] {
+    if (currentView === 'courses') {
+        return [
+            {
+                target: 'notes-header',
+                title: 'Your notes library',
+                description: 'This is where Pilot keeps all generated notes, grouped by course.',
+            },
+            {
+                target: 'notes-grid',
+                title: 'Open a course',
+                description: 'Click a course card to see its modules and the notes inside them.',
+            },
+        ];
+    }
+
+    if (currentView === 'modules') {
+        return [
+            {
+                target: 'notes-breadcrumb',
+                title: 'Find your place',
+                description: 'Use breadcrumbs to jump back to your notes library or course.',
+            },
+            {
+                target: 'notes-back',
+                title: 'Go back',
+                description: 'Use Back when you want to return one level without losing your place.',
+            },
+            {
+                target: 'notes-grid',
+                title: 'Pick a module',
+                description: 'Each module card contains the notes Pilot generated for that topic.',
+            },
+        ];
+    }
+
+    return [
+        {
+            target: 'notes-breadcrumb',
+            title: 'Follow the path',
+            description: 'Breadcrumbs show the course and module you are browsing right now.',
+        },
+        {
+            target: 'notes-grid',
+            title: 'Open a note',
+            description: 'Click a note to read it with proper markdown formatting.',
+        },
+    ];
+}
+
 export function NotesScreen({ initialCourseTitle }: { initialCourseTitle?: string | null }) {
     const [courses, setCourses] = useState<NoteCourse[]>([]);
+    const [readAtByPath, setReadAtByPath] = useState<Record<string, number>>({});
 
     const [selectedCourse, setSelectedCourse] = useState<NoteCourse | null>(null);
     const [selectedModule, setSelectedModule] = useState<NoteModule | null>(null);
@@ -44,6 +98,31 @@ export function NotesScreen({ initialCourseTitle }: { initialCourseTitle?: strin
             : selectedCourse
                 ? 'modules'
                 : 'courses';
+
+    useEffect(() => {
+        try {
+            const stored = window.localStorage.getItem(NOTE_READ_STORAGE_KEY);
+            if (stored) {
+                setReadAtByPath(JSON.parse(stored) as Record<string, number>);
+            }
+        } catch {
+            window.localStorage.removeItem(NOTE_READ_STORAGE_KEY);
+        }
+    }, []);
+
+    function markNoteRead(note: NoteFile) {
+        const readAt = Date.now();
+
+        setReadAtByPath((current) => {
+            const next = {
+                ...current,
+                [note.path]: readAt,
+            };
+
+            window.localStorage.setItem(NOTE_READ_STORAGE_KEY, JSON.stringify(next));
+            return next;
+        });
+    }
 
     useEffect(() => {
         let cancelled = false;
@@ -98,6 +177,7 @@ export function NotesScreen({ initialCourseTitle }: { initialCourseTitle?: strin
             const file = await pilotApi.getNoteFile(note.path);
 
             setSelectedNote(file);
+            markNoteRead(note);
         } catch {
             setError('Could not open this note.');
         } finally {
@@ -138,7 +218,7 @@ export function NotesScreen({ initialCourseTitle }: { initialCourseTitle?: strin
 
     const breadcrumbItems: NotesBreadcrumbItem[] = [
         {
-            label: 'Generated notes',
+            label: 'Notes',
             onClick: currentView === 'courses' && !selectedNote ? undefined : goToNotesRoot,
         },
     ];
@@ -174,16 +254,7 @@ export function NotesScreen({ initialCourseTitle }: { initialCourseTitle?: strin
     }
 
     if (loading) {
-        return (
-            <div
-                style={{
-                    color: 'var(--text-secondary)',
-                    fontSize: '14px',
-                }}
-            >
-                Loading generated notes...
-            </div>
-        );
+        return <NotesSkeleton />;
     }
 
     if (courses.length === 0) {
@@ -195,84 +266,78 @@ export function NotesScreen({ initialCourseTitle }: { initialCourseTitle?: strin
             style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '24px',
+                gap: 'var(--space-6)',
             }}
         >
             {currentView !== 'courses' && (
-                <Button variant="ghost" icon={ArrowLeft} onClick={goBack} style={{ width: 'fit-content' }}>
+                <Button data-tour-id="notes-back" variant="ghost" icon={ArrowLeft} onClick={goBack} style={{ width: 'fit-content' }}>
                     Back
                 </Button>
             )}
 
-            <div
-                style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '10px',
-                }}
-            >
-                <NotesBreadcrumb items={breadcrumbItems} />
+            <div data-tour-id="notes-header" style={{ display: 'grid', gap: 'var(--space-3)' }}>
+                {currentView !== 'courses' && (
+                    <div data-tour-id="notes-breadcrumb">
+                        <NotesBreadcrumb items={breadcrumbItems} />
+                    </div>
+                )}
 
-                <h1
-                    style={{
-                        fontSize: '24px',
-                        fontWeight: 600,
-                        color: 'var(--text-primary)',
-                        margin: 0,
-                    }}
-                >
-                    Generated Notebooks
-                </h1>
-
-                <p
-                    style={{
-                        color: 'var(--text-secondary)',
-                        fontSize: '14px',
-                        margin: 0,
-                    }}
-                >
-                    {currentView === 'courses' && 'Browse generated notes by course.'}
-
-                    {currentView === 'modules' &&
-                        `${selectedCourse?.title}`}
-
-                    {currentView === 'notes' &&
-                        `${selectedModule?.title}`}
-                </p>
+                <PageHeader
+                    title={currentView === 'courses' ? 'Notes' : currentView === 'modules' ? 'Modules' : 'Study material'}
+                    description={
+                        currentView === 'courses'
+                            ? 'Your study library, organized by course.'
+                            : currentView === 'modules'
+                                ? selectedCourse?.title
+                                : selectedModule?.title
+                    }
+                />
             </div>
 
             {error && (
-                <div
-                    style={{
-                        color: 'var(--error)',
-                        fontSize: '13px',
-                    }}
-                >
-                    {error}
-                </div>
+                <MessageBar
+                    tone="error"
+                    title="Notes could not be loaded"
+                    message={error}
+                />
             )}
 
             {currentView === 'courses' && (
-                <NotesCourseGrid
-                    courses={courses}
-                    onSelect={setSelectedCourse}
-                />
+                <div data-tour-id="notes-grid">
+                    <NotesCourseGrid
+                        courses={courses}
+                        readAtByPath={readAtByPath}
+                        onSelect={setSelectedCourse}
+                    />
+                </div>
             )}
 
             {currentView === 'modules' && selectedCourse && (
-                <NotesModuleGrid
-                    modules={selectedCourse.modules}
-                    onSelect={setSelectedModule}
-                />
+                <div data-tour-id="notes-grid">
+                    <NotesModuleGrid
+                        modules={selectedCourse.modules}
+                        readAtByPath={readAtByPath}
+                        onSelect={setSelectedModule}
+                    />
+                </div>
             )}
 
             {currentView === 'notes' && selectedModule && (
-                <NotesFileGrid
-                    notes={selectedModule.notes}
-                    openingNote={openingNote}
-                    onSelect={openNote}
-                />
+                <div data-tour-id="notes-grid">
+                    <NotesFileGrid
+                        notes={selectedModule.notes}
+                        readAtByPath={readAtByPath}
+                        openingNote={openingNote}
+                        onSelect={openNote}
+                    />
+                </div>
             )}
+
+            <GuidedTour
+                storageKey={`pilot-notes-tour-${currentView}-v1`}
+                steps={getNotesTourSteps(currentView)}
+                devAlwaysShow
+            />
         </div>
     );
 }

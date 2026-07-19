@@ -4,6 +4,7 @@ import { LiveActivityLog } from '../components/automation/LiveActivityLog';
 import { usePilotContext } from '../context/usePilotContext';
 import type { LogEvent } from '../hooks/usePilot';
 import type { RuntimeState } from '../api/api';
+import { Card, PageHeader, ProgressBar as UiProgressBar, StatusBadge, type StatusBadgeTone } from '../components/ui';
 
 type StepState = 'done' | 'active' | 'waiting' | 'failed';
 
@@ -45,24 +46,24 @@ function hasLog(logs: LogEvent[], patterns: string[]) {
     });
 }
 
-function getStatusMeta(status: string) {
+function getStatusMeta(status: string): { label: string; tone: StatusBadgeTone } {
     if (status === 'running') {
-        return { label: 'Running', color: 'var(--accent)', bg: 'var(--accent-soft)' };
+        return { label: 'Running', tone: 'running' };
     }
 
     if (status === 'done') {
-        return { label: 'Done', color: 'var(--success)', bg: 'var(--success-soft)' };
+        return { label: 'Done', tone: 'completed' };
     }
 
     if (status === 'stopped') {
-        return { label: 'Stopped', color: 'var(--warning)', bg: 'var(--warning-soft)' };
+        return { label: 'Stopped', tone: 'stopped' };
     }
 
     if (status === 'error') {
-        return { label: 'Error', color: 'var(--error)', bg: 'var(--error-soft)' };
+        return { label: 'Error', tone: 'failed' };
     }
 
-    return { label: 'Idle', color: 'var(--text-muted)', bg: 'var(--surface-subtle)' };
+    return { label: 'Idle', tone: 'ready' };
 }
 
 function getSteps(logs: LogEvent[], runtime: RuntimeState | null, isRunning: boolean) {
@@ -109,79 +110,22 @@ function getPageText(runtime: RuntimeState | null) {
     return runtime?.current_page ?? 'Waiting for page';
 }
 
-function ProgressBar({ value, running }: { value: number; running: boolean }) {
-    return (
-        <div
-            style={{
-                width: '100%',
-                height: '12px',
-                padding: '2px',
-                borderRadius: '999px',
-                backgroundColor: 'var(--surface-subtle)',
-                border: '1px solid var(--border)',
-                overflow: 'hidden',
-            }}
-        >
-            <div
-                style={{
-                    width: `${Math.max(0, Math.min(value, 100))}%`,
-                    height: '100%',
-                    borderRadius: '999px',
-                    backgroundColor: 'var(--accent)',
-                    transition: 'width 200ms ease',
-                    opacity: running ? 1 : 0.82,
-                }}
-            />
-        </div>
-    );
-}
-
 function StatusPill({ status }: { status: string }) {
     const meta = getStatusMeta(status);
-    const isRunning = status === 'running';
-
-    return (
-        <span
-            style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                width: 'fit-content',
-                color: meta.color,
-                backgroundColor: meta.bg,
-                border: `1px solid ${meta.color}`,
-                borderRadius: '999px',
-                padding: '6px 10px',
-                fontSize: '12px',
-                fontWeight: 700,
-                letterSpacing: 0,
-            }}
-        >
-            <span
-                style={{
-                    width: '7px',
-                    height: '7px',
-                    borderRadius: '999px',
-                    backgroundColor: meta.color,
-                    boxShadow: isRunning ? `0 0 0 4px ${meta.bg}` : 'none',
-                }}
-            />
-            {meta.label}
-        </span>
-    );
+    return <StatusBadge tone={meta.tone} label={meta.label} />;
 }
 
 function Field({ label, value }: { label: string; value: string }) {
     return (
         <div style={{ minWidth: 0 }}>
-            <div style={{ color: 'var(--text-muted)', fontSize: '12px', marginBottom: '5px' }}>
+            <div style={{ color: 'var(--text-muted)', fontSize: 'var(--type-caption-size)', marginBottom: 'var(--space-1)' }}>
                 {label}
             </div>
             <div
                 title={value}
                 style={{
                     color: 'var(--text-primary)',
-                    fontSize: '13px',
+                    fontSize: 'var(--type-body-small-size)',
                     fontWeight: 600,
                     lineHeight: '18px',
                     overflow: 'hidden',
@@ -227,7 +171,7 @@ function iconStyle(backgroundColor: string, color: string) {
     return {
         width: '20px',
         height: '20px',
-        borderRadius: '999px',
+        borderRadius: 'var(--radius-pill)',
         backgroundColor,
         color,
         display: 'flex',
@@ -239,17 +183,17 @@ function iconStyle(backgroundColor: string, color: string) {
 
 function CompactTimeline({ steps }: { steps: Array<{ label: string; state: StepState }> }) {
     return (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: '10px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 'var(--space-3)' }}>
             {steps.map((step) => (
                 <div
                     key={step.label}
                     style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '8px',
+                        gap: 'var(--space-2)',
                         minWidth: 0,
                         color: step.state === 'waiting' ? 'var(--text-muted)' : 'var(--text-primary)',
-                        fontSize: '12px',
+                        fontSize: 'var(--type-caption-size)',
                         fontWeight: step.state === 'active' ? 700 : 600,
                     }}
                 >
@@ -265,25 +209,15 @@ function CompactTimeline({ steps }: { steps: Array<{ label: string; state: StepS
 
 function RuntimeSummary({ runtime }: { runtime: RuntimeState | null }) {
     return (
-        <section
-            style={{
-                backgroundColor: 'var(--surface)',
-                border: '1px solid var(--border)',
-                borderRadius: '12px',
-                padding: '16px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '14px',
-            }}
-        >
-            <h3 style={{ color: 'var(--text-secondary)', fontSize: '13px', fontWeight: 600, margin: 0 }}>
+        <Card style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+            <h3 className="pilot-type-section-title" style={{ color: 'var(--text-secondary)', margin: 0 }}>
                 Runtime Summary
             </h3>
             <Field label="Run Type" value={runtime?.run_type ?? 'None'} />
             <Field label="Elapsed Time" value={formatElapsed(runtime?.elapsed_seconds)} />
             <Field label="Browser" value={runtime?.browser_open ? 'Open' : 'Closed'} />
             <Field label="Login" value={runtime?.awaiting_login ? 'Required' : 'Clear'} />
-        </section>
+        </Card>
     );
 }
 
@@ -307,69 +241,29 @@ export function AutomationScreen() {
     const steps = getSteps(logs, runtime, isRunning);
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <div
-                style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '16px',
-                    borderBottom: '1px solid var(--border)',
-                    paddingBottom: '18px',
-                }}
-            >
-                <h1
-                    style={{
-                        fontSize: '26px',
-                        fontWeight: 700,
-                        letterSpacing: 0,
-                        margin: 0,
-                        color: 'var(--text-primary)',
-                    }}
-                >
-                    Automation
-                </h1>
-                {isRunning && (
-                    <span
-                        style={{
-                            color: 'var(--accent)',
-                            backgroundColor: 'var(--accent-soft)',
-                            border: '1px solid var(--accent)',
-                            borderRadius: '999px',
-                            padding: '5px 9px',
-                            fontSize: '12px',
-                            fontWeight: 700,
-                        }}
-                    >
-                        Live
-                    </span>
-                )}
-            </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+            <PageHeader
+                title="Automation Monitor"
+                description="Developer view for the current Pilot runtime."
+                actions={isRunning ? <StatusBadge tone="running" label="Live" /> : undefined}
+            />
 
             <div
                 style={{
                     display: 'grid',
                     gridTemplateColumns: 'minmax(0, 1fr) 360px',
-                    gap: '20px',
+                    gap: 'var(--space-5)',
                     alignItems: 'start',
                 }}
             >
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', minWidth: 0 }}>
-                    <section
-                        style={{
-                            backgroundColor: 'var(--surface)',
-                            border: '1px solid var(--border)',
-                            borderRadius: '14px',
-                            padding: '22px',
-                            minWidth: 0,
-                        }}
-                    >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', alignItems: 'flex-start' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', minWidth: 0, flex: 1 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', minWidth: 0 }}>
+                    <Card padding="lg" style={{ minWidth: 0 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 'var(--space-4)', alignItems: 'flex-start' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', minWidth: 0, flex: 1 }}>
                                 <StatusPill status={currentStatus} />
 
                                 <div>
-                                    <div style={{ color: 'var(--text-muted)', fontSize: '12px', marginBottom: '7px' }}>
+                                    <div style={{ color: 'var(--text-muted)', fontSize: 'var(--type-caption-size)', marginBottom: 'var(--space-2)' }}>
                                         Current Action
                                     </div>
                                     <div
@@ -391,7 +285,7 @@ export function AutomationScreen() {
                                         title={supportText}
                                         style={{
                                             color: 'var(--text-secondary)',
-                                            fontSize: '13px',
+                                            fontSize: 'var(--type-body-small-size)',
                                             lineHeight: '20px',
                                             marginTop: '6px',
                                             overflow: 'hidden',
@@ -415,10 +309,10 @@ export function AutomationScreen() {
                                     style={{
                                         display: 'grid',
                                         gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-                                        gap: '16px',
-                                        marginTop: '24px',
-                                        paddingTop: '18px',
-                                        borderTop: '1px solid var(--border)',
+                                gap: 'var(--space-4)',
+                                marginTop: 'var(--space-6)',
+                                paddingTop: 'var(--space-5)',
+                                borderTop: 'var(--stroke-thin) solid var(--border-subtle)',
                                     }}
                                 >
                                     <Field label="Course" value={runtime?.current_course ?? 'Preparing course'} />
@@ -426,12 +320,12 @@ export function AutomationScreen() {
                                     <Field label="Page" value={getPageText(runtime)} />
                                 </div>
 
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '22px' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)', fontSize: '13px' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', marginTop: 'var(--space-6)' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)', fontSize: 'var(--type-body-small-size)' }}>
                                         <span>Module Progress</span>
                                         <span>{progressText}</span>
                                     </div>
-                                    <ProgressBar value={moduleProgress} running={isRunning} />
+                                    <UiProgressBar value={moduleProgress} height="12px" />
                                 </div>
                             </>
                         )}
@@ -439,49 +333,43 @@ export function AutomationScreen() {
                         {!hasExecution && (
                             <div
                                 style={{
-                                    marginTop: '22px',
-                                    padding: '14px 16px',
-                                    borderRadius: '12px',
-                                    border: '1px solid var(--border)',
+                                    marginTop: 'var(--space-6)',
+                                    padding: 'var(--space-4)',
+                                    borderRadius: 'var(--radius-card)',
+                                    border: 'var(--stroke-thin) solid var(--border-subtle)',
                                     backgroundColor: 'var(--surface-subtle)',
                                     color: 'var(--text-secondary)',
-                                    fontSize: '13px',
+                                    fontSize: 'var(--type-body-small-size)',
                                     lineHeight: '20px',
                                 }}
                             >
                                 No active execution. Start a workflow to see live progress here.
                             </div>
                         )}
-                    </section>
+                    </Card>
 
-                    <section
-                        style={{
-                            backgroundColor: 'var(--surface)',
-                            border: '1px solid var(--border)',
-                            borderRadius: '12px',
-                            padding: '16px 18px',
-                        }}
-                    >
-                        <div style={{ color: 'var(--text-secondary)', fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>
+                    <Card>
+                        <div className="pilot-type-section-title" style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-3)' }}>
                             Execution Timeline
                         </div>
                         <CompactTimeline steps={steps} />
-                    </section>
+                    </Card>
 
                     <details
                         style={{
-                            border: '1px solid var(--border)',
-                            borderRadius: '12px',
-                            backgroundColor: 'var(--surface)',
+                            border: 'var(--stroke-thin) solid var(--border-subtle)',
+                            borderRadius: 'var(--radius-card)',
+                            backgroundColor: 'var(--surface-card)',
                             overflow: 'hidden',
+                            boxShadow: 'var(--shadow-card)',
                         }}
                     >
                         <summary
                             style={{
-                                padding: '14px 18px',
+                                padding: 'var(--space-4) var(--space-5)',
                                 cursor: 'pointer',
                                 color: 'var(--text-primary)',
-                                fontSize: '14px',
+                                fontSize: 'var(--type-body-size)',
                                 fontWeight: 600,
                                 letterSpacing: 0,
                             }}
@@ -491,16 +379,16 @@ export function AutomationScreen() {
 
                         <details
                             style={{
-                                borderTop: '1px solid var(--border)',
-                                backgroundColor: 'var(--surface)',
+                                borderTop: 'var(--stroke-thin) solid var(--border-subtle)',
+                                backgroundColor: 'var(--surface-card)',
                             }}
                         >
                             <summary
                                 style={{
-                                    padding: '12px 20px',
+                                    padding: 'var(--space-3) var(--space-5)',
                                     cursor: 'pointer',
                                     color: 'var(--text-secondary)',
-                                    fontSize: '13px',
+                                    fontSize: 'var(--type-body-small-size)',
                                     fontWeight: 600,
                                 }}
                             >
@@ -510,8 +398,8 @@ export function AutomationScreen() {
                                 style={{
                                     display: 'grid',
                                     gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-                                    gap: '12px',
-                                    padding: '0 20px 16px',
+                                    gap: 'var(--space-3)',
+                                    padding: '0 var(--space-5) var(--space-4)',
                                 }}
                             >
                                 <Field label="Status" value={formatStatus(currentStatus)} />

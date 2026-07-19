@@ -6,9 +6,12 @@ function isTheme(value: string | null): value is Theme {
     return value === 'light' || value === 'dark' || value === 'system';
 }
 
-export const ThemeContext = createContext({
-    theme: 'dark' as Theme,
-    setTheme: (_theme: Theme) => { },
+export const ThemeContext = createContext<{
+    theme: Theme;
+    setTheme: (theme: Theme) => void;
+}>({
+    theme: 'dark',
+    setTheme: () => { },
 });
 
 export function ThemeProvider({ children }: { children: ReactNode }) {

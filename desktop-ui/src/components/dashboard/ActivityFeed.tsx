@@ -3,6 +3,17 @@ import { Button } from '../shared/Button';
 import type { LogEvent, PilotStatus, RuntimeState } from '../../hooks/usePilot';
 import type { ReactNode } from 'react';
 import { Card, ProgressBar as PilotProgressBar, StatusBadge, type StatusBadgeTone } from '../ui';
+import {
+    countNotesSaved,
+    currentAction,
+    formatDuration,
+    formatFinishedAt,
+    getStudyRunMode,
+    pageText,
+    progressText,
+    progressValue,
+    type StudyRunMode,
+} from './studyRunHelpers';
 
 interface StudyRunCardProps {
     logs: LogEvent[];
@@ -14,71 +25,6 @@ interface StudyRunCardProps {
     onConfirmLogin?: () => void;
     actionDisabled?: boolean;
     starting?: boolean;
-}
-
-type StudyRunMode = 'idle' | 'running' | 'paused' | 'completed' | 'stopped' | 'failed';
-
-function getMode(status: PilotStatus, runtime: RuntimeState | null, awaitingLogin: boolean): StudyRunMode {
-    if ((awaitingLogin || runtime?.awaiting_login) && status === 'running') return 'paused';
-    if (status === 'running') return 'running';
-    if (status === 'done') return 'completed';
-    if (status === 'stopped') return 'stopped';
-    if (status === 'error') return 'failed';
-    return 'idle';
-}
-
-function formatDuration(seconds?: number | null) {
-    if (!seconds) return 'Not tracked';
-
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-
-    if (minutes === 0) return `${remainingSeconds}s`;
-    if (minutes < 60) return remainingSeconds ? `${minutes}m ${remainingSeconds}s` : `${minutes}m`;
-
-    const hours = Math.floor(minutes / 60);
-    const leftoverMinutes = minutes % 60;
-    return leftoverMinutes ? `${hours}h ${leftoverMinutes}m` : `${hours}h`;
-}
-
-function formatFinishedAt(value?: string | null) {
-    if (!value) return 'Just now';
-
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return 'Just now';
-
-    const isToday = date.toDateString() === new Date().toDateString();
-    const time = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-    return isToday ? `Today, ${time}` : `${date.toLocaleDateString()}, ${time}`;
-}
-
-function countNotesSaved(logs: LogEvent[]) {
-    return logs.filter((log) => {
-        const text = typeof log.message === 'string' ? log.message.toLowerCase() : JSON.stringify(log.message).toLowerCase();
-        return text.includes('note saved');
-    }).length;
-}
-
-function currentAction(runtime: RuntimeState | null) {
-    return runtime?.current_action_label || runtime?.current_action || 'Working on your study run';
-}
-
-function pageText(runtime: RuntimeState | null) {
-    if (!runtime) return 'Waiting for page data';
-    if (runtime.module_current_index && runtime.modules_total) {
-        return `${runtime.module_current_index} of ${runtime.modules_total}`;
-    }
-    return runtime.current_page || 'Waiting for page data';
-}
-
-function progressText(runtime: RuntimeState | null) {
-    if (!runtime?.modules_total) return 'Waiting for progress';
-    return `${runtime.modules_processed} of ${runtime.modules_total} topics`;
-}
-
-function progressValue(runtime: RuntimeState | null) {
-    if (!runtime?.modules_total) return 0;
-    return Math.max(0, Math.min(100, runtime.module_progress_percent || runtime.course_run_progress_percent || 0));
 }
 
 function Field({ label, value }: { label: string; value: string | number | null | undefined }) {
@@ -267,7 +213,7 @@ function SummaryState({ runtime, logs, mode }: StudyRunCardProps & { mode: 'comp
 }
 
 export function ActivityFeed(props: StudyRunCardProps) {
-    const mode = getMode(props.status, props.runtime, props.awaitingLogin);
+    const mode = getStudyRunMode(props.status, props.runtime, props.awaitingLogin);
     const heading = mode === 'running' || mode === 'paused' ? 'Current Study Run' : 'Study Run';
 
     return (

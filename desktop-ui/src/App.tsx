@@ -5,7 +5,6 @@ import { StatusBar } from './components/layout/StatusBar';
 import { TitleBar } from './components/layout/TitleBar';
 import { DashboardScreen } from './screens/DashboardScreen';
 import { LogsScreen } from './screens/LogsScreen';
-import { AutomationScreen } from './screens/AutomationScreen';
 import { NotesScreen } from './screens/NotesScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { OnboardingScreen } from './screens/OnboardingScreen';
@@ -226,7 +225,6 @@ function AppContent() {
               />
             )}
             {currentTab === 'notifications' && <NotificationsScreen />}
-            {currentTab === 'automation' && <AutomationScreen />}
             {currentTab === 'sessions' && (
               <LogsScreen
                 onOpenNotes={() => navigateTo('notes')}

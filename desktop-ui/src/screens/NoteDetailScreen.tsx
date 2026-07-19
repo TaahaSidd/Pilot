@@ -3,7 +3,6 @@ import type { NoteFileResponse } from '../api/api';
 import { Button } from '../components/ui';
 import { MarkdownNoteViewer } from '../components/notes/MarkdownNoteViewer';
 import { NotesBreadcrumb, type NotesBreadcrumbItem } from '../components/shared/NotesBreadcrumb';
-import { GuidedTour, type GuidedTourStep } from '../components/shared/GuidedTour';
 
 function getPathParts(path: string) {
     const parts = path.split('/').filter(Boolean);
@@ -45,24 +44,6 @@ function getDuplicateTitleLineIndex(content: string, noteTitle: string) {
         : null;
 }
 
-const noteDetailTourSteps: GuidedTourStep[] = [
-    {
-        target: 'note-detail-back',
-        title: 'Back to notes',
-        description: 'Use this to return to the note list for the current module.',
-    },
-    {
-        target: 'note-detail-breadcrumb',
-        title: 'Note location',
-        description: 'This path shows where the note belongs in your course library.',
-    },
-    {
-        target: 'note-reader',
-        title: 'Read markdown notes',
-        description: 'Pilot formats headings, lists, code, and key terms so the note is easier to study.',
-    },
-];
-
 export function NoteDetailScreen({
     note,
     onBack,
@@ -79,13 +60,11 @@ export function NoteDetailScreen({
         <div style={{ maxWidth: 'var(--layout-readable)', margin: '0 auto', width: '100%' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-8)' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-                    <Button data-tour-id="note-detail-back" variant="ghost" icon={ArrowLeft} onClick={onBack} style={{ width: 'fit-content' }}>
+                    <Button variant="ghost" icon={ArrowLeft} onClick={onBack} style={{ width: 'fit-content' }}>
                         Back
                     </Button>
 
-                    <div data-tour-id="note-detail-breadcrumb">
-                        <NotesBreadcrumb items={breadcrumbItems} />
-                    </div>
+                    <NotesBreadcrumb items={breadcrumbItems} />
                 </div>
 
                 <article style={{ color: 'var(--text-primary)', paddingBottom: 'var(--space-16)' }}>
@@ -96,20 +75,12 @@ export function NoteDetailScreen({
                         {note.title}
                     </h1>
 
-                    <div data-tour-id="note-reader">
-                        <MarkdownNoteViewer
-                            content={note.content}
-                            skipLineIndex={duplicateTitleLineIndex}
-                        />
-                    </div>
+                    <MarkdownNoteViewer
+                        content={note.content}
+                        skipLineIndex={duplicateTitleLineIndex}
+                    />
                 </article>
             </div>
-
-            <GuidedTour
-                storageKey="pilot-note-reader-tour-v1"
-                steps={noteDetailTourSteps}
-                devAlwaysShow
-            />
         </div>
     );
 }

@@ -26,7 +26,6 @@ interface GuidedTourProps {
     steps: GuidedTourStep[];
     storageKey: string;
     enabled?: boolean;
-    devAlwaysShow?: boolean;
 }
 
 function getStoredCompletion(storageKey: string) {
@@ -188,8 +187,8 @@ function getPointerStyle(rect: Rect | null, tooltipPosition: TooltipPosition) {
     };
 }
 
-export function GuidedTour({ steps, storageKey, enabled = true, devAlwaysShow = false }: GuidedTourProps) {
-    const [completed, setCompleted] = useState(() => devAlwaysShow ? false : getStoredCompletion(storageKey));
+export function GuidedTour({ steps, storageKey, enabled = true }: GuidedTourProps) {
+    const [completed, setCompleted] = useState(() => getStoredCompletion(storageKey));
     const [activeIndex, setActiveIndex] = useState(0);
     const [rect, setRect] = useState<Rect | null>(null);
     const activeStep = steps[activeIndex];
@@ -250,9 +249,7 @@ export function GuidedTour({ steps, storageKey, enabled = true, devAlwaysShow = 
     if (!enabled || completed || !activeStep) return null;
 
     const finishTour = () => {
-        if (!devAlwaysShow) {
-            setStoredCompletion(storageKey);
-        }
+        setStoredCompletion(storageKey);
         setCompleted(true);
     };
 

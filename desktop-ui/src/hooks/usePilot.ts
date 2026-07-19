@@ -336,7 +336,8 @@ export function usePilot(): UsePilotResult {
         connectWs();
         return () => {
             unmountedRef.current = true;
-            socketIdRef.current++; // invalidate this effect run's socket immediately
+            const nextSocketId = socketIdRef.current + 1;
+            socketIdRef.current = nextSocketId;
             if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
             wsRef.current?.close();
         };
@@ -344,7 +345,7 @@ export function usePilot(): UsePilotResult {
 
     const clearLogs = useCallback(() => setLogs([]), []);
 
-    // ── Actions — each just forwards to api.ts, then reacts ──────
+    // Actions forward to api.ts, then refresh runtime state.
 
     const startWorkflow = useCallback(async () => {
         const result = await pilotApi.startWorkflow();

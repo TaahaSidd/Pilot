@@ -4,6 +4,8 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Optional
 
+from course_filter import filter_visible_courses
+
 
 BASE_DIR = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
@@ -95,8 +97,9 @@ class HistoryManager:
             courses = summary.get("courses")
 
             if isinstance(courses, list) and len(courses) > 0:
+                visible_courses = filter_visible_courses(courses)
                 return {
-                    "courses": courses,
+                    "courses": visible_courses,
                     "source_session_id": session.get("id"),
                     "updated_at": session.get("started_at"),
                     "source_type": session.get("type"),

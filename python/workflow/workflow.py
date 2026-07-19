@@ -1,6 +1,7 @@
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
 import re
 
+from course_filter import is_excluded_course_title
 from ai.quiz_solver import QuizSolver
 from ai.feedback_solver import FeedbackSolver
 from runtime.state import state
@@ -47,7 +48,6 @@ class Workflow:
 
         cards = self.page.locator("div.card.dashboard-card[data-course-id]")
         count = cards.count()
-        log_info(f"Found {count} courses")
 
         for i in range(count):
             if self._should_stop():
@@ -77,6 +77,9 @@ class Workflow:
                             title = title_attr.strip()
                 except:
                     pass
+
+                if is_excluded_course_title(title):
+                    continue
 
                 completion_pct = 0
                 try:
@@ -119,6 +122,7 @@ class Workflow:
                     return courses
                 log_error(f"Reading course {i + 1}: {e}")
 
+        log_info(f"Found {len(courses)} courses")
         return courses
 
     def collect_module_urls(self) -> list[dict]:

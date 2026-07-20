@@ -10,6 +10,11 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+src-tauri/resources/*
+!src-tauri/resources/.gitkeep
+!src-tauri/resources/pilot-backend/
+src-tauri/resources/pilot-backend/*
+!src-tauri/resources/pilot-backend/.gitkeep
 src-tauri/target
 *.local
 

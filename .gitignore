@@ -22,3 +22,8 @@ notes/
 
 # Runtime
 python/data/
+
+# Packaging outputs
+python/build/
+python/dist/
+python/.packaged-smoke/

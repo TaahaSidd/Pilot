@@ -5,7 +5,7 @@
   "identifier": "com.taahasidd.pilot",
   "build": {
     "beforeDevCommand": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/tauri-dev.ps1",
-    "beforeBuildCommand": "npm run build",
+    "beforeBuildCommand": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/tauri-build.ps1",
     "devUrl": "http://localhost:1420",
     "frontendDist": "../dist"
   },
@@ -27,8 +27,11 @@
     }
   },
   "bundle": {
-    "active": false,
+    "active": true,
     "targets": "all",
+    "resources": [
+      "resources/pilot-backend"
+    ],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

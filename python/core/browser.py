@@ -1,13 +1,11 @@
-import os
 from playwright.sync_api import sync_playwright
+from core.paths import PROFILE_DIR
 from ui.pilot_ui import log_info
 class Browser:
     def __init__(self):
         self.p = sync_playwright().start()
 
-        profile_dir = os.path.join(os.path.dirname(
-            os.path.abspath(__file__)), "..", "profile")
-        profile_dir = os.path.normpath(profile_dir)
+        profile_dir = PROFILE_DIR
 
         log_info(f"Using profile: {profile_dir}")
 

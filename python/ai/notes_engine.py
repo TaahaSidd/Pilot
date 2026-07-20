@@ -6,6 +6,7 @@ from groq import Groq
 
 import config
 from config import URL
+from core.paths import NOTES_DIR
 from runtime.history import history
 from runtime.state import (
     state,
@@ -16,10 +17,6 @@ from runtime.state import (
 )
 from ui.pilot_ui import log_info, log_success, log_warning, log_error
 from workflow.workflow import Workflow
-
-
-NOTES_DIR = os.path.join(os.path.dirname(
-    os.path.abspath(__file__)), "..", "notes")
 
 
 class GroqRateLimitReached(Exception):

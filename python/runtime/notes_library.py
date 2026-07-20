@@ -1,7 +1,7 @@
 import os
 from typing import Optional
 
-from ai.notes_engine import NOTES_DIR
+from core.paths import NOTES_DIR
 
 
 def _safe_join(base: str, *paths: str) -> str:
@@ -13,7 +13,7 @@ def _safe_join(base: str, *paths: str) -> str:
     final_path = os.path.abspath(os.path.join(base, *paths))
     base_path = os.path.abspath(base)
 
-    if not final_path.startswith(base_path):
+    if os.path.commonpath([base_path, final_path]) != base_path:
         raise ValueError("Invalid path")
 
     return final_path

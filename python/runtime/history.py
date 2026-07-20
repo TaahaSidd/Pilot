@@ -4,16 +4,11 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Optional
 
+from core.paths import HISTORY_DIR
 from course_filter import filter_visible_courses
 
 
-BASE_DIR = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    "..",
-    "data",
-    "sessions",
-)
-BASE_DIR = os.path.normpath(BASE_DIR)
+BASE_DIR = HISTORY_DIR
 
 
 def _now_iso() -> str:

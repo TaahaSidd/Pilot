@@ -3,11 +3,10 @@ import json
 from ui.pilot_ui import log_info, log_success, log_warning
 from rich.prompt import Prompt
 from rich.console import Console
+from core.paths import CONFIG_FILE
 
 console = Console()
 
-CONFIG_FILE = os.path.join(os.path.dirname(
-    os.path.abspath(__file__)), "..", "user_config.json")
 PURPLE = "#AA00FF"
 
 
@@ -24,6 +23,7 @@ def is_configured() -> bool:
 
 
 def save_config(data: dict):
+    os.makedirs(os.path.dirname(CONFIG_FILE), exist_ok=True)
     with open(CONFIG_FILE, "w") as f:
         json.dump(data, f, indent=2)
 

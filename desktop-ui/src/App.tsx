@@ -29,6 +29,7 @@ function AppContent() {
     status,
     configured,
     statusLoading,
+    backendReachable,
     wsState,
   } = usePilotContext();
 
@@ -243,7 +244,7 @@ function AppContent() {
           </div>
         </main>
 
-        <StatusBar wsState={wsState} status={status} />
+        <StatusBar backendReachable={backendReachable} wsState={wsState} status={status} />
         </div>
       </div>
     </div>

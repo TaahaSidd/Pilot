@@ -54,11 +54,14 @@ export function StatsGrid({
     const isRunning = status === 'running';
     const liveRuntime = isRunning ? runtime : null;
 
-    const coursesComplete = courses
+    const runtimeCourseTotal = liveRuntime?.courses_total ?? 0;
+    const runtimeCoursesComplete = liveRuntime?.courses_completed ?? 0;
+    const savedCoursesComplete = courses
         ? courses.filter((course) => course.completion === 100).length
         : null;
 
-    const courseTotal = courses?.length ?? 0;
+    const courseTotal = runtimeCourseTotal || courses?.length || 0;
+    const coursesComplete = runtimeCourseTotal ? runtimeCoursesComplete : savedCoursesComplete;
     const courseProgressPercent = courseTotal > 0
         ? Math.round(((coursesComplete ?? 0) / courseTotal) * 100)
         : 0;

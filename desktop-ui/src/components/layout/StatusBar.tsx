@@ -1,12 +1,14 @@
 // src/components/layout/StatusBar.tsx
 
 interface StatusBarProps {
+    backendReachable: boolean;
     wsState: string;
     status: string;
 }
 
-export function StatusBar({ wsState, status }: StatusBarProps) {
-    const connected = wsState === 'open';
+export function StatusBar({ backendReachable, wsState, status }: StatusBarProps) {
+    const connected = backendReachable;
+    const detail = connected && wsState !== 'open' ? 'Reconnecting logs' : connected ? 'Ready' : 'Offline';
 
     return (
         <footer style={{
@@ -27,8 +29,8 @@ export function StatusBar({ wsState, status }: StatusBarProps) {
                         width: '7px',
                         height: '7px',
                         borderRadius: 'var(--radius-pill)',
-                        backgroundColor: connected ? 'var(--success)' : 'var(--error)',
-                        boxShadow: connected ? '0 0 0 4px var(--success-soft)' : 'none',
+                    backgroundColor: connected ? 'var(--success)' : 'var(--error)',
+                    boxShadow: connected ? '0 0 0 4px var(--success-soft)' : 'none',
                     }}
                 />
                 <strong style={{
@@ -36,7 +38,7 @@ export function StatusBar({ wsState, status }: StatusBarProps) {
                     fontWeight: 600,
                     textTransform: 'capitalize',
                 }}>
-                    {connected ? 'Ready' : 'Offline'}
+                    {detail}
                 </strong>
             </div>
 

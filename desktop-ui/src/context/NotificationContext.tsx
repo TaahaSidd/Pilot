@@ -11,6 +11,7 @@ import {
 import { Toast } from '../components/shared/Toast';
 import { usePilotContext } from './usePilotContext';
 import type { LogEvent } from '../hooks/usePilot';
+import { formatUserFacingError } from '../utils/userFacingError';
 
 export type NotificationType = 'success' | 'warning' | 'error' | 'info' | 'action_required';
 export type NotificationSource = 'workflow' | 'notes' | 'system';
@@ -268,7 +269,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
                 notify({
                     type: 'error',
                     title: 'Study session failed',
-                    message: runtime?.error ?? 'Pilot ran into a problem. Check History for details.',
+                    message: formatUserFacingError(runtime?.error),
                     dismissible: true,
                     source: runSource(runtime?.run_type),
                     priority: 'critical',

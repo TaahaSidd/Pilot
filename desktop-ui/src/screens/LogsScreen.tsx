@@ -4,6 +4,7 @@ import { LogHistoryRow } from '../components/logs/LogHistoryRow';
 import { Card, EmptyState, MessageBar, PageHeader } from '../components/ui';
 import { HistorySkeleton } from '../components/shared/SkeletonScreens';
 import { pilotApi, type HistorySessionSummary } from '../api/api';
+import historyEmpty from '../assets/empty-states/history.svg';
 
 function formatDate(iso: string | null) {
     if (!iso) return 'Unknown';
@@ -191,6 +192,19 @@ export function LogsScreen({
                             message={sessions.length === 0
                                 ? 'Start a study run or generate notes to build your session history.'
                                 : 'Try a different status or date range.'}
+                            illustration={
+                                <img
+                                    src={historyEmpty}
+                                    alt=""
+                                    aria-hidden="true"
+                                    style={{
+                                        width: '210px',
+                                        maxWidth: '58%',
+                                        height: 'auto',
+                                        opacity: 0.92,
+                                    }}
+                                />
+                            }
                         />
                     )}
 

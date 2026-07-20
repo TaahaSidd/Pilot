@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { usePilotContext } from '../context/usePilotContext';
+import { formatUserFacingError } from '../utils/userFacingError';
 
 type DashboardAction = 'workflow' | 'stop' | 'notes';
 
@@ -50,7 +51,7 @@ function getActionRequiredNotice({
         return {
             id: 'runtime-error',
             title: 'Pilot needs attention',
-            message: runtimeError ?? 'Pilot ran into a problem and cannot continue this run.',
+            message: formatUserFacingError(runtimeError),
             severity: 'error',
             dismissible: true,
         };

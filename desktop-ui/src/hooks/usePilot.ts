@@ -59,6 +59,7 @@ interface UsePilotResult {
     statusError: string | null;
     configured: boolean;
     statusLoading: boolean;
+    backendReachable: boolean;
 
     // logs
     logs: LogEvent[];
@@ -118,6 +119,7 @@ export function usePilot(): UsePilotResult {
     const [statusError, setStatusError] = useState<string | null>(null);
     const [configured, setConfigured] = useState(false);
     const [statusLoading, setStatusLoading] = useState(true);
+    const [backendReachable, setBackendReachable] = useState(false);
 
     const [logs, setLogs] = useState<LogEvent[]>([]);
     const [wsState, setWsState] = useState<WsConnectionState>("connecting");
@@ -151,28 +153,6 @@ export function usePilot(): UsePilotResult {
         }
     }, []);
 
-    const pollStatus = useCallback(async () => {
-        try {
-            const data = await pilotApi.getStatus();
-
-            setStatus(data.status);
-            setStatusError(data.error);
-            setConfigured(data.configured);
-            await pollRuntime();
-
-            if (data.status !== "running") {
-                setAwaitingLogin(false);
-            }
-        } catch {
-            // ignore transient polling failures
-        } finally {
-            setStatusLoading(false);
-        }
-    }, [pollRuntime]);
-
-    // Load the last known course list once when the UI starts.
-    // Live websocket "summary" events will overwrite this whenever
-    // a new workflow finishes.
     const loadCourses = useCallback(async () => {
         try {
             const data = await pilotApi.getCourses();
@@ -183,6 +163,30 @@ export function usePilot(): UsePilotResult {
             setCoursesLoading(false);
         }
     }, []);
+
+    const pollStatus = useCallback(async () => {
+        try {
+            const data = await pilotApi.getStatus();
+
+            setBackendReachable(true);
+            setStatus(data.status);
+            setStatusError(data.error);
+            setConfigured(data.configured);
+            await pollRuntime();
+
+            if (data.status === "running") {
+                await loadCourses();
+            }
+
+            if (data.status !== "running") {
+                setAwaitingLogin(false);
+            }
+        } catch {
+            setBackendReachable(false);
+        } finally {
+            setStatusLoading(false);
+        }
+    }, [loadCourses, pollRuntime]);
 
     const loadConfig = useCallback(async () => {
         try {
@@ -290,7 +294,14 @@ export function usePilot(): UsePilotResult {
                 // Best-effort: just take the text after the em-dash as
                 // the human-readable "current task" — if the format
                 // ever changes in pilot_ui.py, update this to match.
-                if (typeof parsed.message === "string") {
+                if (
+                    typeof parsed.message === "object" &&
+                    parsed.message !== null &&
+                    !Array.isArray(parsed.message) &&
+                    "title" in parsed.message
+                ) {
+                    setCurrentModuleText(String((parsed.message as { title: unknown }).title));
+                } else if (typeof parsed.message === "string") {
                     const dashSplit = parsed.message.split("—");
                     setCurrentModuleText(
                         dashSplit.length > 1 ? dashSplit[1].trim() : parsed.message
@@ -301,11 +312,21 @@ export function usePilot(): UsePilotResult {
             // log_course formats as:
             //   "Course {current}/{total} — {title} ({completion}%)"
             // Same best-effort string parse as above.
-            if (parsed.level === "course" && typeof parsed.message === "string") {
-                const dashSplit = parsed.message.split("—");
-                setCurrentCourseText(
-                    dashSplit.length > 1 ? dashSplit[1].trim() : parsed.message
-                );
+            if (parsed.level === "course") {
+                if (
+                    typeof parsed.message === "object" &&
+                    parsed.message !== null &&
+                    !Array.isArray(parsed.message) &&
+                    "title" in parsed.message
+                ) {
+                    setCurrentCourseText(String((parsed.message as { title: unknown }).title));
+                    void loadCourses();
+                } else if (typeof parsed.message === "string") {
+                    const dashSplit = parsed.message.split("—");
+                    setCurrentCourseText(
+                        dashSplit.length > 1 ? dashSplit[1].trim() : parsed.message
+                    );
+                }
             }
         };
 
@@ -329,7 +350,7 @@ export function usePilot(): UsePilotResult {
             // onclose always fires after onerror for browser WebSockets,
             // so reconnect scheduling is handled there, not here
         };
-    }, []);
+    }, [loadCourses]);
 
     useEffect(() => {
         unmountedRef.current = false;
@@ -384,6 +405,7 @@ export function usePilot(): UsePilotResult {
         statusError,
         configured,
         statusLoading,
+        backendReachable,
         logs,
         clearLogs,
         wsState,

@@ -6,6 +6,7 @@ import { Card, ProgressBar as PilotProgressBar, StatusBadge, type StatusBadgeTon
 import {
     countNotesSaved,
     currentAction,
+    currentItemText,
     formatDuration,
     formatFinishedAt,
     getStudyRunMode,
@@ -14,6 +15,7 @@ import {
     progressValue,
     type StudyRunMode,
 } from './studyRunHelpers';
+import { formatUserFacingError } from '../../utils/userFacingError';
 
 interface StudyRunCardProps {
     logs: LogEvent[];
@@ -27,7 +29,15 @@ interface StudyRunCardProps {
     starting?: boolean;
 }
 
-function Field({ label, value }: { label: string; value: string | number | null | undefined }) {
+function Field({
+    label,
+    value,
+    multiline = false,
+}: {
+    label: string;
+    value: string | number | null | undefined;
+    multiline?: boolean;
+}) {
     return (
         <div
             style={{
@@ -47,8 +57,11 @@ function Field({ label, value }: { label: string; value: string | number | null 
                     fontWeight: 700,
                     lineHeight: '19px',
                     overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
+                    textOverflow: multiline ? undefined : 'ellipsis',
+                    whiteSpace: multiline ? undefined : 'nowrap',
+                    display: multiline ? '-webkit-box' : undefined,
+                    WebkitLineClamp: multiline ? 2 : undefined,
+                    WebkitBoxOrient: multiline ? 'vertical' : undefined,
                 }}
                 title={String(value ?? 'Not available')}
             >
@@ -105,27 +118,24 @@ function EmptyState() {
 
 function LiveState({ runtime, mode, onOpenBrowser, onConfirmLogin }: StudyRunCardProps & { mode: 'running' | 'paused' }) {
     const value = progressValue(runtime);
+    const action = mode === 'paused' ? 'Study Run Paused' : currentAction(runtime);
+    const currentItem = mode === 'paused'
+        ? 'Waiting for login verification.'
+        : currentItemText(runtime);
 
     return (
         <CardShell>
-            <div style={{ display: 'grid', gap: '18px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: '12px' }}>
-                    <div style={{ minWidth: 0 }}>
-                        <StatusBadge tone={statusToneForMode(mode)} label={mode === 'paused' ? 'Needs attention' : undefined} />
-                        <h4 style={{ margin: '14px 0 6px', color: 'var(--text-primary)', fontSize: '22px', fontWeight: 720, lineHeight: '28px' }}>
-                            {mode === 'paused' ? 'Study Run Paused' : currentAction(runtime)}
-                        </h4>
-                        <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '20px' }}>
-                            {mode === 'paused'
-                                ? 'Waiting for login verification.'
-                                : runtime?.current_module || runtime?.current_page || 'Pilot is preparing the next study step.'}
-                        </p>
-                    </div>
+            <div style={{ display: 'grid', gap: '18px', minWidth: 0 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+                    <h4 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '22px', fontWeight: 720, lineHeight: '28px', minWidth: 0 }}>
+                        {action}
+                    </h4>
+                    <StatusBadge tone={statusToneForMode(mode)} label={mode === 'paused' ? 'Needs attention' : undefined} />
                 </div>
 
                 <div>
+                    <Field label="Current item" value={currentItem} multiline />
                     <Field label="Current Course" value={runtime?.current_course} />
-                    <Field label="Current Module" value={runtime?.current_module} />
                     <Field label="Page" value={pageText(runtime)} />
                 </div>
 
@@ -162,6 +172,7 @@ function SummaryState({ runtime, logs, mode }: StudyRunCardProps & { mode: 'comp
     const notesSaved = mode === 'completed' ? countNotesSaved(logs) : 0;
     const isFailure = mode === 'failed';
     const title = isFailure ? 'Study Run Failed' : mode === 'stopped' ? 'Study Run Stopped' : 'Study Run Complete';
+    const friendlyError = formatUserFacingError(runtime?.error);
     const message = isFailure
         ? 'Pilot could not finish the study run.'
         : mode === 'stopped'
@@ -183,7 +194,7 @@ function SummaryState({ runtime, logs, mode }: StudyRunCardProps & { mode: 'comp
                     </div>
                 </div>
 
-                {isFailure && runtime?.error && (
+                {isFailure && (
                     <div
                         style={{
                             borderRadius: '10px',
@@ -195,7 +206,7 @@ function SummaryState({ runtime, logs, mode }: StudyRunCardProps & { mode: 'comp
                             lineHeight: '19px',
                         }}
                     >
-                        {runtime.error}
+                        {friendlyError}
                     </div>
                 )}
 

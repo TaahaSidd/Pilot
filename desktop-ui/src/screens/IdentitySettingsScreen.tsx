@@ -3,7 +3,8 @@ import { ArrowLeft, Save } from 'lucide-react';
 import { Button, Card, Input, PageHeader, Skeleton } from '../components/ui';
 import { useToast } from '../hooks/useToast';
 import { Toast } from '../components/shared/Toast';
-import { pilotApi, ApiError, NetworkError } from '../api/api';
+import { pilotApi } from '../api/api';
+import { formatUnknownError } from '../utils/userFacingError';
 
 interface IdentitySettingsScreenProps {
     onBack: () => void;
@@ -44,12 +45,7 @@ export function IdentitySettingsScreen({ onBack }: IdentitySettingsScreenProps) 
                 }
             } catch (err) {
                 if (cancelled) return;
-                showToast(
-                    err instanceof NetworkError
-                        ? err.message
-                        : "Couldn't load your current settings.",
-                    'error'
-                );
+                showToast(formatUnknownError(err, "Couldn't load your current settings."), 'error');
             } finally {
                 if (!cancelled) setLoading(false);
             }
@@ -111,13 +107,7 @@ export function IdentitySettingsScreen({ onBack }: IdentitySettingsScreenProps) 
             setPassword(MASKED_PLACEHOLDER);
             setPasswordTouched(false);
         } catch (err) {
-            if (err instanceof NetworkError) {
-                showToast(err.message, 'error');
-            } else if (err instanceof ApiError) {
-                showToast(`Couldn't save changes: ${err.message}`, 'error');
-            } else {
-                showToast("Couldn't save changes. Please try again.", 'error');
-            }
+            showToast(formatUnknownError(err, "Couldn't save changes. Please try again."), 'error');
         } finally {
             setSaving(false);
         }

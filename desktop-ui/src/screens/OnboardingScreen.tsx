@@ -3,7 +3,8 @@ import { Button, Input } from '../components/ui';
 import { Toast } from '../components/shared/Toast';
 import { useToast } from '../hooks/useToast';
 import { InfoModal } from '../components/shared/InfoModal';
-import { pilotApi, ApiError, NetworkError } from '../api/api';
+import { pilotApi } from '../api/api';
+import { formatUnknownError } from '../utils/userFacingError';
 import heroImage from '../assets/hero.png';
 
 interface OnboardingScreenProps {
@@ -38,9 +39,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
             if (!result.saved) throw new Error('Server did not confirm the save.');
             onComplete();
         } catch (err) {
-            if (err instanceof NetworkError) showToast(err.message, 'error');
-            else if (err instanceof ApiError) showToast(`Couldn't save: ${err.message}`, 'error');
-            else showToast("Couldn't save your details.", 'error');
+            showToast(formatUnknownError(err, "Couldn't save your details. Please try again."), 'error');
         } finally {
             setSaving(false);
         }

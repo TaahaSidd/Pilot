@@ -44,7 +44,48 @@ export function countNotesSaved(logs: LogEvent[]) {
 }
 
 export function currentAction(runtime: RuntimeState | null) {
-    return runtime?.current_action_label || runtime?.current_action || 'Working on your study run';
+    if (!runtime) return 'Working on your study run';
+
+    const actionLabels: Record<string, string> = {
+        launching_browser: 'Opening browser',
+        checking_session: 'Checking login',
+        waiting_login: 'Waiting for login',
+        login_confirmed: 'Login confirmed',
+        scanning_courses: 'Scanning courses',
+        opening_course: 'Opening course',
+        scanning_modules: 'Scanning topics',
+        processing_module: 'Processing topic',
+        reading_page: 'Reading page',
+        processing_quiz: 'Processing quiz',
+        processing_feedback: 'Processing feedback',
+        generating_notes: 'Generating notes',
+        saving_notes: 'Saving notes',
+        closing_browser: 'Ending session',
+        stopping: 'Stopping',
+    };
+
+    if (runtime.current_action && actionLabels[runtime.current_action]) {
+        return actionLabels[runtime.current_action];
+    }
+
+    const label = runtime.current_action_label || runtime.current_action;
+    if (!label) return 'Working on your study run';
+
+    const [stableLabel] = label.split(':');
+    return stableLabel || label;
+}
+
+export function currentItemText(runtime: RuntimeState | null) {
+    if (!runtime) return 'Pilot is preparing the next study step.';
+
+    const labelDetail = runtime.current_action_label?.split(':').slice(1).join(':').trim();
+    if (labelDetail) return labelDetail;
+
+    if (runtime.current_page && runtime.current_module && runtime.current_page !== runtime.current_module) {
+        return runtime.current_page;
+    }
+
+    return runtime.current_module || runtime.current_page || 'Pilot is preparing the next study step.';
 }
 
 export function pageText(runtime: RuntimeState | null) {

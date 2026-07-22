@@ -1,6 +1,8 @@
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
 import re
+from urllib.parse import urljoin
 
+from config import URL
 from course_filter import is_excluded_course_title
 from ai.quiz_solver import QuizSolver
 from ai.feedback_solver import FeedbackSolver
@@ -39,15 +41,64 @@ class Workflow:
         except:
             pass
 
+    def go_to_dashboard(self):
+        dashboard_url = urljoin(URL, "/my/")
+        self.page.goto(dashboard_url)
+        self.page.wait_for_load_state("domcontentloaded")
+        try:
+            self.page.wait_for_load_state("networkidle", timeout=15000)
+        except:
+            pass
+
+        self.stabilize_page()
+
+    def wait_for_dashboard_courses(self) -> int:
+        cards = self.page.locator("div.card.dashboard-card[data-course-id]")
+
+        for _ in range(12):
+            if self._should_stop():
+                return 0
+
+            self.stabilize_page()
+
+            count = cards.count()
+            if count > 0:
+                return count
+
+            try:
+                self.page.wait_for_selector(
+                    "div.card.dashboard-card[data-course-id]",
+                    timeout=3000,
+                    state="attached",
+                )
+            except:
+                pass
+
+        return cards.count()
+
     def get_course_urls(self) -> list[dict]:
         if self._should_stop():
             return []
 
         log_info("Scanning courses...")
-        courses = []
+        self.go_to_dashboard()
 
+        if self._should_stop():
+            return []
+
+        courses = []
+        seen_urls = set()
+
+        def add_course(course: dict):
+            title = course.get("title", "")
+            href = course.get("url", "")
+            if not href or href in seen_urls or is_excluded_course_title(title):
+                return
+            seen_urls.add(href)
+            courses.append(course)
+
+        count = self.wait_for_dashboard_courses()
         cards = self.page.locator("div.card.dashboard-card[data-course-id]")
-        count = cards.count()
 
         for i in range(count):
             if self._should_stop():
@@ -109,7 +160,7 @@ class Workflow:
                 except:
                     pass
 
-                courses.append({
+                add_course({
                     "id": course_id,
                     "title": title,
                     "url": href.strip(),
@@ -326,6 +377,11 @@ class Workflow:
 
         if self._should_stop():
             return
+
+        if not courses:
+            raise RuntimeError(
+                "No courses were found on your Amity dashboard. Try again after the dashboard finishes loading."
+            )
 
         pending = [c for c in courses if c["completion"] < 100]
         skipped = [c for c in courses if c["completion"] == 100]

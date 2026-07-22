@@ -123,14 +123,14 @@ export function NotificationSettingsScreen({ onBack }: { onBack: () => void }) {
                 />
                 <SwitchRow
                     label="Desktop notifications"
-                    description="Prepare Pilot updates for native Windows notifications."
+                    description="Show important Pilot updates as Windows notifications."
                     checked={preferences.nativeNotifications}
                     disabled={!enabled}
                     onChange={(checked) => setPreference('nativeNotifications', checked)}
                 />
                 <SwitchRow
                     label="Notification sound"
-                    description="Play a sound for important updates when sound is available."
+                    description="Play a soft sound for important updates."
                     checked={preferences.playSound}
                     disabled={!enabled}
                     onChange={(checked) => setPreference('playSound', checked)}

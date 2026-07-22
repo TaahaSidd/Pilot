@@ -3,8 +3,11 @@ use std::{process::Child, sync::Mutex};
 #[cfg(not(debug_assertions))]
 use std::{
     fs,
+    io::{Read, Write},
+    net::TcpStream,
     path::{Path, PathBuf},
     process::{Command, Stdio},
+    time::Duration,
 };
 
 use tauri::{Manager, WindowEvent};
@@ -96,7 +99,24 @@ fn stop_packaged_backend(app: &tauri::AppHandle) {
 
 #[cfg(not(debug_assertions))]
 fn is_backend_running() -> bool {
-    std::net::TcpStream::connect(("127.0.0.1", 8000)).is_ok()
+    let mut stream = match TcpStream::connect(("127.0.0.1", 8000)) {
+        Ok(stream) => stream,
+        Err(_) => return false,
+    };
+
+    let timeout = Some(Duration::from_millis(1200));
+    let _ = stream.set_read_timeout(timeout);
+    let _ = stream.set_write_timeout(timeout);
+
+    if stream
+        .write_all(b"GET /status HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n")
+        .is_err()
+    {
+        return false;
+    }
+
+    let mut response = String::new();
+    stream.read_to_string(&mut response).is_ok() && response.contains("200 OK")
 }
 
 #[cfg(not(debug_assertions))]

@@ -11,10 +11,17 @@ interface StatsGridProps {
 function formatElapsed(seconds: number | null | undefined) {
     if (!seconds) return '0s';
 
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
+    const roundedSeconds = Math.max(0, Math.round(seconds));
+    const mins = Math.floor(roundedSeconds / 60);
+    const secs = roundedSeconds % 60;
 
     if (mins < 1) return `${secs}s`;
+    if (mins >= 60) {
+        const hours = Math.floor(mins / 60);
+        const leftoverMinutes = mins % 60;
+        return leftoverMinutes ? `${hours}h ${leftoverMinutes}m` : `${hours}h`;
+    }
+
     return `${mins}m ${secs}s`;
 }
 

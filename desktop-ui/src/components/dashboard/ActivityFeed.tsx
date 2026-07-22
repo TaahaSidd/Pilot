@@ -1,7 +1,7 @@
 import { ExternalLink } from 'lucide-react';
 import { Button } from '../shared/Button';
 import type { LogEvent, PilotStatus, RuntimeState } from '../../hooks/usePilot';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Card, ProgressBar as PilotProgressBar, StatusBadge, type StatusBadgeTone } from '../ui';
 import {
     countNotesSaved,
@@ -77,7 +77,7 @@ function statusToneForMode(mode: StudyRunMode): StatusBadgeTone {
     if (mode === 'paused') return 'attention';
     if (mode === 'completed') return 'completed';
     if (mode === 'stopped') return 'stopped';
-    return 'failed';
+    return 'attention';
 }
 
 function CardShell({ children }: { children: ReactNode }) {
@@ -130,7 +130,7 @@ function LiveState({ runtime, mode, onOpenBrowser, onConfirmLogin }: StudyRunCar
                     <h4 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '22px', fontWeight: 720, lineHeight: '28px', minWidth: 0 }}>
                         {action}
                     </h4>
-                    <StatusBadge tone={statusToneForMode(mode)} label={mode === 'paused' ? 'Needs attention' : undefined} />
+                    <StatusBadge tone={statusToneForMode(mode)} label={mode === 'paused' ? 'Attention' : undefined} />
                 </div>
 
                 <div>
@@ -169,12 +169,13 @@ function LiveState({ runtime, mode, onOpenBrowser, onConfirmLogin }: StudyRunCar
 }
 
 function SummaryState({ runtime, logs, mode }: StudyRunCardProps & { mode: 'completed' | 'stopped' | 'failed' }) {
+    const [showFailureReason, setShowFailureReason] = useState(false);
     const notesSaved = mode === 'completed' ? countNotesSaved(logs) : 0;
     const isFailure = mode === 'failed';
-    const title = isFailure ? 'Study Run Failed' : mode === 'stopped' ? 'Study Run Stopped' : 'Study Run Complete';
+    const title = isFailure ? 'Study Run Needs Attention' : mode === 'stopped' ? 'Study Run Stopped' : 'Study Run Complete';
     const friendlyError = formatUserFacingError(runtime?.error);
     const message = isFailure
-        ? 'Pilot could not finish the study run.'
+        ? 'Pilot stopped before finishing this run.'
         : mode === 'stopped'
             ? 'The study run has ended. Start a new run when you are ready.'
             : 'Your study run finished successfully.';
@@ -183,30 +184,68 @@ function SummaryState({ runtime, logs, mode }: StudyRunCardProps & { mode: 'comp
         <CardShell>
             <div style={{ display: 'grid', gap: '18px' }}>
                 <div style={{ minWidth: 0 }}>
-                    <h4 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '22px', fontWeight: 720, lineHeight: '28px' }}>
-                        {title}
-                    </h4>
+                    <div
+                        style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'minmax(0, 1fr) auto',
+                            alignItems: 'start',
+                            gap: '14px',
+                            minWidth: 0,
+                        }}
+                    >
+                        <h4 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '21px', fontWeight: 720, lineHeight: '28px', minWidth: 0, maxWidth: '15ch' }}>
+                            {title}
+                        </h4>
+                        <div style={{ justifySelf: 'end', flexShrink: 0 }}>
+                            <StatusBadge tone={statusToneForMode(mode)} label={isFailure ? 'Attention' : undefined} />
+                        </div>
+                    </div>
                     <p style={{ margin: '6px 0 0', color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '19px' }}>
                         {message}
                     </p>
-                    <div style={{ marginTop: '8px' }}>
-                        <StatusBadge tone={statusToneForMode(mode)} />
-                    </div>
                 </div>
 
                 {isFailure && (
                     <div
                         style={{
+                            display: 'grid',
+                            gap: showFailureReason ? '10px' : 0,
                             borderRadius: '10px',
-                            border: '1px solid color-mix(in srgb, var(--error) 26%, var(--border))',
-                            backgroundColor: 'var(--error-soft)',
-                            color: 'var(--text-primary)',
-                            padding: '12px',
+                            border: '1px solid var(--border)',
+                            backgroundColor: 'var(--surface-subtle)',
+                            padding: '10px 12px',
                             fontSize: '13px',
                             lineHeight: '19px',
                         }}
                     >
-                        {friendlyError}
+                        <button
+                            type="button"
+                            onClick={() => setShowFailureReason((value) => !value)}
+                            style={{
+                                appearance: 'none',
+                                border: 0,
+                                background: 'transparent',
+                                padding: 0,
+                                color: 'var(--text-primary)',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                gap: '12px',
+                                width: '100%',
+                                textAlign: 'left',
+                                font: 'inherit',
+                                fontWeight: 700,
+                            }}
+                        >
+                            <span>Why did Pilot stop?</span>
+                            <span style={{ color: 'var(--text-secondary)' }}>{showFailureReason ? 'Hide' : 'Show'}</span>
+                        </button>
+                        {showFailureReason && (
+                            <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
+                                {friendlyError}
+                            </p>
+                        )}
                     </div>
                 )}
 

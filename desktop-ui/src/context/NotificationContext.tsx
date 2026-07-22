@@ -12,6 +12,8 @@ import { Toast } from '../components/shared/Toast';
 import { usePilotContext } from './usePilotContext';
 import type { LogEvent } from '../hooks/usePilot';
 import { formatUserFacingError } from '../utils/userFacingError';
+import { ensureNativeNotificationPermission, sendNativePilotNotification } from '../utils/nativeNotifications';
+import { playNotificationSound } from '../utils/notificationSound';
 
 export type NotificationType = 'success' | 'warning' | 'error' | 'info' | 'action_required';
 export type NotificationSource = 'workflow' | 'notes' | 'system';
@@ -169,9 +171,17 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
             setActiveToast(notification);
         }
 
-        // Future bridge point:
-        // if notification.nativeNotification is enabled by settings later,
-        // this is where the Tauri Windows notification adapter can subscribe.
+        if (notification.playSound) {
+            playNotificationSound();
+        }
+
+        if (notification.nativeNotification) {
+            void sendNativePilotNotification({
+                id: notification.id,
+                title: notification.title,
+                message: notification.message,
+            });
+        }
     }, [preferences]);
 
     const updatePreferences = useCallback((updates: Partial<NotificationPreferences>) => {
@@ -185,6 +195,18 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
             return next;
         });
+
+        if (updates.nativeNotifications === true) {
+            void ensureNativeNotificationPermission().then((granted) => {
+                if (!granted) {
+                    setPreferences((current) => {
+                        const next = { ...current, nativeNotifications: false };
+                        localStorage.setItem(NOTIFICATION_PREFS_KEY, JSON.stringify(next));
+                        return next;
+                    });
+                }
+            });
+        }
     }, []);
 
     const emitOnce = useCallback((key: string, draft: NotificationDraft) => {

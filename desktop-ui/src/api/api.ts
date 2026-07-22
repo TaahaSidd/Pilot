@@ -17,6 +17,7 @@
  */
 
 export const API_BASE = "http://127.0.0.1:8000";
+const REQUEST_TIMEOUT_MS = 5000;
 
 // ──────────────────────────────────────────────────────────────────
 // Error type — lets callers distinguish "request reached the server
@@ -52,6 +53,8 @@ async function request<T>(
     options: RequestInit = {}
 ): Promise<T> {
     let res: Response;
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
     try {
         res = await fetch(`${API_BASE}${path}`, {
@@ -59,11 +62,14 @@ async function request<T>(
                 ? { "Content-Type": "application/json", ...options.headers }
                 : options.headers,
             ...options,
+            signal: options.signal ?? controller.signal,
         });
     } catch {
         // fetch itself threw — the server is unreachable, not just
         // unhappy with the request
         throw new NetworkError();
+    } finally {
+        window.clearTimeout(timeout);
     }
 
     if (!res.ok) {

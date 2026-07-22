@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { usePilotContext } from '../context/usePilotContext';
-import { formatUserFacingError } from '../utils/userFacingError';
 
 type DashboardAction = 'workflow' | 'stop' | 'notes';
 
@@ -14,14 +13,10 @@ export type ActionRequiredNotice = {
 
 function getActionRequiredNotice({
     awaitingLogin,
-    status,
     logs,
-    runtimeError,
 }: {
     awaitingLogin: boolean;
-    status: string;
     logs: Array<{ message: unknown }>;
-    runtimeError?: string | null;
 }): ActionRequiredNotice | null {
     const recentText = logs
         .slice(-12)
@@ -47,16 +42,6 @@ function getActionRequiredNotice({
         };
     }
 
-    if (status === 'error') {
-        return {
-            id: 'runtime-error',
-            title: 'Pilot needs attention',
-            message: formatUserFacingError(runtimeError),
-            severity: 'error',
-            dismissible: true,
-        };
-    }
-
     return null;
 }
 
@@ -70,9 +55,7 @@ export function useDashboardScreen() {
     const userName = pilot.config?.display_name || pilot.config?.username || 'there';
     const actionRequiredNotice = getActionRequiredNotice({
         awaitingLogin: pilot.awaitingLogin,
-        status: pilot.status,
         logs: pilot.logs,
-        runtimeError: pilot.runtime?.error,
     });
     const shouldShowActionNotice = actionRequiredNotice && dismissedNoticeId !== actionRequiredNotice.id;
 

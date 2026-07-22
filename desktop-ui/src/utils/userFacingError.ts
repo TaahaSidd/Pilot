@@ -24,6 +24,10 @@ export function formatUserFacingError(error?: string | null) {
         return 'Your AI quota has been reached. Please try again after it resets or update your API key.';
     }
 
+    if (lower.includes('no courses') || lower.includes('courses were found')) {
+        return 'Pilot could not find courses on your Amity dashboard. Try again after the dashboard finishes loading.';
+    }
+
     if (lower.includes('failed to fetch') || lower.includes('network') || lower.includes('couldn\'t reach')) {
         return 'Pilot cannot reach the local backend right now. Please restart Pilot and try again.';
     }
@@ -32,8 +36,12 @@ export function formatUserFacingError(error?: string | null) {
         return 'The browser session closed before Pilot could finish. Start a new run when you are ready.';
     }
 
-    if (lower.includes('login') || lower.includes('captcha')) {
+    if (lower.includes('captcha') || lower.includes('verification')) {
         return 'Pilot needs you to complete login verification before it can continue.';
+    }
+
+    if (lower.includes('login')) {
+        return 'Pilot could not complete login. Check your Amity details and try again.';
     }
 
     return 'Pilot ran into a problem and could not finish this run.';
@@ -42,7 +50,7 @@ export function formatUserFacingError(error?: string | null) {
 export function formatUnknownError(error: unknown, fallback = 'Something went wrong. Please try again.') {
     if (error instanceof Error) {
         if (error.name === 'NetworkError') {
-            return 'Pilot is not ready yet. Please restart the app and try again.';
+            return 'Pilot is still starting. Wait a few seconds and try again.';
         }
 
         return formatUserFacingError(error.message);

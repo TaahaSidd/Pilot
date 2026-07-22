@@ -22,6 +22,7 @@ export function NotesScreen({ initialCourseTitle }: { initialCourseTitle?: strin
         openNote,
         openingNote,
         readAtByPath,
+        missingCourseTitle,
         selectedCourse,
         selectedModule,
         selectedNote,
@@ -43,9 +44,11 @@ export function NotesScreen({ initialCourseTitle }: { initialCourseTitle?: strin
         return <NotesSkeleton />;
     }
 
-    if (courses.length === 0) {
+    if (courses.length === 0 && !missingCourseTitle) {
         return <NotesEmptyState />;
     }
+
+    const activeCourseTitle = selectedCourse?.title ?? missingCourseTitle ?? undefined;
 
     return (
         <div
@@ -72,7 +75,7 @@ export function NotesScreen({ initialCourseTitle }: { initialCourseTitle?: strin
                         currentView === 'courses'
                             ? 'Your study library, organized by course.'
                             : currentView === 'modules'
-                                ? selectedCourse?.title
+                                ? activeCourseTitle
                                 : selectedModule?.title
                     }
                 />
@@ -94,12 +97,19 @@ export function NotesScreen({ initialCourseTitle }: { initialCourseTitle?: strin
                 />
             )}
 
-            {currentView === 'modules' && selectedCourse && (
-                <NotesModuleGrid
-                    modules={selectedCourse.modules}
-                    readAtByPath={readAtByPath}
-                    onSelect={setSelectedModule}
-                />
+            {currentView === 'modules' && (
+                selectedCourse && selectedCourse.modules.length > 0 ? (
+                    <NotesModuleGrid
+                        modules={selectedCourse.modules}
+                        readAtByPath={readAtByPath}
+                        onSelect={setSelectedModule}
+                    />
+                ) : (
+                    <NotesEmptyState
+                        title="No notes for this course yet."
+                        message="Start a notes generation run and Pilot will add this course's study notes here."
+                    />
+                )
             )}
 
             {currentView === 'notes' && selectedModule && (

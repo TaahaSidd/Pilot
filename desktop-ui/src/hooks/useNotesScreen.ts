@@ -27,6 +27,8 @@ export function useNotesScreen(initialCourseTitle?: string | null) {
     const [selectedCourse, setSelectedCourse] = useState<NoteCourse | null>(null);
     const [selectedModule, setSelectedModule] = useState<NoteModule | null>(null);
     const [selectedNote, setSelectedNote] = useState<NoteFileResponse | null>(null);
+    const [missingCourseTitle, setMissingCourseTitle] = useState<string | null>(null);
+    const [initialCourseDismissed, setInitialCourseDismissed] = useState(false);
 
     const [loading, setLoading] = useState(true);
     const [openingNote, setOpeningNote] = useState(false);
@@ -35,7 +37,7 @@ export function useNotesScreen(initialCourseTitle?: string | null) {
     const currentView: NotesView =
         selectedModule
             ? 'notes'
-            : selectedCourse
+            : selectedCourse || missingCourseTitle
                 ? 'modules'
                 : 'courses';
 
@@ -82,7 +84,11 @@ export function useNotesScreen(initialCourseTitle?: string | null) {
     }, []);
 
     useEffect(() => {
-        if (!initialCourseTitle || selectedCourse || courses.length === 0) {
+        setInitialCourseDismissed(false);
+    }, [initialCourseTitle]);
+
+    useEffect(() => {
+        if (!initialCourseTitle || initialCourseDismissed || selectedCourse || missingCourseTitle || loading) {
             return;
         }
 
@@ -93,8 +99,11 @@ export function useNotesScreen(initialCourseTitle?: string | null) {
 
         if (matchingCourse) {
             setSelectedCourse(matchingCourse);
+            return;
         }
-    }, [courses, initialCourseTitle, selectedCourse]);
+
+        setMissingCourseTitle(initialCourseTitle);
+    }, [courses, initialCourseDismissed, initialCourseTitle, loading, missingCourseTitle, selectedCourse]);
 
     function markNoteRead(note: NoteFile) {
         const readAt = Date.now();
@@ -129,6 +138,8 @@ export function useNotesScreen(initialCourseTitle?: string | null) {
         setSelectedNote(null);
         setSelectedModule(null);
         setSelectedCourse(null);
+        setMissingCourseTitle(null);
+        setInitialCourseDismissed(true);
     }
 
     function goToCourse() {
@@ -153,6 +164,12 @@ export function useNotesScreen(initialCourseTitle?: string | null) {
 
         if (selectedCourse) {
             setSelectedCourse(null);
+            setInitialCourseDismissed(true);
+        }
+
+        if (missingCourseTitle) {
+            setMissingCourseTitle(null);
+            setInitialCourseDismissed(true);
         }
     }
 
@@ -164,9 +181,9 @@ export function useNotesScreen(initialCourseTitle?: string | null) {
             },
         ];
 
-        if (selectedCourse) {
+        if (selectedCourse || missingCourseTitle) {
             items.push({
-                label: selectedCourse.title,
+                label: selectedCourse?.title ?? missingCourseTitle ?? 'Course',
                 onClick: selectedModule || selectedNote ? goToCourse : undefined,
             });
         }
@@ -185,7 +202,7 @@ export function useNotesScreen(initialCourseTitle?: string | null) {
         }
 
         return items;
-    }, [currentView, selectedCourse, selectedModule, selectedNote]);
+    }, [currentView, missingCourseTitle, selectedCourse, selectedModule, selectedNote]);
 
     return {
         breadcrumbItems,
@@ -197,6 +214,7 @@ export function useNotesScreen(initialCourseTitle?: string | null) {
         openNote,
         openingNote,
         readAtByPath,
+        missingCourseTitle,
         selectedCourse,
         selectedModule,
         selectedNote,

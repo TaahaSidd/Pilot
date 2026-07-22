@@ -24,15 +24,14 @@ class QuizSolver:
         self.page.wait_for_load_state("domcontentloaded")
         self.page.wait_for_timeout(2000)
 
+        if self._is_reattempt_quiz_page():
+            log_info("Quiz already attempted - skipping")
+            return
+
         # Step 1: click Attempt quiz or Continue your attempt
-        attempt_btn = self.page.locator(
-            "a.btn:has-text('Attempt quiz'), "
-            "button.btn:has-text('Attempt quiz'), "
-            "a.btn:has-text('Continue your attempt'), "
-            "button.btn:has-text('Continue your attempt')"
-        )
-        if attempt_btn.count() > 0:
-            attempt_btn.first.click()
+        attempt_btn = self._get_start_or_continue_button()
+        if attempt_btn is not None:
+            attempt_btn.click()
             self.page.wait_for_load_state("domcontentloaded")
             self.page.wait_for_timeout(2000)
 
@@ -137,6 +136,30 @@ class QuizSolver:
             log_success("Quiz submitted")
         except Exception as e:
             log_warning(f"Modal confirmation failed: {e}")
+
+    def _is_reattempt_quiz_page(self) -> bool:
+        try:
+            page_text = self.page.locator("body").inner_text(timeout=3000)
+        except Exception:
+            return False
+
+        normalized = re_module.sub(r"\s+", " ", page_text).strip().lower()
+        return re_module.search(r"\bre[-\s]?attempt quiz\b", normalized) is not None
+
+    def _get_start_or_continue_button(self):
+        labels = ("Attempt quiz", "Continue your attempt")
+
+        for label in labels:
+            for selector in ("a.btn", "button.btn", "a", "button"):
+                candidates = self.page.locator(selector).filter(has_text=label)
+                for index in range(candidates.count()):
+                    candidate = candidates.nth(index)
+                    text = candidate.inner_text().strip().lower()
+                    if "re-attempt" in text or "reattempt" in text or "re attempt" in text:
+                        continue
+                    return candidate
+
+        return None
 
     def _ask_ai(self, question: str, options: list[str], context: str = "") -> int | None:
         if self.provider == "groq":

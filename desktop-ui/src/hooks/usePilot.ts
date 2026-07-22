@@ -369,6 +369,10 @@ export function usePilot(): UsePilotResult {
     // Actions forward to api.ts, then refresh runtime state.
 
     const startWorkflow = useCallback(async () => {
+        setCourses(null);
+        setModulesCompletedThisRun(0);
+        setCurrentCourseText(null);
+        setCurrentModuleText(null);
         const result = await pilotApi.startWorkflow();
         await pollStatus();
         window.setTimeout(pollStatus, 750);
@@ -376,6 +380,10 @@ export function usePilot(): UsePilotResult {
     }, [pollStatus]);
 
     const startNotes = useCallback(async () => {
+        setCourses(null);
+        setModulesCompletedThisRun(0);
+        setCurrentCourseText(null);
+        setCurrentModuleText(null);
         const result = await pilotApi.startNotes();
         await pollStatus();
         window.setTimeout(pollStatus, 750);

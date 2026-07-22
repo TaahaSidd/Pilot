@@ -59,10 +59,10 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
     const stepSubtitle = step === 1 ? 'Enter your Groq API key.' : step === 2 ? 'Sync your study materials.' : step === 3 ? 'Auto-fill forms on your behalf.' : 'Final step to personalize.';
 
     return (
-        <div style={{ display: 'flex', width: '100vw', height: '100vh', backgroundColor: 'var(--background)', overflow: 'hidden' }}>
-            <div style={{ flex: 1, display: 'flex', padding: 'var(--space-10)' }}>
-                <div style={{ width: '100%', maxWidth: '400px', margin: '0 auto', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                    <div style={{ margin: 'auto 0' }}>
+        <div style={{ display: 'flex', width: '100vw', height: '100vh', minHeight: 0, backgroundColor: 'var(--background)', overflow: 'hidden' }}>
+            <div style={{ flex: 1, minWidth: 0, minHeight: 0, display: 'flex', padding: 'clamp(28px, 5vw, var(--space-10))', overflowY: 'auto' }}>
+                <div style={{ width: '100%', maxWidth: '400px', minHeight: 'min-content', margin: '0 auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 'var(--space-8)' }}>
+                    <div>
                         <div>
                             <h1 className="pilot-type-page-title" style={{ color: 'var(--text-primary)', margin: 0 }}>{stepTitle}</h1>
                             <p style={{ color: 'var(--text-secondary)', marginTop: 'var(--space-2)', marginBottom: 0 }}>{stepSubtitle}</p>
@@ -91,7 +91,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
                         </div>
                     </div>
 
-                    <div style={{ fontSize: 'var(--type-caption-size)', color: 'var(--text-secondary)', textAlign: 'center', paddingTop: 'var(--space-5)' }}>
+                    <div style={{ fontSize: 'var(--type-caption-size)', color: 'var(--text-secondary)', textAlign: 'center' }}>
                         By continuing, you agree to our{' '}
                         <span onClick={() => setModalType('legal')} style={{ color: 'var(--accent)', cursor: 'pointer', textDecoration: 'underline' }}>Terms of Service</span>
                         {' '}and{' '}
@@ -103,6 +103,8 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
             <div
                 style={{
                     flex: 1,
+                    minWidth: 0,
+                    minHeight: 0,
                     backgroundColor: 'var(--surface-subtle)',
                     backgroundImage: `linear-gradient(color-mix(in srgb, var(--background) 18%, transparent), color-mix(in srgb, var(--background) 18%, transparent)), url(${heroImage})`,
                     backgroundSize: 'cover',
@@ -110,16 +112,17 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
                     display: 'flex',
                     alignItems: 'flex-end',
                     justifyContent: 'flex-end',
-                    padding: 'var(--space-10)',
+                    padding: 'clamp(24px, 4vw, var(--space-10))',
                     borderLeft: 'var(--stroke-thin) solid var(--border-subtle)',
+                    overflow: 'hidden',
                 }}
             >
                 <div
                     style={{
                         color: 'var(--text-on-accent)',
                         textAlign: 'right',
-                        maxWidth: '650px',
-                        padding: 'var(--space-8)',
+                        maxWidth: 'min(650px, 80%)',
+                        padding: 'clamp(24px, 4vw, var(--space-8))',
                         borderRadius: 'var(--radius-panel)',
                         backgroundColor: 'color-mix(in srgb, var(--surface) 24%, transparent)',
                         backdropFilter: 'blur(15px)',
@@ -127,8 +130,8 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
                         boxShadow: 'var(--shadow-lg)',
                     }}
                 >
-                    <h2 style={{ fontSize: 'clamp(34px, 4vw, 42px)', fontWeight: 700, lineHeight: '1.2', margin: 0 }}>Your Amity study assistant.</h2>
-                    <p style={{ fontSize: 'var(--type-section-title-size)', opacity: 0.84, marginTop: 'var(--space-6)', lineHeight: '1.6' }}>Pilot helps you study, generate notes, and keep track of coursework from your Amity portal.</p>
+                    <h2 style={{ fontSize: 'clamp(28px, 4vw, 42px)', fontWeight: 700, lineHeight: '1.2', margin: 0 }}>Your Amity study assistant.</h2>
+                    <p style={{ fontSize: 'clamp(17px, 2vw, var(--type-section-title-size))', opacity: 0.84, marginTop: 'var(--space-5)', marginBottom: 0, lineHeight: '1.55' }}>Pilot helps you study, generate notes, and keep track of coursework from your Amity portal.</p>
                 </div>
             </div>
 
